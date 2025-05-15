@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Stock Out - SOP BURTOK</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <div class="sidebar">
+      <img src="logo.png" alt="SOP BURTOK">
+      <h3>SOP BURTOK</h3>
+      <button class="menu-btn" onclick="location.href='inventory.html'">Kembali</button>
+    </div>
+    <div class="content">
+      <h2>Stock Out - Kurangi Jumlah Stok</h2>
+
+      <div class="stock-out-form">
+        <h3>Kurangi Jumlah</h3>
+        <input type="text" id="stockOutName" placeholder="Nama Bahan Baku">
+        <input type="number" id="stockOutQuantity" placeholder="Jumlah yang Dikurangi">
+        <button onclick="subtractStockOut()">Kurangi Stok</button>
+      </div>
+
+      <table class="stock-table">
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Kategori</th>
+            <th>Kedaluwarsa</th>
+            <th>Jumlah</th>
+          </tr>
+        </thead>
+        <tbody id="stockOutTableBody">
+          <!-- Data akan dimuat dari localStorage -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

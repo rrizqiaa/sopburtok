@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile - SOP BURTOK</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <div class="sidebar">
+      <img src="logo.png" alt="SOP BURTOK">
+      <h3>SOP BURTOK</h3>
+      <button class="menu-btn" onclick="location.href='dashboard.html'">Home</button>
+      <button class="menu-btn" onclick="location.href='inventory.html'">Inventory</button>
+      <button class="menu-btn" onclick="location.href='production.html'">Production</button>
+      <button class="menu-btn" onclick="location.href='reporting.html'">Reporting</button>
+      <button class="menu-btn active" onclick="location.href='profile.html'">Profile</button>
+    </div>
+    <div class="top-bar">
+      <button class="logout-btn" onclick="location.href='index.html'">Logout</button>
+    </div>
+    <div class="content">
+      <div class="profile-content">
+        <h2>Halaman Profile</h2>
+        <div class="profile-img"></div>
+        <div class="profile-info">
+          <label>Nama</label><input type="text" value="Nama Anda">
+          <label>Email</label><input type="text" value="user@email">
+          <label>No. HP</label><input type="text" value="08123456789">
+          <label>Alamat</label><input type="text" value="Alamat Anda">
+        </div>
+        <button>Update</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
