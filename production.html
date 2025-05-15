@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Production - SOP BURTOK</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <div class="sidebar">
+      <img src="assets/images/logo.png" alt="SOP BURTOK">
+      <h3>SOP BURTOK</h3>
+      <button class="menu-btn" onclick="location.href='dashboard.html'">Kembali</button>
+    </div>
+    <div class="content">
+      <h2>Production - Penggunaan Bahan Baku</h2>
+
+      <div class="production-form">
+        <h3>Gunakan Bahan Baku</h3>
+        <input type="text" id="productionName" placeholder="Nama Bahan Baku">
+        <input type="number" id="productionQuantity" placeholder="Jumlah yang Digunakan">
+        <button onclick="processProduction()">Gunakan</button>
+      </div>
+
+      <table class="stock-table">
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Kategori</th>
+            <th>Kedaluwarsa</th>
+            <th>Jumlah Tersedia</th>
+          </tr>
+        </thead>
+        <tbody id="productionTableBody">
+          <!-- Data akan dimuat dari localStorage -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script src="assets/js/script.js"></script>
+</body>
+</html>
