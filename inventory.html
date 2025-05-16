@@ -22,17 +22,25 @@
     <div class="top-bar">
       <button class="logout-btn" onclick="location.href='index.html'">Logout</button>
     </div>
-    <div class="content">
-      <h2>Inventory</h2>
-      <div class="inventory-circles">
-        <div class="inventory-circle" onclick="location.href='stock.html'">Stock</div>
-        <div class="inventory-circle" onclick="location.href='stockin.html'">Stock In</div>
-        <div class="inventory-circle" onclick="location.href='stockout.html'">Stock Out</div>
-        <div class="inventory-circle" onclick="location.href='log.html'">Log Aktivitas</div>
-        <div class="inventory-circle" onclick="location.href='prediction.html'">Prediksi</div>
-
+ <div class="content">
+      <h2>Stock Bahan Baku</h2>
+      <button onclick="showAddForm()">+ Tambah Bahan Baku</button>
+      <div id="addStockForm" class="hidden">
+        <h3>Tambah Bahan Baku</h3>
+        <input id="stockName" placeholder="Nama Bahan Baku">
+        <input id="stockCategory" placeholder="Kategori">
+        <input id="stockExpiry" type="date">
+        <input id="stockQuantity" type="number">
+        <button onclick="addStock()">Simpan</button>
+        <button onclick="hideAddForm()">Batal</button>
       </div>
+      <table class="stock-table">
+        <thead><tr><th>Nama</th><th>Kategori</th><th>Kedaluwarsa</th><th>Jumlah</th><th>Aksi</th></tr></thead>
+        <tbody id="stockTableBody"></tbody>
+      </table>
     </div>
   </div>
+  <script src="assets/js/script.js"></script>
+
 </body>
 </html>
