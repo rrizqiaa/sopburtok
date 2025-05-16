@@ -1,12 +1,12 @@
-// ========= LOGIN LOGIC ===========
-document.addEventListener("DOMContentLoaded", function () {
+// ========================================
+// 1. LOGIN LOGIC
+// ========================================
+document.addEventListener("DOMContentLoaded", () => {
   const loginBtn = document.getElementById('loginBtn');
   if (loginBtn) {
-    loginBtn.addEventListener('click', function () {
-      // Contoh validasi sederhana
+    loginBtn.addEventListener('click', () => {
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value.trim();
-
       if (username === "a" && password === "a") {
         window.location.href = "dashboard.html";
       } else {
@@ -16,507 +16,221 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-// ========= STOCK PAGE LOGIC ===========
-function showAddForm() {
-  const form = document.getElementById('addStockForm');
-  if (form) form.classList.remove('hidden');
-}
+// ========================================
+// 2. FORM TOGGLE
+// ========================================
+const showAddForm = () => document.getElementById('addStockForm')?.classList.remove('hidden');
+const hideAddForm = () => document.getElementById('addStockForm')?.classList.add('hidden');
 
-function hideAddForm() {
-  const form = document.getElementById('addStockForm');
-  if (form) form.classList.add('hidden');
-}
-
-function addStock() {
+// ========================================
+// 3. STOCK MANAGEMENT
+// ========================================
+const addStock = () => {
   const name = document.getElementById('stockName').value.trim();
   const category = document.getElementById('stockCategory').value.trim();
   const expiry = document.getElementById('stockExpiry').value;
-  const quantity = document.getElementById('stockQuantity').value.trim();
+  const quantity = parseInt(document.getElementById('stockQuantity').value.trim());
 
-  if (!name || !category || !expiry || !quantity) {
-    alert("Mohon lengkapi semua data!");
-    return;
-  }
+  if (!name || !category || !expiry || isNaN(quantity)) return alert("Mohon lengkapi semua data!");
 
   const stocks = JSON.parse(localStorage.getItem('stocks')) || [];
-  stocks.push({ name, category, expiry, quantity: parseInt(quantity) });
+  stocks.push({ id: Date.now(), name, category, expiry, quantity });
   localStorage.setItem('stocks', JSON.stringify(stocks));
-
-  const tableBody = document.getElementById('stockTableBody');
-  const row = document.createElement('tr');
-  row.innerHTML = `
-    <td>${name}</td>
-    <td>${category}</td>
-    <td>${expiry}</td>
-    <td>${quantity}</td>
-    <td><button onclick="this.parentElement.parentElement.remove()">Hapus</button></td>
-  `;
-  tableBody.appendChild(row);
-
-  document.getElementById('stockName').value = '';
-  document.getElementById('stockCategory').value = '';
-  document.getElementById('stockExpiry').value = '';
-  document.getElementById('stockQuantity').value = '';
-
+  clearForm();
   hideAddForm();
-}
-
-
-  // ========= STOCK IN PAGE LOGIC ===========
-function loadStockTable() {
-  const tableBody = document.getElementById('stockTableBody');
-  if (!tableBody) return;
-
-  tableBody.innerHTML = '';
-  const stocks = JSON.parse(localStorage.getItem('stocks')) || [];
-
-  stocks.forEach(stock => {
-    const expiryDate = new Date(stock.expiry);
-    const currentDate = new Date();
-    const timeDiff = expiryDate - currentDate;
-    const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-
-    let warningClass = '';
-    let warningText = '';
-
-    if (parseInt(stock.quantity) <= 10) {
-      warningClass = 'low-stock-warning';
-      warningText += '⚠️ Stok Menipis! ';
-    }
-
-    if (daysLeft <= 7 && daysLeft >= 0) {
-      warningClass = 'low-stock-warning';
-      warningText += `⚠️ Kedaluwarsa dalam ${daysLeft} hari!`;
-    }
-
-    const row = document.createElement('tr');
-    row.className = warningClass;
-    row.innerHTML = `
-      <td>${stock.name}</td>
-      <td>${stock.category}</td>
-      <td>${stock.expiry}</td>
-      <td>${stock.quantity}</td>
-      <td>${warningText}</td>
-    `;
-    tableBody.appendChild(row);
-  });
-}
-
-
-function addStockIn() {
-  const name = document.getElementById('stockInName').value.trim();
-  const quantityToAdd = parseInt(document.getElementById('stockInQuantity').value.trim());
-
-  if (!name || isNaN(quantityToAdd) || quantityToAdd <= 0) {
-    alert("Nama dan Jumlah harus diisi dengan benar!");
-    return;
-  }
-
-  const stocks = JSON.parse(localStorage.getItem('stocks')) || [];
-  const stockIndex = stocks.findIndex(stock => stock.name.toLowerCase() === name.toLowerCase());
-
-  if (stockIndex === -1) {
-    alert("Bahan baku tidak ditemukan di stok!");
-    return;
-  }
-
-  stocks[stockIndex].quantity = parseInt(stocks[stockIndex].quantity) + quantityToAdd;
-  localStorage.setItem('stocks', JSON.stringify(stocks));
-
   loadStockTable();
-  alert("Jumlah stok berhasil ditambahkan.");
-  saveLog('Stock In', name, quantityToAdd);
-}
+};
 
-// Auto load table when page is loaded
-document.addEventListener("DOMContentLoaded", loadStockTable);
+const clearForm = () => {
+  ['stockName', 'stockCategory', 'stockExpiry', 'stockQuantity'].forEach(id => document.getElementById(id).value = '');
+};
 
-
-  // Bersihkan form setelah submit
-  document.getElementById('stockName').value = '';
-  document.getElementById('stockCategory').value = '';
-  document.getElementById('stockExpiry').value = '';
-  document.getElementById('stockQuantity').value = '';
-
-  hideAddForm();
-
-// ========= STOCK OUT PAGE LOGIC ===========
-function loadStockOutTable() {
-  const tableBody = document.getElementById('stockOutTableBody');
+const loadStockTable = () => {
+  const tableBody = document.getElementById('stockTableBody');
   if (!tableBody) return;
 
-  tableBody.innerHTML = '';
-
   const stocks = JSON.parse(localStorage.getItem('stocks')) || [];
-
-  stocks.forEach(stock => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
+  tableBody.innerHTML = stocks.map(stock => `
+    <tr>
       <td>${stock.name}</td>
       <td>${stock.category}</td>
       <td>${stock.expiry}</td>
       <td>${stock.quantity}</td>
-    `;
-    tableBody.appendChild(row);
-  });
-}
+      <td><button onclick="deleteStockById(${stock.id})">Hapus</button></td>
+    </tr>
+  `).join('');
+};
 
-function subtractStockOut() {
-  const name = document.getElementById('stockOutName').value.trim();
-  const quantityToSubtract = parseInt(document.getElementById('stockOutQuantity').value.trim());
+const deleteStockById = (id) => {
+  const stocks = JSON.parse(localStorage.getItem('stocks')) || [];
+  localStorage.setItem('stocks', JSON.stringify(stocks.filter(stock => stock.id !== id)));
+  loadStockTable();
+};
 
-  if (!name || isNaN(quantityToSubtract) || quantityToSubtract <= 0) {
-    alert("Nama dan Jumlah harus diisi dengan benar!");
-    return;
-  }
+// ========================================
+// 4. STOCK IN / OUT
+// ========================================
+const modifyStockQuantity = (nameId, qtyId, isAddition = true) => {
+  const name = document.getElementById(nameId).value.trim().toLowerCase();
+  const quantity = parseInt(document.getElementById(qtyId).value.trim());
+  if (!name || isNaN(quantity) || quantity <= 0) return alert("Nama dan Jumlah harus diisi dengan benar!");
 
   const stocks = JSON.parse(localStorage.getItem('stocks')) || [];
-  const stockIndex = stocks.findIndex(stock => stock.name.toLowerCase() === name.toLowerCase());
+  const stock = stocks.find(s => s.name.toLowerCase() === name);
 
-  if (stockIndex === -1) {
-    alert("Bahan baku tidak ditemukan di stok!");
-    return;
-  }
+  if (!stock) return alert("Bahan baku tidak ditemukan di stok!");
 
-  const currentQuantity = parseInt(stocks[stockIndex].quantity);
+  if (!isAddition && quantity > stock.quantity) return alert("Jumlah melebihi stok!");
 
-  if (quantityToSubtract > currentQuantity) {
-    alert("Jumlah yang dikurangi melebihi stok yang tersedia!");
-    return;
-  }
-
-  stocks[stockIndex].quantity = currentQuantity - quantityToSubtract;
+  stock.quantity += isAddition ? quantity : -quantity;
   localStorage.setItem('stocks', JSON.stringify(stocks));
+  loadStockTable();
+  alert(`Stok ${isAddition ? 'ditambahkan' : 'dikurangi'}.`);
+};
 
-  loadStockOutTable();
-  alert("Jumlah stok berhasil dikurangi.");
-  saveLog('Stock Out', name, quantityToSubtract);
+const addStockIn = () => modifyStockQuantity('stockInName', 'stockInQuantity', true);
+const subtractStockOut = () => modifyStockQuantity('stockOutName', 'stockOutQuantity', false);
 
-}
+// ========================================
+// 5. PRODUCTION LOGIC (FIFO)
+// ========================================
+const processProduction = () => {
+  const nameInput = document.getElementById('productionName').value.trim().toLowerCase();
+  let qtyToUse = parseInt(document.getElementById('productionQuantity').value.trim());
+  if (!nameInput || isNaN(qtyToUse) || qtyToUse <= 0) return alert("Nama dan Jumlah harus diisi dengan benar!");
 
+  let stocks = JSON.parse(localStorage.getItem('stocks')) || [];
+  const matchingStocks = stocks.filter(s => s.name.toLowerCase() === nameInput).sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
 
-// ========= PRODUCTION PAGE LOGIC ===========
-function loadProductionTable() {
+  if (!matchingStocks.length) return alert("Bahan baku tidak ditemukan di stok!");
+  const totalAvailable = matchingStocks.reduce((sum, s) => sum + s.quantity, 0);
+  if (qtyToUse > totalAvailable) return alert("Jumlah melebihi stok!");
+
+  stocks = stocks.map(s => {
+    if (s.name.toLowerCase() === nameInput && qtyToUse > 0) {
+      const used = Math.min(s.quantity, qtyToUse);
+      s.quantity -= used;
+      qtyToUse -= used;
+    }
+    return s;
+  });
+
+  localStorage.setItem('stocks', JSON.stringify(stocks));
+  loadProductionTable();
+  alert("Produksi berhasil dilakukan.");
+};
+// ========================================
+// 5B. LOAD PRODUCTION TABLE ONLY IF STOCK > 0
+// ========================================
+const loadProductionTable = () => {
   const tableBody = document.getElementById('productionTableBody');
   if (!tableBody) return;
 
-  tableBody.innerHTML = '';
+  let stocks = JSON.parse(localStorage.getItem('stocks')) || [];
+  const availableStocks = stocks.filter(stock => stock.quantity > 0);
 
-  const stocks = JSON.parse(localStorage.getItem('stocks')) || [];
+  if (availableStocks.length === 0) {
+    tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Belum ada stok tersedia</td></tr>`;
+    return;
+  }
 
-  stocks.forEach(stock => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
+  tableBody.innerHTML = availableStocks.map(stock => `
+    <tr>
       <td>${stock.name}</td>
       <td>${stock.category}</td>
       <td>${stock.expiry}</td>
       <td>${stock.quantity}</td>
-    `;
-    tableBody.appendChild(row);
-  });
-}
+    </tr>
+  `).join('');
+};
 
-function processProduction() {
-  const name = document.getElementById('productionName').value.trim();
-  const quantityToUse = parseInt(document.getElementById('productionQuantity').value.trim());
-
-  if (!name || isNaN(quantityToUse) || quantityToUse <= 0) {
-    alert("Nama dan Jumlah harus diisi dengan benar!");
-    return;
-  }
-
-  const stocks = JSON.parse(localStorage.getItem('stocks')) || [];
-  const stockIndex = stocks.findIndex(stock => stock.name.toLowerCase() === name.toLowerCase());
-
-  if (stockIndex === -1) {
-    alert("Bahan baku tidak ditemukan di stok!");
-    return;
-  }
-
-  const currentQuantity = parseInt(stocks[stockIndex].quantity);
-
-  if (quantityToUse > currentQuantity) {
-    alert("Jumlah yang digunakan melebihi stok yang tersedia!");
-    return;
-  }
-
-  stocks[stockIndex].quantity = currentQuantity - quantityToUse;
-  localStorage.setItem('stocks', JSON.stringify(stocks));
-
-  loadProductionTable();
-  alert("Bahan baku berhasil digunakan dalam produksi.");
-  saveLog('Production', name, quantityToUse);
-
-}
-
-
-// ========= REPORTING PAGE LOGIC ===========
-function loadReportingTable() {
-  const tableBody = document.getElementById('reportingTableBody');
-  if (!tableBody) return;
-
-  tableBody.innerHTML = '';
-  const stocks = JSON.parse(localStorage.getItem('stocks')) || [];
-
-  stocks.forEach(stock => {
-    const expiryDate = new Date(stock.expiry);
-    const currentDate = new Date();
-    const timeDiff = expiryDate - currentDate;
-    const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-
-    let warningClass = '';
-    let warningText = '';
-
-    if (parseInt(stock.quantity) <= 10) {
-      warningClass = 'low-stock-warning';
-      warningText += '⚠️ Stok Menipis! ';
-    }
-
-    if (daysLeft <= 7 && daysLeft >= 0) {
-      warningClass = 'low-stock-warning';
-      warningText += `⚠️ Kedaluwarsa dalam ${daysLeft} hari!`;
-    }
-
-    const row = document.createElement('tr');
-    row.className = warningClass;
-    row.innerHTML = `
-      <td>${stock.name}</td>
-      <td>${stock.category}</td>
-      <td>${stock.expiry}</td>
-      <td>${stock.quantity}</td>
-      <td>${warningText}</td>
-    `;
-    tableBody.appendChild(row);
-  });
-}
-
-
-function saveLog(action, stockName, quantity) {
-  const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
-  const timestamp = new Date().toLocaleString('id-ID');
-  logs.push({ timestamp, action, stockName, quantity });
-  localStorage.setItem('activityLogs', JSON.stringify(logs));
-}
-
-function loadActivityLog() {
+// ========================================
+// LOAD 10 AKTIVITAS TERBARU
+// ========================================
+const loadActivityLog = () => {
   const tableBody = document.getElementById('logTableBody');
   if (!tableBody) return;
 
-  tableBody.innerHTML = '';
   const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
+  const latestLogs = logs.slice(-10).reverse();  // Ambil 10 terakhir dan balik urutan
 
-  logs.forEach(log => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
+  tableBody.innerHTML = latestLogs.map(log => `
+    <tr>
       <td>${log.timestamp}</td>
       <td>${log.action}</td>
       <td>${log.stockName}</td>
       <td>${log.quantity}</td>
-    `;
-    tableBody.appendChild(row);
-  });
-}
-
-document.addEventListener("DOMContentLoaded", loadActivityLog);
-
-// ========= PREDICTION PAGE LOGIC ===========
-function loadProductionPrediction() {
-  const resultContainer = document.getElementById('predictionResult');
-  if (!resultContainer) return;
-
-  const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
-  const productionLogs = logs.filter(log => log.action === 'Production');
-
-  if (productionLogs.length === 0) {
-    resultContainer.innerHTML = "<p>Belum ada data produksi untuk dianalisis.</p>";
-    return;
-  }
-
-  // Hitung total dan rata-rata penggunaan
-  const usageSummary = {};
-
-  productionLogs.forEach(log => {
-    const name = log.stockName;
-    const quantity = parseInt(log.quantity);
-    if (!usageSummary[name]) {
-      usageSummary[name] = { total: 0, count: 0 };
-    }
-    usageSummary[name].total += quantity;
-    usageSummary[name].count += 1;
-  });
-
-  // Buat hasil prediksi
-  let html = "<table class='stock-table'><thead><tr><th>Nama Bahan Baku</th><th>Total Penggunaan</th><th>Rata-Rata Penggunaan</th><th>Saran Stok</th></tr></thead><tbody>";
-
-  for (const name in usageSummary) {
-    const total = usageSummary[name].total;
-    const count = usageSummary[name].count;
-    const average = Math.ceil(total / count);
-    const suggestedStock = average * 5; // Saran stok 5x rata-rata produksi
-
-    html += `<tr>
-      <td>${name}</td>
-      <td>${total}</td>
-      <td>${average}</td>
-      <td>${suggestedStock}</td>
-    </tr>`;
-  }
-
-  html += "</tbody></table>";
-  resultContainer.innerHTML = html;
-}
-
-document.addEventListener("DOMContentLoaded", loadProductionPrediction);
+    </tr>
+  `).join('');
+};
 
 
-// ========= EXPORT DUMMY LOGIC ===========
-function exportToPDF() {
-  alert("Fitur Export to PDF berhasil dipanggil (simulasi).");
-}
+// ========================================
+// 7. EXPORT DUMMY FUNCTION
+// ========================================
+const exportToPDF = () => alert("Export ke PDF berhasil dipanggil (simulasi).");
+const exportToExcel = () => alert("Export ke Excel berhasil dipanggil (simulasi).");
 
-function exportToExcel() {
-  alert("Fitur Export to Excel berhasil dipanggil (simulasi).");
-}
-
-/// Role Fungsion ///
-document.addEventListener("DOMContentLoaded", function () {
-  const loginBtn = document.getElementById('loginBtn');
-  if (loginBtn) {
-    loginBtn.addEventListener('click', function () {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const role = document.getElementById('userRole').value;
-
-      if (username === "admin" && password === "admin") {
-        localStorage.setItem('currentRole', role);
-        window.location.href = "dashboard.html";
-      } else {
-        alert("Username atau Password salah!");
-      }
-    });
-  }
-});
-
-function applyRoleAccess() {
+// ========================================
+// 8. ROLE MANAGEMENT
+// ========================================
+const applyRoleAccess = () => {
   const role = localStorage.getItem('currentRole');
-
-  document.querySelectorAll('.menu-btn, .inventory-circle').forEach(button => {
-    const text = button.textContent.toLowerCase();
-
-    if (role === 'staf' && (text.includes('profile') || text.includes('reporting') || text.includes('log') || text.includes('prediksi'))) {
-      button.style.display = 'none';
-    }
-
-    if (role === 'kasir' && (text.includes('inventory') || text.includes('stock') || text.includes('production') || text.includes('log') || text.includes('prediksi'))) {
-      button.style.display = 'none';
+  document.querySelectorAll('.menu-btn, .inventory-circle').forEach(btn => {
+    const text = btn.textContent.toLowerCase();
+    if ((role === 'staf' && /profile|reporting|log|prediksi/.test(text)) ||
+        (role === 'kasir' && /inventory|stock|production|log|prediksi/.test(text))) {
+      btn.style.display = 'none';
     }
   });
-}
+};
 
 document.addEventListener("DOMContentLoaded", applyRoleAccess);
 
-const logoutBtn = document.getElementById('logoutBtn');
-if (logoutBtn) {
-  logoutBtn.addEventListener('click', function () {
-    localStorage.removeItem('currentRole');
-    window.location.href = "index.html";
-  });
-}
-/// Dashboard ///
-function loadDashboardSummary() {
-  const summaryContainer = document.getElementById('dashboardSummary');
-  if (!summaryContainer) return;
+// ========================================
+// 9. DASHBOARD SUMMARY
+// ========================================
+const loadDashboardSummary = () => {
+  const container = document.getElementById('dashboardSummary');
+  if (!container) return;
 
   const stocks = JSON.parse(localStorage.getItem('stocks')) || [];
   const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
 
-  const lowStockCount = stocks.filter(s => parseInt(s.quantity) <= 10).length;
+  const lowStockCount = stocks.filter(s => s.quantity <= 10).length;
   const nearExpiryCount = stocks.filter(s => {
-    const expiryDate = new Date(s.expiry);
-    const currentDate = new Date();
-    const daysLeft = Math.ceil((expiryDate - currentDate) / (1000 * 60 * 60 * 24));
+    const daysLeft = (new Date(s.expiry) - new Date()) / (1000 * 60 * 60 * 24);
     return daysLeft <= 7 && daysLeft >= 0;
   }).length;
 
-  const latestLogs = logs.slice(-5).reverse();
+  const latestLogs = logs.slice(-5).reverse().map(log => `<li>${log.timestamp} - ${log.action} - ${log.stockName} (${log.quantity})</li>`).join('');
 
-  let html = `
+  container.innerHTML = `
     <h2>Ringkasan Stok</h2>
-    <p>Total Bahan Baku: ${stocks.length}</p>
-    <p>Stok Menipis: ${lowStockCount}</p>
+    <p>Total: ${stocks.length}</p>
+    <p>Menipis: ${lowStockCount}</p>
     <p>Kedaluwarsa Dekat: ${nearExpiryCount}</p>
-
     <h2>Aktivitas Terakhir</h2>
-    <ul>
-      ${latestLogs.map(log => `<li>${log.timestamp} - ${log.action} - ${log.stockName} (${log.quantity})</li>`).join('')}
-    </ul>
+    <ul>${latestLogs}</ul>
   `;
-
-  summaryContainer.innerHTML = html;
-}
+};
 
 document.addEventListener("DOMContentLoaded", loadDashboardSummary);
 
-
-
-// Auto load table when page is loaded
-document.addEventListener("DOMContentLoaded", loadStockOutTable);
-
-
-// ========= MENU NAVIGATION HIGHLIGHT ===========
-document.querySelectorAll('.menu-btn').forEach(button => {
-  button.addEventListener('click', function () {
-    document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+// ========================================
+// 10. MENU NAVIGATION HIGHLIGHT
+// ========================================
+document.querySelectorAll('.menu-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
     this.classList.add('active');
   });
 });
 
-
-function loadStockTable() {
-  const tableBody = document.getElementById('stockTableBody');
-  if (!tableBody) return;
-
-  let stocks = JSON.parse(localStorage.getItem('stocks')) || [];
-  tableBody.innerHTML = '';
-
-  stocks.forEach((stock, index) => {
-    const expiryDate = new Date(stock.expiry);
-    const currentDate = new Date();
-    const daysLeft = Math.ceil((expiryDate - currentDate) / (1000 * 60 * 60 * 24));
-
-    let warningClass = '';
-    let warningText = '';
-
-    if (parseInt(stock.quantity) <= 10) {
-      warningClass = 'low-stock-warning';
-      warningText += '⚠️ Stok Menipis! ';
-    }
-
-    if (daysLeft <= 7 && daysLeft >= 0) {
-      warningClass = 'low-stock-warning';
-      warningText += `⚠️ Kedaluwarsa dalam ${daysLeft} hari!`;
-    }
-
-    const row = document.createElement('tr');
-    row.className = warningClass;
-    row.innerHTML = `
-      <td>${stock.name}</td>
-      <td>${stock.category}</td>
-      <td>${stock.expiry}</td>
-      <td>${stock.quantity}</td>
-      <td>
-        ${warningText}
-        <button onclick="deleteStockByName('${stock.name}')" style="margin-left:10px;color:white;background:red;border:none;border-radius:4px;padding:4px 8px;cursor:pointer;">Hapus</button>
-      </td>
-    `;
-    tableBody.appendChild(row);
-  });
-}
-
-function deleteStockByName(stockName) {
-  let stocks = JSON.parse(localStorage.getItem('stocks')) || [];
-  stocks = stocks.filter(stock => stock.name !== stockName);
-  localStorage.setItem('stocks', JSON.stringify(stocks));
+// ========================================
+// AUTOLOAD LOG DAN STOCK TABLE SAAT DIBUKA
+// ========================================
+document.addEventListener("DOMContentLoaded", () => {
   loadStockTable();
-}
-
+  loadActivityLog();
+});

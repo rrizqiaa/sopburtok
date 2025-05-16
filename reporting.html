@@ -9,8 +9,18 @@
   <div class="dashboard-wrapper">
     <div class="sidebar">
       <img src="assets/images/logo.png" alt="SOP BURTOK">
+
       <h3>SOP BURTOK</h3>
-      <button class="menu-btn" onclick="location.href='dashboard.html'">Kembali</button>
+      <button class="menu-btn" onclick="location.href='dashboard.html'">Home</button>
+      <button class="menu-btn" onclick="location.href='inventory.html'">Inventory</button>
+      <button class="menu-btn" onclick="location.href='production.html'">Production</button>
+      <button class="menu-btn active" onclick="location.href='reporting.html'">Reporting</button>
+      <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
+      
+          </div>
+    <div class="top-bar">
+      <div id="liveClock" style="margin-right: 15px; font-weight: bold;"></div>
+      <button class="logout-btn" onclick="location.href='index.html'">Logout</button>
     </div>
     <div class="content">
       <h2>Reporting - Laporan Stok Saat Ini</h2>
@@ -36,5 +46,29 @@
     </div>
   </div>
   <script src="assets/js/script.js"></script>
+<<script>
+  function updateLiveClock() {
+    const clockElement = document.getElementById('liveClock');
+    if (!clockElement) return;
+
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+    const now = new Date();
+    const dayName = days[now.getDay()];
+    const date = now.getDate();
+    const month = months[now.getMonth()];
+    const year = now.getFullYear();
+    const time = now.toLocaleTimeString('id-ID');
+
+    clockElement.textContent = `${dayName}, ${date} ${month} ${year} - ${time}`;
+  }
+
+  // Update setiap detik
+  setInterval(updateLiveClock, 1000);
+  updateLiveClock();
+</script>
+
 </body>
 </html>

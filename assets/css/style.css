@@ -1,4 +1,6 @@
-/* === GLOBAL STYLE === */
+/* =========================================
+   GLOBAL STYLE
+========================================= */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
@@ -7,7 +9,9 @@ body {
   color: #333;
 }
 
-/* === LOGIN PAGE === */
+/* =========================================
+   LOGIN PAGE
+========================================= */
 .login-page {
   height: 100vh;
   display: flex;
@@ -38,36 +42,39 @@ body {
   text-align: center;
 }
 
-.login-box input {
+.login-box input,
+.login-box button {
   width: 90%;
   padding: 10px;
   margin: 8px 0;
-  border: 1px solid #ddd;
   border-radius: 4px;
 }
 
+.login-box input {
+  border: 1px solid #ddd;
+}
+
 .login-box button {
-  width: 95%;
-  padding: 10px;
   background-color: #4CAF50;
-  border: none;
   color: white;
-  border-radius: 4px;
-  cursor: pointer;
+  border: none;
   margin-top: 10px;
+  width: 95%;
+  cursor: pointer;
 }
 
 .login-box button:hover {
   background-color: #45a049;
 }
 
-/* === DASHBOARD WRAPPER === */
+/* =========================================
+   DASHBOARD WRAPPER & SIDEBAR
+========================================= */
 .dashboard-wrapper {
   display: flex;
   min-height: 100vh;
 }
 
-/* === SIDEBAR === */
 .sidebar {
   width: 220px;
   background-color: #2c3e50;
@@ -99,12 +106,15 @@ body {
   transition: 0.3s;
 }
 
-.menu-btn:hover, .menu-btn.active {
+.menu-btn:hover,
+.menu-btn.active {
   background-color: #34495e;
   border-radius: 4px;
 }
 
-/* === TOP BAR === */
+/* =========================================
+   TOP BAR
+========================================= */
 .top-bar {
   width: 100%;
   background-color: #ecf0f1;
@@ -130,20 +140,23 @@ body {
   background-color: #c0392b;
 }
 
-/* === CONTENT AREA === */
+/* =========================================
+   CONTENT AREA
+========================================= */
 .content {
   padding: 80px 20px 20px 240px;
   width: 100%;
 }
 
-/* === HOME PAGE === */
+/* =========================================
+   PAGE SPECIFIC STYLES
+========================================= */
 .home-content blockquote {
   font-size: 24px;
   text-align: center;
   color: #555;
 }
 
-/* === PROFILE PAGE === */
 .profile-content {
   max-width: 600px;
   background-color: #fff;
@@ -168,8 +181,8 @@ body {
 .profile-info input {
   width: 100%;
   padding: 8px;
-  border-radius: 4px;
   border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 .profile-content button {
@@ -186,14 +199,18 @@ body {
   background-color: #3498db;
 }
 
-/* === INVENTORY PAGE === */
-.inventory-circles, .reporting-circles {
+/* =========================================
+   INVENTORY AND REPORTING
+========================================= */
+.inventory-circles,
+.reporting-circles {
   display: flex;
   justify-content: space-around;
   margin-top: 30px;
 }
 
-.inventory-circle, .reporting-circle {
+.inventory-circle,
+.reporting-circle {
   width: 120px;
   height: 120px;
   background-color: #3498db;
@@ -206,50 +223,61 @@ body {
   transition: 0.3s;
 }
 
-.inventory-circle:hover, .reporting-circle:hover {
+.inventory-circle:hover,
+.reporting-circle:hover {
   background-color: #2980b9;
 }
 
-/* === STOCK PAGE === */
-.stock-controls button {
-  padding: 10px;
-  background-color: #27ae60;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.stock-form {
-  margin-top: 15px;
-  background-color: #f1f8e9;
-  padding: 15px;
-  border-radius: 8px;
-}
-
-.stock-form input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.stock-form button {
+/* =========================================
+   STOCK PAGES
+========================================= */
+.stock-controls button,
+.stock-form button,
+.stock-in-form button,
+.stock-out-form button,
+.production-form button {
   padding: 8px 15px;
   border-radius: 4px;
   border: none;
   cursor: pointer;
 }
 
-.stock-form button:nth-child(1) {
-  background-color: #4CAF50;
-  color: white;
+.stock-form,
+.stock-in-form,
+.stock-out-form,
+.production-form {
+  margin-top: 15px;
+  padding: 15px;
+  border-radius: 8px;
+  max-width: 500px;
+  margin-bottom: 20px;
 }
 
-.stock-form button:nth-child(2) {
-  background-color: #e74c3c;
-  color: white;
+.stock-form {
+  background-color: #f1f8e9;
+}
+
+.stock-in-form {
+  background-color: #f1f8e9;
+}
+
+.stock-out-form {
+  background-color: #ffebee;
+}
+
+.production-form {
+  background-color: #e8f5e9;
+}
+
+.stock-form input,
+.stock-in-form input,
+.stock-out-form input,
+.production-form input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .stock-table {
@@ -258,7 +286,8 @@ body {
   margin-top: 15px;
 }
 
-.stock-table th, .stock-table td {
+.stock-table th,
+.stock-table td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: center;
@@ -269,143 +298,18 @@ body {
   color: white;
 }
 
-
-
-/* === RESPONSIVE === */
-@media (max-width: 768px) {
-  .sidebar {
-    width: 100px;
-    padding: 10px;
-  }
-
-  .top-bar {
-    left: 100px;
-  }
-
-  .content {
-    padding-left: 120px;
-  }
-}
-
-/* === UTILITY CLASSES === */
-.hidden {
-  display: none;
-}
-
-/* === STOCK IN PAGE === */
-.stock-in-form {
-  margin-top: 15px;
-  background-color: #f1f8e9;
-  padding: 15px;
-  border-radius: 8px;
-  max-width: 500px;
-  margin-bottom: 20px;
-}
-
-.stock-in-form h3 {
-  margin-bottom: 10px;
-}
-
-.stock-in-form input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.stock-in-form button {
-  padding: 8px 15px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.stock-in-form button:hover {
-  background-color: #45a049;
-}
-
-/* === STOCK OUT PAGE === */
-.stock-out-form {
-  margin-top: 15px;
-  background-color: #ffebee;
-  padding: 15px;
-  border-radius: 8px;
-  max-width: 500px;
-  margin-bottom: 20px;
-}
-
-.stock-out-form h3 {
-  margin-bottom: 10px;
-}
-
-.stock-out-form input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.stock-out-form button {
-  padding: 8px 15px;
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.stock-out-form button:hover {
-  background-color: #c0392b;
-}
-
-
-/* === PRODUCTION PAGE === */
-.production-form {
-  margin-top: 15px;
-  background-color: #e8f5e9;
-  padding: 15px;
-  border-radius: 8px;
-  max-width: 500px;
-  margin-bottom: 20px;
-}
-
-.production-form h3 {
-  margin-bottom: 10px;
-}
-
-.production-form input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.production-form button {
-  padding: 8px 15px;
-  background-color: #27ae60;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.production-form button:hover {
-  background-color: #1e8449;
-}
-
-/* === LOW STOCK WARNING === */
+/* =========================================
+   LOW STOCK WARNING
+========================================= */
 .low-stock-warning {
   background-color: #ffebee;
   color: #c62828;
   font-weight: bold;
 }
 
-/* === EXPORT BUTTONS === */
+/* =========================================
+   EXPORT BUTTONS
+========================================= */
 .export-buttons {
   margin-bottom: 15px;
 }
@@ -424,9 +328,9 @@ body {
   background-color: #3498db;
 }
 
-
-/* === Small Display === */
-/* === RESPONSIVE DESIGN === */
+/* =========================================
+   RESPONSIVE DESIGN
+========================================= */
 @media (max-width: 768px) {
   .dashboard-wrapper {
     flex-direction: column;
@@ -471,29 +375,6 @@ body {
   }
 }
 
-
-/* === BUTTONS STANDARDIZATION === */
-button {
-  font-size: 14px;
-  transition: 0.3s ease;
-}
-
-/* === HEADINGS STANDARDIZATION === */
-h2, h3 {
-  color: #2c3e50;
-  margin-bottom: 10px;
-}
-
-button:hover {
-  opacity: 0.9;
-  transform: scale(1.02);
-}
-
-.stock-table {
-  overflow-x: auto;
-  display: block;
-}
-
 @media (min-width: 769px) {
   .top-bar {
     display: flex !important;
@@ -507,4 +388,79 @@ button:hover {
     background-color: #ecf0f1;
     z-index: 1000;
   }
+}
+
+/* =========================================
+   UTILITY CLASSES
+========================================= */
+.hidden {
+  display: none;
+}
+
+button {
+  font-size: 14px;
+  transition: 0.3s ease;
+}
+
+button:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+h2,
+h3 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.stock-table {
+  overflow-x: auto;
+  display: block;
+}
+
+/* =========================================
+   DARK MODE
+========================================= */
+body.dark-mode {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+body.dark-mode .sidebar,
+body.dark-mode .top-bar {
+  background-color: #1f1f1f;
+  color: #e0e0e0;
+}
+
+body.dark-mode .content,
+body.dark-mode .login-page,
+body.dark-mode .stock-form,
+body.dark-mode .stock-in-form,
+body.dark-mode .stock-out-form,
+body.dark-mode .production-form {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+}
+
+body.dark-mode .menu-btn,
+body.dark-mode .logout-btn,
+body.dark-mode button {
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+body.dark-mode .menu-btn.active,
+body.dark-mode .menu-btn:hover {
+  background-color: #555;
+}
+
+body.dark-mode .stock-table th {
+  background-color: #333;
+  color: #fff;
+}
+
+body.dark-mode .stock-table td {
+  background-color: #222;
+  color: #e0e0e0;
 }
