@@ -23,73 +23,80 @@ const showAddForm = () => document.getElementById('addStockForm')?.classList.rem
 const hideAddForm = () => document.getElementById('addStockForm')?.classList.add('hidden');
 
 // ========================================
-// 3. STOCK MANAGEMENT
+// 3. INVENTORY MANAGEMENT
 // ========================================
-const addStock = () => {
+const addInventory = () => {
   const name = document.getElementById('stockName').value.trim();
   const category = document.getElementById('stockCategory').value.trim();
   const expiry = document.getElementById('stockExpiry').value;
   const quantity = parseInt(document.getElementById('stockQuantity').value.trim());
 
-  if (!name || !category || !expiry || isNaN(quantity)) return alert("Mohon lengkapi semua data!");
+  if (!name || !category || !expiry || isNaN(quantity)) {
+    alert("Mohon lengkapi semua data!");
+    return;
+  }
 
-  const stocks = JSON.parse(localStorage.getItem('stocks')) || [];
-  stocks.push({ id: Date.now(), name, category, expiry, quantity });
-  localStorage.setItem('stocks', JSON.stringify(stocks));
+  const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+  inventory.push({ id: Date.now(), name, category, expiry, quantity });
+  localStorage.setItem('inventory', JSON.stringify(inventory));
+
   clearForm();
   hideAddForm();
-  loadStockTable();
+  loadInventoryTable();
+
+  saveLog('Add Inventory', name, quantity);
+  loadActivityLog();
 };
 
 const clearForm = () => {
   ['stockName', 'stockCategory', 'stockExpiry', 'stockQuantity'].forEach(id => document.getElementById(id).value = '');
 };
 
-const loadStockTable = () => {
+const loadInventoryTable = () => {
   const tableBody = document.getElementById('stockTableBody');
   if (!tableBody) return;
 
-  const stocks = JSON.parse(localStorage.getItem('stocks')) || [];
-  tableBody.innerHTML = stocks.map(stock => `
+  const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+  tableBody.innerHTML = inventory.map(item => `
     <tr>
-      <td>${stock.name}</td>
-      <td>${stock.category}</td>
-      <td>${stock.expiry}</td>
-      <td>${stock.quantity}</td>
-      <td><button onclick="deleteStockById(${stock.id})">Hapus</button></td>
+      <td>${item.name}</td>
+      <td>${item.category}</td>
+      <td>${item.expiry}</td>
+      <td>${item.quantity}</td>
+      <td><button onclick="deleteInventoryById(${item.id})">Hapus</button></td>
     </tr>
   `).join('');
 };
 
-const deleteStockById = (id) => {
-  const stocks = JSON.parse(localStorage.getItem('stocks')) || [];
-  localStorage.setItem('stocks', JSON.stringify(stocks.filter(stock => stock.id !== id)));
-  loadStockTable();
+const deleteInventoryById = (id) => {
+  const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+  localStorage.setItem('inventory', JSON.stringify(inventory.filter(item => item.id !== id)));
+  loadInventoryTable();
 };
 
 // ========================================
-// 4. STOCK IN / OUT
+// 4. INVENTORY IN / OUT
 // ========================================
-const modifyStockQuantity = (nameId, qtyId, isAddition = true) => {
+const modifyInventoryQuantity = (nameId, qtyId, isAddition = true) => {
   const name = document.getElementById(nameId).value.trim().toLowerCase();
   const quantity = parseInt(document.getElementById(qtyId).value.trim());
   if (!name || isNaN(quantity) || quantity <= 0) return alert("Nama dan Jumlah harus diisi dengan benar!");
 
-  const stocks = JSON.parse(localStorage.getItem('stocks')) || [];
-  const stock = stocks.find(s => s.name.toLowerCase() === name);
+  const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+  const item = inventory.find(s => s.name.toLowerCase() === name);
 
-  if (!stock) return alert("Bahan baku tidak ditemukan di stok!");
+  if (!item) return alert("Bahan baku tidak ditemukan!");
 
-  if (!isAddition && quantity > stock.quantity) return alert("Jumlah melebihi stok!");
+  if (!isAddition && quantity > item.quantity) return alert("Jumlah melebihi stok!");
 
-  stock.quantity += isAddition ? quantity : -quantity;
-  localStorage.setItem('stocks', JSON.stringify(stocks));
-  loadStockTable();
-  alert(`Stok ${isAddition ? 'ditambahkan' : 'dikurangi'}.`);
+  item.quantity += isAddition ? quantity : -quantity;
+  localStorage.setItem('inventory', JSON.stringify(inventory));
+
+  loadInventoryTable();
+  saveLog(isAddition ? 'Inventory Masuk' : 'Inventory Keluar', name, quantity);
+  loadActivityLog();
+  alert(`Inventory berhasil ${isAddition ? 'ditambahkan' : 'dikurangi'}.`);
 };
-
-const addStockIn = () => modifyStockQuantity('stockInName', 'stockInQuantity', true);
-const subtractStockOut = () => modifyStockQuantity('stockOutName', 'stockOutQuantity', false);
 
 // ========================================
 // 5. PRODUCTION LOGIC (FIFO)
@@ -99,14 +106,14 @@ const processProduction = () => {
   let qtyToUse = parseInt(document.getElementById('productionQuantity').value.trim());
   if (!nameInput || isNaN(qtyToUse) || qtyToUse <= 0) return alert("Nama dan Jumlah harus diisi dengan benar!");
 
-  let stocks = JSON.parse(localStorage.getItem('stocks')) || [];
-  const matchingStocks = stocks.filter(s => s.name.toLowerCase() === nameInput).sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
+  let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+  const matchingItems = inventory.filter(s => s.name.toLowerCase() === nameInput).sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
 
-  if (!matchingStocks.length) return alert("Bahan baku tidak ditemukan di stok!");
-  const totalAvailable = matchingStocks.reduce((sum, s) => sum + s.quantity, 0);
-  if (qtyToUse > totalAvailable) return alert("Jumlah melebihi stok!");
+  if (!matchingItems.length) return alert("Bahan baku tidak ditemukan di inventory!");
+  const totalAvailable = matchingItems.reduce((sum, s) => sum + s.quantity, 0);
+  if (qtyToUse > totalAvailable) return alert("Jumlah melebihi inventory!");
 
-  stocks = stocks.map(s => {
+  inventory = inventory.map(s => {
     if (s.name.toLowerCase() === nameInput && qtyToUse > 0) {
       const used = Math.min(s.quantity, qtyToUse);
       s.quantity -= used;
@@ -115,55 +122,60 @@ const processProduction = () => {
     return s;
   });
 
-  localStorage.setItem('stocks', JSON.stringify(stocks));
+  localStorage.setItem('inventory', JSON.stringify(inventory));
   loadProductionTable();
+  saveLog('Production', nameInput, parseInt(document.getElementById('productionQuantity').value.trim()));
+  loadActivityLog();
   alert("Produksi berhasil dilakukan.");
 };
-// ========================================
-// 5B. LOAD PRODUCTION TABLE ONLY IF STOCK > 0
-// ========================================
+
 const loadProductionTable = () => {
   const tableBody = document.getElementById('productionTableBody');
   if (!tableBody) return;
 
-  let stocks = JSON.parse(localStorage.getItem('stocks')) || [];
-  const availableStocks = stocks.filter(stock => stock.quantity > 0);
+  const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+  const availableInventory = inventory.filter(item => item.quantity > 0);
 
-  if (availableStocks.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Belum ada stok tersedia</td></tr>`;
+  if (availableInventory.length === 0) {
+    tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Belum ada inventory tersedia</td></tr>`;
     return;
   }
 
-  tableBody.innerHTML = availableStocks.map(stock => `
+  tableBody.innerHTML = availableInventory.map(item => `
     <tr>
-      <td>${stock.name}</td>
-      <td>${stock.category}</td>
-      <td>${stock.expiry}</td>
-      <td>${stock.quantity}</td>
+      <td>${item.name}</td>
+      <td>${item.category}</td>
+      <td>${item.expiry}</td>
+      <td>${item.quantity}</td>
     </tr>
   `).join('');
 };
 
 // ========================================
-// LOAD 10 AKTIVITAS TERBARU
+// 6. ACTIVITY LOG - SHOW 10 LATEST
 // ========================================
+const saveLog = (action, itemName, quantity) => {
+  const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
+  logs.push({ timestamp: new Date().toLocaleString('id-ID'), action, itemName, quantity });
+  localStorage.setItem('activityLogs', JSON.stringify(logs));
+};
+
 const loadActivityLog = () => {
   const tableBody = document.getElementById('logTableBody');
   if (!tableBody) return;
 
   const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
-  const latestLogs = logs.slice(-10).reverse();  // Ambil 10 terakhir dan balik urutan
+  const latestLogs = logs.slice(-10).reverse();
 
   tableBody.innerHTML = latestLogs.map(log => `
     <tr>
       <td>${log.timestamp}</td>
       <td>${log.action}</td>
-      <td>${log.stockName}</td>
+      <td>${log.itemName}</td>
       <td>${log.quantity}</td>
     </tr>
   `).join('');
 };
-
 
 // ========================================
 // 7. EXPORT DUMMY FUNCTION
@@ -179,7 +191,7 @@ const applyRoleAccess = () => {
   document.querySelectorAll('.menu-btn, .inventory-circle').forEach(btn => {
     const text = btn.textContent.toLowerCase();
     if ((role === 'staf' && /profile|reporting|log|prediksi/.test(text)) ||
-        (role === 'kasir' && /inventory|stock|production|log|prediksi/.test(text))) {
+        (role === 'kasir' && /inventory|production|log|prediksi/.test(text))) {
       btn.style.display = 'none';
     }
   });
@@ -194,21 +206,21 @@ const loadDashboardSummary = () => {
   const container = document.getElementById('dashboardSummary');
   if (!container) return;
 
-  const stocks = JSON.parse(localStorage.getItem('stocks')) || [];
+  const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
   const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
 
-  const lowStockCount = stocks.filter(s => s.quantity <= 10).length;
-  const nearExpiryCount = stocks.filter(s => {
+  const lowInventoryCount = inventory.filter(s => s.quantity <= 10).length;
+  const nearExpiryCount = inventory.filter(s => {
     const daysLeft = (new Date(s.expiry) - new Date()) / (1000 * 60 * 60 * 24);
     return daysLeft <= 7 && daysLeft >= 0;
   }).length;
 
-  const latestLogs = logs.slice(-5).reverse().map(log => `<li>${log.timestamp} - ${log.action} - ${log.stockName} (${log.quantity})</li>`).join('');
+  const latestLogs = logs.slice(-5).reverse().map(log => `<li>${log.timestamp} - ${log.action} - ${log.itemName} (${log.quantity})</li>`).join('');
 
   container.innerHTML = `
-    <h2>Ringkasan Stok</h2>
-    <p>Total: ${stocks.length}</p>
-    <p>Menipis: ${lowStockCount}</p>
+    <h2>Ringkasan Inventory</h2>
+    <p>Total: ${inventory.length}</p>
+    <p>Menipis: ${lowInventoryCount}</p>
     <p>Kedaluwarsa Dekat: ${nearExpiryCount}</p>
     <h2>Aktivitas Terakhir</h2>
     <ul>${latestLogs}</ul>
@@ -228,9 +240,9 @@ document.querySelectorAll('.menu-btn').forEach(btn => {
 });
 
 // ========================================
-// AUTOLOAD LOG DAN STOCK TABLE SAAT DIBUKA
+// AUTOLOAD TABLES AND LOGS
 // ========================================
 document.addEventListener("DOMContentLoaded", () => {
-  loadStockTable();
+  loadInventoryTable();
   loadActivityLog();
 });
