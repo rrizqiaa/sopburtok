@@ -165,7 +165,7 @@ const loadActivityLog = () => {
   if (!tableBody) return;
 
   const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
-  const latestLogs = logs.slice(-10).reverse();
+  const latestLogs = logs.slice(-5).reverse();
 
   tableBody.innerHTML = latestLogs.map(log => `
     <tr>
@@ -246,3 +246,29 @@ document.addEventListener("DOMContentLoaded", () => {
   loadInventoryTable();
   loadActivityLog();
 });
+
+
+const loadReportingTable = () => {
+  const tableBody = document.getElementById('reportingTableBody');
+  if (!tableBody) return;
+
+  const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+  if (inventory.length === 0) {
+    tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Tidak ada data inventory</td></tr>`;
+    return;
+  }
+
+  tableBody.innerHTML = inventory.map(item => `
+    <tr>
+      <td>${item.name}</td>
+      <td>${item.category}</td>
+      <td>${item.expiry}</td>
+      <td>${item.quantity}</td>
+    </tr>
+  `).join('');
+};
+
+
+document.addEventListener("DOMContentLoaded", loadReportingTable);
+
+

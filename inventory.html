@@ -25,16 +25,17 @@
     </div>
  <div class="content">
       <h2>Inventory Bahan Baku</h2>
-      <button onclick="showAddForm()">+ Tambah Bahan Baku</button>
-      <div id="addStockForm" class="hidden">
-        <h3>Tambah Bahan Baku</h3>
-        <input id="stockName" placeholder="Nama Bahan Baku">
-        <input id="stockCategory" placeholder="Kategori">
-        <input id="stockExpiry" type="date">
-        <input id="stockQuantity" type="number">
-        <button onclick="addStock()">Simpan</button>
-        <button onclick="hideAddForm()">Batal</button>
-      </div>
+<button onclick="showAddForm()">+ Tambah Bahan Baku</button>
+<div id="addStockForm" class="hidden">
+  <h3>Tambah Bahan Baku</h3>
+  <input id="stockName" placeholder="Nama Bahan Baku">
+  <input id="stockCategory" placeholder="Kategori">
+  <input id="stockExpiry" type="date">
+  <input id="stockQuantity" type="number">
+  <button onclick="addInventory()">Simpan</button> <!-- GANTI addStock() KE addInventory() -->
+  <button onclick="hideAddForm()">Batal</button>
+</div>
+
       <table class="stock-table">
         <thead><tr><th>Nama</th><th>Kategori</th><th>tanggal masuk</th><th>Jumlah</th><th>Aksi</th></tr></thead>
         <tbody id="stockTableBody"></tbody>
