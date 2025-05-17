@@ -268,6 +268,75 @@ const loadReportingTable = () => {
   `).join('');
 };
 
+function exportReportingToPDF() {
+  const printWindow = window.open('', '', 'width=800,height=600');
+  const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+
+  if (inventory.length === 0) {
+    printWindow.document.write('<p>Tidak ada data untuk dicetak.</p>');
+  } else {
+    let tableHTML = `
+      <h2>Laporan Inventory</h2>
+      <table border="1" cellspacing="0" cellpadding="5">
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Kategori</th>
+            <th>Kedaluwarsa</th>
+            <th>Jumlah</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    inventory.forEach(item => {
+      tableHTML += `
+        <tr>
+          <td>${item.name}</td>
+          <td>${item.category}</td>
+          <td>${item.expiry}</td>
+          <td>${item.quantity}</td
+        </tr>
+      `;
+    });
+
+    tableHTML += `
+        </tbody>
+      </table>
+    `;
+    printWindow.document.write(tableHTML);
+  }
+
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+  printWindow.close();
+}
+
+
+function exportReportingToCSV() {
+  const inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+  if (inventory.length === 0) {
+    alert("Tidak ada data untuk diexport.");
+    return;
+  }
+
+  let csvContent = "data:text/csv;charset=utf-8,";
+  csvContent += "Nama,Kategori,Kedaluwarsa,Jumlah\n"; // Header CSV
+
+  inventory.forEach(item => {
+    csvContent += `${item.name},${item.category},${item.expiry},${item.quantity}\n`;
+  });
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "laporan_inventory.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 
 document.addEventListener("DOMContentLoaded", loadReportingTable);
 
