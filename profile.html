@@ -19,9 +19,11 @@
       <button class="menu-btn active" onclick="location.href='profile.html'">Profile</button>
     </div>
     <div class="top-bar">
-      <div id="liveClock" style="margin-right: 15px; font-weight: bold;"></div>
-      ><button class="logout-btn" onclick="location.href='index.html'">Logout</button>
-    </div>
+  <div id="liveClock" style="margin-right: 15px; font-weight: bold;"></div>
+  <button class="toggle-mode-btn" onclick="toggleMode()" style="margin-right: 10px;">🌓</button>
+  <button class="logout-btn" onclick="location.href='index.html'">Logout</button>
+</div>
+    
     <div class="content">
       <div class="profile-content">
         <h2>Halaman Profile</h2>
@@ -58,6 +60,19 @@
   // Update setiap detik
   setInterval(updateLiveClock, 1000);
   updateLiveClock();
+</script>
+<script>
+  function toggleMode() {
+    const isDark = document.body.classList.toggle('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  }
+
+  // Terapkan mode saat halaman dimuat
+  document.addEventListener('DOMContentLoaded', function () {
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark-mode');
+    }
+  });
 </script>
 
 </body>
