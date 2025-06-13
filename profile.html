@@ -4,9 +4,17 @@
   <meta charset="UTF-8">
   <title>Profile - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
-
 </head>
 <body>
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Anda harus login terlebih dahulu.");
+      window.location.href = "index.html";
+    }
+  });
+</script>
   <div class="dashboard-wrapper">
     <div class="sidebar">
       <img src="assets/images/logo.png" alt="SOP BURTOK">
@@ -21,7 +29,7 @@
     <div class="top-bar">
   <div id="liveClock" style="margin-right: 15px; font-weight: bold;"></div>
   <button class="toggle-mode-btn" onclick="toggleMode()" style="margin-right: 10px;">🌓</button>
-  <button class="logout-btn" onclick="location.href='index.html'">Logout</button>
+  <button class="logout-btn" onclick="handleLogout()">Logout</button>
 </div>
     
     <div class="content">
@@ -73,6 +81,13 @@
       document.body.classList.add('dark-mode');
     }
   });
+
+  function handleLogout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("username");
+    window.location.href = "index.html";
+  }
 </script>
 
 </body>
