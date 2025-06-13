@@ -7,14 +7,13 @@
 </head>
 <body>
   <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Anda harus login terlebih dahulu.");
-      window.location.href = "index.html";
-    }
-  });
-</script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        window.location.href = "inventory.html"; // Bisa diganti ke halaman default lainnya
+      }
+    });
+  </script>
   <div class="dashboard-wrapper">
     <div class="sidebar">
       <img src="assets/images/logo.png" alt="SOP BURTOK">
