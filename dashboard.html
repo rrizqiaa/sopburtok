@@ -6,11 +6,9 @@
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
-  
   <div class="dashboard-wrapper">
     <div class="sidebar">
       <img src="assets/images/logo.png" alt="SOP BURTOK">
-
       <h3>SOP BURTOK</h3>
       <button class="menu-btn active" onclick="location.href='dashboard.html'">Home</button>
       <button class="menu-btn" onclick="location.href='inventory.html'">Inventory</button>
@@ -18,11 +16,12 @@
       <button class="menu-btn" onclick="location.href='reporting.html'">Reporting</button>
       <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
     </div>
+
     <div class="top-bar">
-  <div id="liveClock" style="margin-right: 15px; font-weight: bold;"></div>
-  <button class="toggle-mode-btn" onclick="toggleMode()" style="margin-right: 10px;">🌓</button>
-  <button class="logout-btn" onclick="location.href='index.html'">Logout</button>
-</div>
+      <div id="liveClock" style="margin-right: 15px; font-weight: bold;"></div>
+      <button class="toggle-mode-btn" onclick="toggleMode()" style="margin-right: 10px;">🌓</button>
+      <button class="logout-btn" onclick="logoutUser()">Logout</button>
+    </div>
 
     <div class="content">
       <h2>Log Aktivitas</h2>
@@ -41,44 +40,129 @@
       </table>
     </div>
   </div>
-  <script src="assets/js/script.js"></script>
-<script>
-  function updateLiveClock() {
-    const clockElement = document.getElementById('liveClock');
-    if (!clockElement) return;
 
-    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  <!-- Clock -->
+  <script>
+    function updateLiveClock() {
+      const clockElement = document.getElementById('liveClock');
+      if (!clockElement) return;
 
-    const now = new Date();
-    const dayName = days[now.getDay()];
-    const date = now.getDate();
-    const month = months[now.getMonth()];
-    const year = now.getFullYear();
-    const time = now.toLocaleTimeString('id-ID');
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli',
+                      'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
-    clockElement.textContent = `${dayName}, ${date} ${month} ${year} - ${time}`;
-  }
+      const now = new Date();
+      const dayName = days[now.getDay()];
+      const date = now.getDate();
+      const month = months[now.getMonth()];
+      const year = now.getFullYear();
+      const time = now.toLocaleTimeString('id-ID');
 
-  // Update setiap detik
-  setInterval(updateLiveClock, 1000);
-  updateLiveClock();
-</script>
-<script>
-  function toggleMode() {
-    const isDark = document.body.classList.toggle('dark-mode');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  }
-
-  // Terapkan mode saat halaman dimuat
-  document.addEventListener('DOMContentLoaded', function () {
-    if (localStorage.getItem('theme') === 'dark') {
-      document.body.classList.add('dark-mode');
+      clockElement.textContent = `${dayName}, ${date} ${month} ${year} - ${time}`;
     }
-  });
-</script>
 
+    setInterval(updateLiveClock, 1000);
+    updateLiveClock();
+  </script>
+
+  <!-- Theme Toggle -->
+  <script>
+    function toggleMode() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
+    });
+  </script>
+
+  <!-- Dashboard Data Load -->
+  <script>
+    const token = localStorage.getItem("token");
+    const logTableBody = document.getElementById("logTableBody");
+
+    if (!token) {
+      window.location.href = "index.html";
+    }
+
+    async function fetchLogs() {
+      try {
+        const [inventoryRes, productionRes] = await Promise.all([
+          fetch("https://api.sopburtok.giize.com/api/inventory", {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Accept": "application/json"
+            }
+          }),
+          fetch("https://api.sopburtok.giize.com/api/production", {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Accept": "application/json"
+            }
+          })
+        ]);
+
+        const inventoryData = await inventoryRes.json();
+        const productionData = await productionRes.json();
+
+        const logs = [];
+
+        inventoryData.forEach(item => {
+          logs.push({
+            waktu: item.created_at,
+            aksi: "Penambahan Stok",
+            nama: item.name,
+            jumlah: item.stock
+          });
+        });
+
+        productionData.forEach(item => {
+          logs.push({
+            waktu: item.created_at,
+            aksi: "Produksi",
+            nama: item.product_name || "-",
+            jumlah: item.quantity_produced || 0
+          });
+        });
+
+        logs.sort((a, b) => new Date(b.waktu) - new Date(a.waktu));
+
+        logs.forEach(log => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${new Date(log.waktu).toLocaleString('id-ID')}</td>
+            <td>${log.aksi}</td>
+            <td>${log.nama}</td>
+            <td>${log.jumlah}</td>
+          `;
+          logTableBody.appendChild(row);
+        });
+      } catch (error) {
+        console.error("Gagal memuat data log:", error);
+        logTableBody.innerHTML = `<tr><td colspan="4">Gagal memuat data log.</td></tr>`;
+      }
+    }
+
+    fetchLogs();
+  </script>
+
+  <!-- Logout -->
+  <script>
+    function logoutUser() {
+      fetch("https://api.sopburtok.giize.com/api/logout", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json"
+        }
+      }).finally(() => {
+        localStorage.clear();
+        window.location.href = "index.html";
+      });
+    }
+  </script>
 </body>
 </html>
-

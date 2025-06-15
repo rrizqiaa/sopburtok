@@ -12,18 +12,54 @@
     <div class="sop-title">SOP BURTOK</div>
     <div class="login-box">
       <h2>Login</h2>
-      <input type="text" id="username" placeholder="Username" />
+      <input type="email" id="email" placeholder="Email" />
       <input type="password" id="password" placeholder="Password" />
-      <select id="userRole">
-          <option value="admin">Admin</option>
-          <option value="staf">Staf</option>
-          <option value="kasir">Kasir</option>
-      </select>
-      
-      <button id="loginBtn" onclick="window.location='dashboard.html'">LOGIN</button>
-      
+      <button id="loginBtn">LOGIN</button>
+      <div id="error" style="color:red; margin-top:10px;"></div>
     </div>
   </div>
+
+  <script>
+    const loginBtn = document.getElementById("loginBtn");
+    const apiUrl = "https://api.sopburtok.giize.com/api/login";
+
+    loginBtn.addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const errorDiv = document.getElementById("error");
+
+      if (!email || !password) {
+        errorDiv.innerText = "Email dan password wajib diisi!";
+        return;
+      }
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Simpan token dan user info
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("user", JSON.stringify(data.user));
+
+          // Redirect ke dashboard
+          window.location.href = "dashboard.html";
+        } else {
+          errorDiv.innerText = data.message || "Login gagal. Cek email dan password.";
+        }
+      } catch (err) {
+        console.error(err);
+        errorDiv.innerText = "Terjadi kesalahan koneksi.";
+      }
+    });
+  </script>
 </body>
 </html>
-

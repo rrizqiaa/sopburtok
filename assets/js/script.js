@@ -340,4 +340,84 @@ function exportReportingToCSV() {
 
 document.addEventListener("DOMContentLoaded", loadReportingTable);
 
+function createUser() {
+  const data = {
+    name: document.getElementById('new_name').value,
+    email: document.getElementById('new_email').value,
+    password: document.getElementById('new_password').value,
+    phone: document.getElementById('new_hp').value,
+    address: document.getElementById('new_alamat').value,
+    role: document.getElementById('new_role').value
+  };
 
+  fetch(`${API_BASE}/users`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(response => {
+    if (response.message) {
+      alert(response.message);
+    } else {
+      alert("Akun berhasil dibuat.");
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Gagal membuat user.");
+  });
+}
+
+
+
+function loadUsers() {
+  fetch(`${API_BASE}/users`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json'
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    const tbody = document.getElementById('userTableBody');
+    tbody.innerHTML = '';
+    data.forEach(user => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${user.name}</td>
+        <td>${user.email}</td>
+        <td>${user.role}</td>
+        <td><button onclick="deleteUser(${user.id})">Hapus</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+    document.getElementById('user-list-section').style.display = 'block';
+  })
+  .catch(err => console.error("Gagal memuat user:", err));
+}
+
+function deleteUser(id) {
+  if (!confirm("Yakin ingin menghapus user ini?")) return;
+
+  fetch(`${API_BASE}/users/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json'
+    }
+  })
+  .then(res => res.json())
+  .then(response => {
+    alert(response.message);
+    loadUsers(); // refresh daftar
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Gagal menghapus user");
+  });
+}
