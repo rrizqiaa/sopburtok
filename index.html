@@ -6,76 +6,24 @@
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
-  <!-- Jika user sudah login, arahkan ke dashboard -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        window.location.href = "dashboard.html"; // Bisa diganti ke halaman default lainnya
-      }
-    });
-  </script>
-
   <div class="login-page" id="loginPage">
     <img src="assets/images/logo.png" alt="SOP BURTOK">
-    <div class="sop-title">SOP BURTOK</div>
 
+    <div class="sop-title">SOP BURTOK</div>
     <div class="login-box">
       <h2>Login</h2>
       <input type="text" id="username" placeholder="Username" />
       <input type="password" id="password" placeholder="Password" />
       <select id="userRole">
-        <option value="admin">Admin</option>
-        <option value="staf">Staf</option>
-        <option value="kasir">Kasir</option>
+          <option value="admin">Admin</option>
+          <option value="staf">Staf</option>
+          <option value="kasir">Kasir</option>
       </select>
-      <button id="loginBtn">LOGIN</button>
+      
+      <button id="loginBtn" onclick="window.location='dashboard.html'">LOGIN</button>
+      
     </div>
   </div>
-
-  <script>
-    document.getElementById("loginBtn").addEventListener("click", handleLogin);
-
-    async function handleLogin() {
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const role = document.getElementById("userRole").value;
-
-      if (!username || !password) {
-        alert("Username dan password wajib diisi.");
-        return;
-      }
-
-      try {
-        const response = await fetch("https://api.sopburtok.giize.com/api/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: username, // Sesuaikan dengan backend jika pakai "email"
-            password: password
-          })
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.token) {
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("role", role);
-          localStorage.setItem("username", username);
-
-          // Redirect ke halaman terakhir yang diminta (jika ada)
-          const redirectTo = localStorage.getItem("redirectAfterLogin") || "dashboard.html";
-          localStorage.removeItem("redirectAfterLogin");
-
-          window.location.href = redirectTo;
-        } else {
-          alert(data.message || "Login gagal. Cek username/password.");
-        }
-      } catch (error) {
-        console.error("Login error:", error);
-        alert("Gagal login. Pastikan server backend aktif.");
-      }
-    }
-  </script>
 </body>
 </html>
+
