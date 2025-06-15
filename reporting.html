@@ -97,7 +97,15 @@ async function loadReports() {
       tbody.appendChild(tr);
     });
 
-    drawChart(labels, quantities);
+    try {
+      const canvas = document.getElementById('stockChart');
+      if (canvas && canvas.getContext) {
+        drawChart(labels, quantities);
+      }
+    } catch (err) {
+      console.warn('⚠️ Gagal menampilkan grafik:', err.message);
+    }
+
   } catch (err) {
     console.error('Gagal memuat laporan:', err);
   }
@@ -131,8 +139,15 @@ async function loadLogReports() {
 }
 
 function drawChart(labels, values) {
-  const ctx = document.getElementById('stockChart').getContext('2d');
+  const canvas = document.getElementById('stockChart');
+  if (!canvas || !canvas.getContext) {
+    console.warn("Canvas #stockChart tidak valid.");
+    return;
+  }
+
+  const ctx = canvas.getContext('2d');
   if (chartInstance) chartInstance.destroy();
+
   chartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
@@ -180,7 +195,6 @@ function exportTableToExcel() {
   link.click();
   document.body.removeChild(link);
 }
-
 
 function exportToPDF() {
   window.print();
