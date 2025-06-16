@@ -152,7 +152,7 @@ const loadProductionTable = () => {
 };
 
 // ========================================
-// 6. ACTIVITY LOG - SHOW 10 LATEST
+// 6. ACTIVITY LOG - SHOW 15 LATEST
 // ========================================
 const saveLog = (action, itemName, quantity) => {
   const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
@@ -165,7 +165,7 @@ const loadActivityLog = () => {
   if (!tableBody) return;
 
   const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
-  const latestLogs = logs.slice(-5).reverse();
+  const latestLogs = logs.slice(-15).reverse();
 
   tableBody.innerHTML = latestLogs.map(log => `
     <tr>
@@ -215,7 +215,7 @@ const loadDashboardSummary = () => {
     return daysLeft <= 7 && daysLeft >= 0;
   }).length;
 
-  const latestLogs = logs.slice(-5).reverse().map(log => `<li>${log.timestamp} - ${log.action} - ${log.itemName} (${log.quantity})</li>`).join('');
+  const latestLogs = logs.slice(-15).reverse().map(log => `<li>${log.timestamp} - ${log.action} - ${log.itemName} (${log.quantity})</li>`).join('');
 
   container.innerHTML = `
     <h2>Ringkasan Inventory</h2>
