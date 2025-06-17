@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Production - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
   <div class="dashboard-wrapper">
+    <!-- Sidebar -->
     <div class="sidebar">
-      <img src="assets/images/logo.png" alt="SOP BURTOK">
+      <img src="assets/images/logo.png" alt="SOP BURTOK" />
       <h3>SOP BURTOK</h3>
       <button class="menu-btn" onclick="location.href='dashboard.html'">Home</button>
       <button class="menu-btn" onclick="location.href='inventory.html'">Inventory</button>
@@ -17,22 +18,28 @@
       <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
     </div>
 
+    <!-- Top Bar -->
     <div class="top-bar">
       <div id="liveClock" style="margin-right: 15px; font-weight: bold;"></div>
       <button class="toggle-mode-btn" onclick="toggleMode()" style="margin-right: 10px;">🌓</button>
-      <button class="logout-btn" onclick="logout()">Logout</button>
+      <button class="logout-btn" onclick="logoutUser()">Logout</button>
     </div>
 
+    <!-- Main Content -->
     <div class="content">
       <h2>Production - Penggunaan Bahan Baku</h2>
 
-      <div class="production-form">
-        <h3>Gunakan Bahan Baku</h3>
-        <select id="productionName"></select>
-        <input type="number" id="productionQuantity" placeholder="Jumlah yang Digunakan">
-        <button onclick="processProduction()">Gunakan</button>
+      <!-- Form penggunaan -->
+      <div style="background-color: #e7f7e6; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <h4>Gunakan Bahan Baku</h4>
+        <select id="selectBahan">
+          <option>-- Pilih Bahan Baku --</option>
+        </select>
+        <input id="jumlahDigunakan" type="number" placeholder="Jumlah yang Digunakan" />
+        <button>Gunakan</button>
       </div>
 
+      <!-- Tabel stok -->
       <table class="stock-table">
         <thead>
           <tr>
@@ -42,102 +49,104 @@
             <th>Jumlah Tersedia</th>
           </tr>
         </thead>
-        <tbody id="productionTableBody"></tbody>
+        <tbody id="stockTableBody"></tbody>
       </table>
     </div>
   </div>
 
+  <!-- Clock -->
   <script>
-    const API_BASE = 'https://api.sopburtok.giize.com/api';
-    const token = localStorage.getItem('token');
-
-    async function loadInventoryTable() {
-      const res = await fetch(`${API_BASE}/inventory`, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      const data = await res.json();
-
-      const tbody = document.getElementById('productionTableBody');
-      const select = document.getElementById('productionName');
-      tbody.innerHTML = '';
-      select.innerHTML = '<option value="">-- Pilih Bahan Baku --</option>';
-
-      data.forEach(item => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${item.name}</td>
-            <td>${item.category ?? '-'}</td>
-            <td>${item.entry_date ?? '-'}</td>
-            <td>${item.stock}</td>
-          </tr>
-        `;
-        select.innerHTML += `<option value="${item.name}">${item.name}</option>`;
-      });
-    }
-
-    async function processProduction() {
-      const name = document.getElementById('productionName').value;
-      const qty = parseInt(document.getElementById('productionQuantity').value);
-      if (!name || !qty) return alert('Nama dan jumlah wajib diisi');
-
-      const res = await fetch(`${API_BASE}/production`, {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + token,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          product_name: name,
-          quantity_produced: qty,
-          production_date: new Date().toISOString().split('T')[0]
-        })
-      });
-
-      if (res.ok) {
-        alert('Produksi berhasil disimpan!');
-        loadInventoryTable(); // refresh
-      } else {
-        const error = await res.json();
-        alert('Gagal: ' + JSON.stringify(error));
-      }
-    }
-
-    function logout() {
-      fetch(`${API_BASE}/logout`, {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + token,
-          'Accept': 'application/json'
-        }
-      }).then(() => {
-        localStorage.removeItem('token');
-        window.location.href = 'index.html';
-      });
-    }
-
-    // Clock and theme
     function updateLiveClock() {
-      const clockElement = document.getElementById('liveClock');
-      const now = new Date();
+      const el = document.getElementById("liveClock");
       const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-      const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-      clockElement.textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} - ${now.toLocaleTimeString('id-ID')}`;
+      const months = ['Januari','Februari','Maret','April','Mei','Juni',
+                      'Juli','Agustus','September','Oktober','November','Desember'];
+      const now = new Date();
+      el.textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} - ${now.toLocaleTimeString('id-ID')}`;
     }
-
-    function toggleMode() {
-      const isDark = document.body.classList.toggle('dark-mode');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      if (localStorage.getItem('theme') === 'dark') {
-        document.body.classList.add('dark-mode');
-      }
-      loadInventoryTable();
-    });
-
     setInterval(updateLiveClock, 1000);
     updateLiveClock();
+  </script>
+
+  <!-- Theme -->
+  <script>
+    function toggleMode() {
+      const isDark = document.body.classList.toggle("dark-mode");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+      }
+    });
+  </script>
+
+  <!-- Data Stok -->
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) window.location.href = "index.html";
+
+    async function loadStock() {
+      try {
+        const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
+          headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
+        });
+        const data = await res.json();
+        renderStockTable(data);
+        renderDropdown(data);
+      } catch (err) {
+        console.error("Gagal memuat data:", err);
+        document.getElementById("stockTableBody").innerHTML = "<tr><td colspan='4'>Gagal memuat data.</td></tr>";
+      }
+    }
+
+    function renderStockTable(data) {
+      const tbody = document.getElementById("stockTableBody");
+      tbody.innerHTML = "";
+
+      data.forEach(item => {
+        const row = document.createElement("tr");
+        const nameLower = item.name?.toLowerCase() || "";
+        const unit = (nameLower === "air" || nameLower === "minyak") ? "Liter" : "Kg";
+
+        row.innerHTML = `
+          <td>${item.name}</td>
+          <td>${item.category}</td>
+          <td>${item.entry_date}</td>
+          <td>${item.stock} ${unit}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function renderDropdown(data) {
+      const select = document.getElementById("selectBahan");
+      data.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.id;
+        option.textContent = item.name;
+        select.appendChild(option);
+      });
+    }
+
+    loadStock();
+  </script>
+
+  <!-- Logout -->
+  <script>
+    function logoutUser() {
+      fetch("https://api.sopburtok.giize.com/api/logout", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json"
+        }
+      }).finally(() => {
+        localStorage.clear();
+        window.location.href = "index.html";
+      });
+    }
   </script>
 </body>
 </html>

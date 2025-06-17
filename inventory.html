@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Inventory - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
   <div class="dashboard-wrapper">
+    <!-- Sidebar -->
     <div class="sidebar">
-      <img src="assets/images/logo.png" alt="SOP BURTOK">
+      <img src="assets/images/logo.png" alt="SOP BURTOK" />
       <h3>SOP BURTOK</h3>
       <button class="menu-btn" onclick="location.href='dashboard.html'">Home</button>
       <button class="menu-btn active" onclick="location.href='inventory.html'">Inventory</button>
@@ -17,22 +18,38 @@
       <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
     </div>
 
+    <!-- Top Bar -->
     <div class="top-bar">
       <div id="liveClock" style="margin-right: 15px; font-weight: bold;"></div>
       <button class="toggle-mode-btn" onclick="toggleMode()" style="margin-right: 10px;">🌓</button>
       <button class="logout-btn" onclick="logoutUser()">Logout</button>
     </div>
 
+    <!-- Content -->
     <div class="content">
-      <h2>Inventory Bahan Baku</h2>
+      <h2>⚠️ Peringatan Bahan Baku</h2>
+      <table class="stock-table" style="background-color: #fff4f4;">
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Masalah</th>
+          </tr>
+        </thead>
+        <tbody id="warningTableBody"></tbody>
+      </table>
+
+      <h2 style="margin-top: 30px;">Inventory Bahan Baku</h2>
       <button onclick="showAddForm()">+ Tambah Bahan Baku</button>
 
-      <div id="addStockForm" class="hidden">
-        <h3>Tambah Bahan Baku</h3>
-        <input id="stockName" placeholder="Nama Bahan Baku">
-        <input id="stockCategory" placeholder="Kategori">
-        <input id="stockExpiry" type="date">
-        <input id="stockQuantity" type="number">
+      <div id="addStockForm" class="hidden" style="margin-top: 20px;">
+        <input id="stockName" placeholder="Nama Bahan Baku" />
+        <select id="stockCategory">
+          <option value="Sayuran">Sayuran</option>
+          <option value="Pokok">Pokok</option>
+          <option value="Bumbu">Bumbu</option>
+        </select>
+        <input id="stockEntry" type="date" />
+        <input id="stockAmount" type="number" placeholder="Jumlah" />
         <button onclick="addInventory()">Simpan</button>
         <button onclick="hideAddForm()">Batal</button>
       </div>
@@ -52,79 +69,120 @@
     </div>
   </div>
 
-  <!-- CLOCK -->
+  <!-- Clock -->
   <script>
     function updateLiveClock() {
-      const clockElement = document.getElementById('liveClock');
-      if (!clockElement) return;
-
-      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-
+      const el = document.getElementById("liveClock");
+      const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+      const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
       const now = new Date();
-      const dayName = days[now.getDay()];
-      const date = now.getDate();
-      const month = months[now.getMonth()];
-      const year = now.getFullYear();
-      const time = now.toLocaleTimeString('id-ID');
-
-      clockElement.textContent = `${dayName}, ${date} ${month} ${year} - ${time}`;
+      el.textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} - ${now.toLocaleTimeString("id-ID")}`;
     }
-
     setInterval(updateLiveClock, 1000);
     updateLiveClock();
   </script>
 
-  <!-- MODE -->
+  <!-- Mode -->
   <script>
     function toggleMode() {
-      const isDark = document.body.classList.toggle('dark-mode');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      const isDark = document.body.classList.toggle("dark-mode");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-      if (localStorage.getItem('theme') === 'dark') {
-        document.body.classList.add('dark-mode');
+    document.addEventListener("DOMContentLoaded", () => {
+      if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark-mode");
       }
     });
   </script>
 
-  <!-- CRUD -->
+  <!-- Script -->
   <script>
-    const token = localStorage.getItem('token');
-    const apiUrl = "https://api.sopburtok.giize.com/api/inventory";
-
-    if (!token) {
-      window.location.href = "index.html";
-    }
+    const token = localStorage.getItem("token");
+    if (!token) window.location.href = "index.html";
 
     function showAddForm() {
-      document.getElementById('addStockForm').classList.remove('hidden');
+      document.getElementById("addStockForm").classList.remove("hidden");
     }
 
     function hideAddForm() {
-      document.getElementById('addStockForm').classList.add('hidden');
+      document.getElementById("addStockForm").classList.add("hidden");
     }
 
     async function loadInventory() {
-      const res = await fetch(apiUrl, {
-        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
-      });
-      const data = await res.json();
+      try {
+        const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
+          headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
+        });
+        const data = await res.json();
+        renderStockTable(data);
+        checkStockAlerts(data);
+      } catch (err) {
+        console.error("Gagal memuat data:", err);
+      }
+    }
+
+    function renderStockTable(data) {
       const tbody = document.getElementById("stockTableBody");
       tbody.innerHTML = "";
 
       data.forEach(item => {
         const row = document.createElement("tr");
+        const nameLower = item.name?.toLowerCase() || "";
+        const unit = (nameLower === "air" || nameLower === "minyak") ? "Liter" : "Kg";
+
         row.innerHTML = `
-          <td><input value="${item.name}" onchange="updateInventory(${item.id}, 'name', this.value)"/></td>
-          <td><input value="${item.category}" onchange="updateInventory(${item.id}, 'category', this.value)"/></td>
-          <td><input type="date" value="${item.entry_date || ''}" onchange="updateInventory(${item.id}, 'entry_date', this.value)"/></td>
-          <td><input type="number" value="${item.stock}" onchange="updateInventory(${item.id}, 'stock', this.value)"/></td>
+          <td><input value="${item.name}" onchange="updateInventory(${item.id}, 'name', this.value)" /></td>
+          <td>
+            <select onchange="updateInventory(${item.id}, 'category', this.value)">
+              <option value="Sayuran" ${item.category === "Sayuran" ? "selected" : ""}>Sayuran</option>
+              <option value="Pokok" ${item.category === "Pokok" ? "selected" : ""}>Pokok</option>
+              <option value="Bumbu" ${item.category === "Bumbu" ? "selected" : ""}>Bumbu</option>
+            </select>
+          </td>
+          <td><input type="date" value="${item.entry_date}" onchange="updateInventory(${item.id}, 'entry_date', this.value)" /></td>
+          <td>
+            <input type="number" value="${item.stock}" onchange="updateInventory(${item.id}, 'stock', this.value)" style="width: 80px;" /> ${unit}
+          </td>
           <td><button onclick="deleteInventory(${item.id})">🗑️</button></td>
         `;
         tbody.appendChild(row);
+      });
+    }
+
+    function checkStockAlerts(data) {
+      const warningTable = document.getElementById("warningTableBody");
+      warningTable.innerHTML = "";
+
+      const now = new Date();
+      const lowThreshold = 5;
+
+      data.forEach(item => {
+        const masalah = [];
+        const nameLower = item.name?.toLowerCase() || "";
+        const unit = (nameLower === "air" || nameLower === "minyak") ? "Liter" : "Kg";
+        const jumlah = item.stock || 0;
+
+        if (jumlah < lowThreshold) {
+          masalah.push(`Stok rendah (${jumlah} ${unit})`);
+        }
+
+        if (item.entry_date) {
+          const entryDate = new Date(item.entry_date);
+          const daysStored = Math.floor((now - entryDate) / (1000 * 60 * 60 * 24));
+          if (daysStored >= 7) {
+            masalah.push(`Tersimpan ${daysStored} hari`);
+          }
+        }
+
+        if (masalah.length > 0) {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.name}</td>
+            <td>${masalah.join("<br>")}</td>
+          `;
+          warningTable.appendChild(row);
+        }
       });
     }
 
@@ -132,66 +190,57 @@
       const body = {
         name: document.getElementById("stockName").value,
         category: document.getElementById("stockCategory").value,
-        entry_date: document.getElementById("stockExpiry").value,
-        stock: parseInt(document.getElementById("stockQuantity").value)
+        entry_date: document.getElementById("stockEntry").value,
+        stock: parseFloat(document.getElementById("stockAmount").value)
       };
 
-      const res = await fetch(apiUrl, {
+      const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          Accept: "application/json"
         },
         body: JSON.stringify(body)
       });
 
       if (res.ok) {
-        alert("Bahan baku ditambahkan");
+        alert("✅ Berhasil ditambahkan");
         hideAddForm();
         loadInventory();
       } else {
-        alert("Gagal menambahkan");
+        alert("❌ Gagal menambahkan data");
       }
     }
 
     async function updateInventory(id, field, value) {
-      const res = await fetch(`${apiUrl}/${id}`, {
+      await fetch(`https://api.sopburtok.giize.com/api/inventory/${id}`, {
         method: "PUT",
         headers: {
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          Accept: "application/json"
         },
         body: JSON.stringify({ [field]: value })
       });
-
-      if (!res.ok) alert("Gagal mengupdate");
     }
 
     async function deleteInventory(id) {
       if (!confirm("Hapus bahan baku ini?")) return;
-
-      const res = await fetch(`${apiUrl}/${id}`, {
+      await fetch(`https://api.sopburtok.giize.com/api/inventory/${id}`, {
         method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Accept": "application/json"
-        }
+        headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
       });
-
-      if (res.ok) {
-        alert("Dihapus");
-        loadInventory();
-      } else {
-        alert("Gagal menghapus");
-      }
+      loadInventory();
     }
 
     function logoutUser() {
       fetch("https://api.sopburtok.giize.com/api/logout", {
         method: "POST",
-        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json"
+        }
       }).finally(() => {
         localStorage.clear();
         window.location.href = "index.html";

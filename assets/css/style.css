@@ -464,3 +464,56 @@ body.dark-mode .stock-table td {
   background-color: #222;
   color: #e0e0e0;
 }
+
+/* File: style.css (yang sudah kamu punya) */
+
+/* ... style existing ... */
+
+@media screen and (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  .main-content {
+    margin: 0;
+    padding: 10px;
+  }
+
+  table {
+    width: 100%;
+    font-size: 12px;
+    overflow-x: auto;
+    display: block;
+  }
+
+  td, th {
+    white-space: nowrap;
+  }
+}
+
+/* =========================================
+   PRINT STYLES
+========================================= */
+@media (max-width: 768px) {
+  .log-row {
+    flex-direction: column;
+  }
+}
+.log-container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+
+.log-box {
+  flex: 1;
+  min-width: 350px;
+}
+
+@media (max-width: 768px) {
+  .log-container {
+    flex-direction: column;
+  }
+}

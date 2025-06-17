@@ -7,6 +7,7 @@
 </head>
 <body>
   <div class="dashboard-wrapper">
+    <!-- Sidebar -->
     <div class="sidebar">
       <img src="assets/images/logo.png" alt="SOP BURTOK">
       <h3>SOP BURTOK</h3>
@@ -17,61 +18,72 @@
       <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
     </div>
 
+    <!-- Top Bar -->
     <div class="top-bar">
       <div id="liveClock" style="margin-right: 15px; font-weight: bold;"></div>
       <button class="toggle-mode-btn" onclick="toggleMode()" style="margin-right: 10px;">🌓</button>
       <button class="logout-btn" onclick="logoutUser()">Logout</button>
     </div>
 
+    <!-- Content -->
     <div class="content">
       <h2>Log Aktivitas</h2>
-      <table class="stock-table">
-        <thead>
-          <tr>
-            <th>Waktu</th>
-            <th>Aksi</th>
-            <th>Nama Bahan Baku</th>
-            <th>Jumlah</th>
-          </tr>
-        </thead>
-        <tbody id="logTableBody">
-          <!-- Data log akan dimuat di sini -->
-        </tbody>
-      </table>
+      <div class="log-container">
+        <!-- Inventory Log -->
+        <div class="log-box">
+          <h3>Inventory</h3>
+          <table class="stock-table">
+            <thead>
+              <tr>
+                <th>Waktu</th>
+                <th>Aksi</th>
+                <th>Nama Bahan Baku</th>
+                <th>Jumlah</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryLogBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Production Log -->
+        <div class="log-box">
+          <h3>Production</h3>
+          <table class="stock-table">
+            <thead>
+              <tr>
+                <th>Waktu</th>
+                <th>Aksi</th>
+                <th>Nama Produk</th>
+                <th>Jumlah</th>
+              </tr>
+            </thead>
+            <tbody id="productionLogBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Clock -->
   <script>
     function updateLiveClock() {
-      const clockElement = document.getElementById('liveClock');
-      if (!clockElement) return;
-
-      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli',
-                      'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-
+      const el = document.getElementById("liveClock");
+      const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+      const months = ['Januari','Februari','Maret','April','Mei','Juni',
+                      'Juli','Agustus','September','Oktober','November','Desember'];
       const now = new Date();
-      const dayName = days[now.getDay()];
-      const date = now.getDate();
-      const month = months[now.getMonth()];
-      const year = now.getFullYear();
-      const time = now.toLocaleTimeString('id-ID');
-
-      clockElement.textContent = `${dayName}, ${date} ${month} ${year} - ${time}`;
+      el.textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} - ${now.toLocaleTimeString('id-ID')}`;
     }
-
     setInterval(updateLiveClock, 1000);
     updateLiveClock();
   </script>
 
-  <!-- Theme Toggle -->
+  <!-- Theme -->
   <script>
     function toggleMode() {
       const isDark = document.body.classList.toggle('dark-mode');
       localStorage.setItem('theme', isDark ? 'dark' : 'light');
     }
-
     document.addEventListener('DOMContentLoaded', function () {
       if (localStorage.getItem('theme') === 'dark') {
         document.body.classList.add('dark-mode');
@@ -79,71 +91,65 @@
     });
   </script>
 
-  <!-- Dashboard Data Load -->
+  <!-- Log Rendering -->
   <script>
     const token = localStorage.getItem("token");
-    const logTableBody = document.getElementById("logTableBody");
-
-    if (!token) {
-      window.location.href = "index.html";
-    }
+    if (!token) window.location.href = "index.html";
 
     async function fetchLogs() {
       try {
         const [inventoryRes, productionRes] = await Promise.all([
           fetch("https://api.sopburtok.giize.com/api/inventory", {
-            headers: {
-              "Authorization": `Bearer ${token}`,
-              "Accept": "application/json"
-            }
+            headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
           }),
           fetch("https://api.sopburtok.giize.com/api/production", {
-            headers: {
-              "Authorization": `Bearer ${token}`,
-              "Accept": "application/json"
-            }
+            headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
           })
         ]);
 
         const inventoryData = await inventoryRes.json();
         const productionData = await productionRes.json();
 
-        const logs = [];
+        renderLogs(inventoryData, "inventoryLogBody", "Penambahan Stok", "name", "stock");
+        renderLogs(productionData, "productionLogBody", "Produksi", "product_name", "quantity_produced");
 
-        inventoryData.forEach(item => {
-          logs.push({
-            waktu: item.created_at,
-            aksi: "Penambahan Stok",
-            nama: item.name,
-            jumlah: item.stock
-          });
-        });
+      } catch (error) {
+        console.error("Gagal memuat log:", error);
+        document.getElementById("inventoryLogBody").innerHTML = "<tr><td colspan='4'>Gagal memuat log inventory.</td></tr>";
+        document.getElementById("productionLogBody").innerHTML = "<tr><td colspan='4'>Gagal memuat log produksi.</td></tr>";
+      }
+    }
 
-        productionData.forEach(item => {
-          logs.push({
-            waktu: item.created_at,
-            aksi: "Produksi",
-            nama: item.product_name || "-",
-            jumlah: item.quantity_produced || 0
-          });
-        });
+    function renderLogs(data, tableId, actionText, nameField, valueField) {
+      const tbody = document.getElementById(tableId);
+      tbody.innerHTML = "";
 
-        logs.sort((a, b) => new Date(b.waktu) - new Date(a.waktu));
+      const isInventory = tableId === "inventoryLogBody" || tableId === "productionLogBody";
 
-        logs.forEach(log => {
+      data
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 10)
+        .forEach(item => {
+          const nama = (item[nameField] || "-").toLowerCase();
+          const label = item[nameField] || "-";
+          const jumlah = item[valueField] || 0;
+
+          let satuan = "";
+          if (nama === "air" || nama === "minyak") {
+            satuan = "Liter";
+          } else {
+            satuan = "Kg";
+          }
+
           const row = document.createElement("tr");
           row.innerHTML = `
-            <td>${new Date(log.waktu).toLocaleString('id-ID')}</td>
-            <td>${log.aksi}</td>
-            <td>${log.nama}</td>
-            <td>${log.jumlah}</td>
+            <td>${new Date(item.created_at).toLocaleString("id-ID")}</td>
+            <td>${actionText}</td>
+            <td>${label}</td>
+            <td>${jumlah} ${satuan}</td>
           `;
-          logTableBody.appendChild(row);
+          tbody.appendChild(row);
         });
-      } catch (error) {
-        console.error("Gagal memuat data log:", error);
-        logTableBody.innerHTML = `<tr><td colspan="4">Gagal memuat data log.</td></tr>`;
-      }
     }
 
     fetchLogs();

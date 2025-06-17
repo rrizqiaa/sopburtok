@@ -152,7 +152,7 @@ const loadProductionTable = () => {
 };
 
 // ========================================
-// 6. ACTIVITY LOG - SHOW 15 LATEST
+// 6. ACTIVITY LOG - SHOW 10 LATEST
 // ========================================
 const saveLog = (action, itemName, quantity) => {
   const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
@@ -165,7 +165,7 @@ const loadActivityLog = () => {
   if (!tableBody) return;
 
   const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
-  const latestLogs = logs.slice(-15).reverse();
+  const latestLogs = logs.slice(-10).reverse();
 
   tableBody.innerHTML = latestLogs.map(log => `
     <tr>
@@ -215,7 +215,7 @@ const loadDashboardSummary = () => {
     return daysLeft <= 7 && daysLeft >= 0;
   }).length;
 
-  const latestLogs = logs.slice(-15).reverse().map(log => `<li>${log.timestamp} - ${log.action} - ${log.itemName} (${log.quantity})</li>`).join('');
+  const latestLogs = logs.slice(-10).reverse().map(log => `<li>${log.timestamp} - ${log.action} - ${log.itemName} (${log.quantity})</li>`).join('');
 
   container.innerHTML = `
     <h2>Ringkasan Inventory</h2>
@@ -240,12 +240,79 @@ document.querySelectorAll('.menu-btn').forEach(btn => {
 });
 
 // ========================================
+// 11. LOG INVENTORY & PRODUCTION (API)
+// ========================================
+const inventoryLogBody = document.getElementById("inventoryLogBody");
+const productionLogBody = document.getElementById("productionLogBody");
+
+async function fetchLogsFromAPI() {
+  try {
+    const [inventoryRes, productionRes] = await Promise.all([
+      fetch("https://api.sopburtok.giize.com/api/inventory", {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json"
+        }
+      }),
+      fetch("https://api.sopburtok.giize.com/api/production", {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json"
+        }
+      })
+    ]);
+
+    const inventoryData = await inventoryRes.json();
+    const productionData = await productionRes.json();
+
+    // Inventory logs
+    const inventoryLogBody = document.getElementById("inventoryLogBody");
+    inventoryData.forEach(item => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${new Date(item.created_at).toLocaleString('id-ID')}</td>
+        <td>Penambahan Stok</td>
+        <td>${item.name}</td>
+        <td>${item.stock}</td>
+      `;
+      inventoryLogBody.appendChild(row);
+    });
+
+    // Production logs
+    const productionLogBody = document.getElementById("productionLogBody");
+    productionData.forEach(item => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${new Date(item.created_at).toLocaleString('id-ID')}</td>
+        <td>Produksi</td>
+        <td>${item.product_name || '-'}</td>
+        <td>${item.quantity_produced || 0}</td>
+      `;
+      productionLogBody.appendChild(row);
+    });
+
+  } catch (error) {
+    console.error("Gagal memuat log:", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  fetchLogsFromAPI();
+});
+
+
+// ========================================
 // AUTOLOAD TABLES AND LOGS
 // ========================================
 document.addEventListener("DOMContentLoaded", () => {
+  applyRoleAccess();
   loadInventoryTable();
   loadActivityLog();
+  loadDashboardSummary();
+  fetchLogsFromAPI();
+  loadReportingTable();
 });
+
 
 
 const loadReportingTable = () => {
@@ -295,7 +362,7 @@ function exportReportingToPDF() {
           <td>${item.name}</td>
           <td>${item.category}</td>
           <td>${item.expiry}</td>
-          <td>${item.quantity}</td
+          <td>${item.quantity}</td>
         </tr>
       `;
     });

@@ -6,6 +6,9 @@
   <link rel="stylesheet" href="assets/css/style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 </head>
 <body>
 <div class="dashboard-wrapper">
@@ -33,7 +36,10 @@
       <button onclick="exportTableToExcel()">Export to Excel</button>
     </div>
 
-    <canvas id="stockChart" height="120" style="margin-bottom: 30px;"></canvas>
+    <canvas id="stockChart" width="800" height="450" style="margin-bottom: 30px;"></canvas>
+    <canvas id="pieChart" width="500" height="500" style="margin-bottom: 30px;"></canvas>
+    <canvas id="lineChart" width="800" height="450" style="margin-bottom: 30px;"></canvas>
+
 
     <table class="stock-table">
       <thead>
@@ -54,6 +60,7 @@
           <th>Judul Laporan</th>
           <th>Isi</th>
           <th>Tanggal</th>
+          <th>sumber</th>
         </tr>
       </thead>
       <tbody id="logTableBody"></tbody>
@@ -80,34 +87,83 @@ async function loadReports() {
 
     const tbody = document.getElementById('reportingTableBody');
     tbody.innerHTML = '';
-    const labels = [];
-    const quantities = [];
+
+    const kategoriMap = {
+      Pokok: 0,
+      Sayuran: 0,
+      Bumbu: 0
+    };
 
     data.forEach(item => {
-      labels.push(item.name);
-      quantities.push(item.stock);
+      const kategori = item.category?.toLowerCase();
+      if (kategori === "pokok") kategoriMap.Pokok += item.stock;
+      else if (kategori === "sayuran") kategoriMap.Sayuran += item.stock;
+      else if (kategori === "bumbu") kategoriMap.Bumbu += item.stock;
+
+      // Menentukan satuan
+      let satuan = 'kg';
+      const namaLower = item.name.toLowerCase();
+      if (namaLower.includes('air') || namaLower.includes('minyak')) {
+        satuan = 'liter';
+      }
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${item.name}</td>
         <td>${item.category}</td>
         <td>${item.entry_date}</td>
-        <td>${item.stock}</td>
+        <td>${item.stock} ${satuan}</td>
       `;
       tbody.appendChild(tr);
     });
 
-    try {
-      const canvas = document.getElementById('stockChart');
-      if (canvas && canvas.getContext) {
-        drawChart(labels, quantities);
+    const labels = ["Pokok", "Sayuran", "Bumbu"];
+    const quantities = [kategoriMap.Pokok, kategoriMap.Sayuran, kategoriMap.Bumbu];
+
+    const trendMap = {};
+
+    data.forEach(item => {
+      const kategori = item.category?.toLowerCase();
+      const bulan = new Date(item.entry_date).toLocaleString('id-ID', { month: 'short', year: 'numeric' });
+
+      if (!trendMap[bulan]) {
+        trendMap[bulan] = { Pokok: 0, Sayuran: 0, Bumbu: 0 };
       }
-    } catch (err) {
-      console.warn('⚠️ Gagal menampilkan grafik:', err.message);
+
+      if (kategori === "pokok") trendMap[bulan].Pokok += item.stock;
+      else if (kategori === "sayuran") trendMap[bulan].Sayuran += item.stock;
+      else if (kategori === "bumbu") trendMap[bulan].Bumbu += item.stock;
+    });
+
+    const monthLabels = Object.keys(trendMap).sort((a, b) => {
+      const [ma, ya] = a.split(' ');
+      const [mb, yb] = b.split(' ');
+      const monthMap = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, Mei: 4, Jun: 5, Jul: 6, Agu: 7, Sep: 8, Okt: 9, Nov: 10, Des: 11 };
+      return new Date(ya, monthMap[ma]) - new Date(yb, monthMap[mb]);
+    });
+
+    const datasetByCategory = {
+      Pokok: monthLabels.map(bln => trendMap[bln].Pokok),
+      Sayuran: monthLabels.map(bln => trendMap[bln].Sayuran),
+      Bumbu: monthLabels.map(bln => trendMap[bln].Bumbu)
+    };
+
+    const canvas = document.getElementById('stockChart');
+    if (canvas && canvas.getContext) {
+      drawChart(labels, quantities);
+      drawPieChart(labels, quantities);
+      drawLineChart(monthLabels, datasetByCategory);
     }
 
   } catch (err) {
     console.error('Gagal memuat laporan:', err);
+    const tbody = document.getElementById('reportingTableBody');
+    tbody.innerHTML = '<tr><td colspan="4">Gagal memuat data.</td></tr>';
+  } finally {
+    const tbody = document.getElementById('reportingTableBody');
+    if (!tbody.innerHTML.trim()) {
+      tbody.innerHTML = '<tr><td colspan="4">Tidak ada data tersedia.</td></tr>';
+    }
   }
 }
 
@@ -138,6 +194,22 @@ async function loadLogReports() {
   }
 }
 
+function loadLocalExportLogs() {
+  const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
+  const tbody = document.getElementById('logTableBody');
+
+  logs.slice(-10).reverse().forEach(log => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${log.action}</td>
+      <td>${log.itemName}</td>
+      <td>${log.timestamp}</td>
+      <td>${log.lokal}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
 function drawChart(labels, values) {
   const canvas = document.getElementById('stockChart');
   if (!canvas || !canvas.getContext) {
@@ -160,10 +232,93 @@ function drawChart(labels, values) {
       }]
     },
     options: {
-      responsive: true,
+      responsive: false,
       plugins: {
         legend: { display: false },
         title: { display: true, text: 'Grafik Stok Bahan Baku' }
+      }
+    }
+  });
+}
+
+function drawPieChart(labels, values) {
+  const pieCanvas = document.getElementById('pieChart');
+  if (!pieCanvas || !pieCanvas.getContext) return;
+
+  const ctx = pieCanvas.getContext('2d');
+  if (window.pieChartInstance) window.pieChartInstance.destroy();
+
+  window.pieChartInstance = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.7)',
+          'rgba(54, 162, 235, 0.7)',
+          'rgba(255, 206, 86, 0.7)'
+        ]
+      }]
+    },
+    options: {
+      responsive: false, // ⚠️ Pastikan ini false untuk kontrol manual ukuran
+      plugins: {
+        legend: { position: 'bottom' },
+        title: {
+          display: true,
+          text: 'Distribusi Stok Berdasarkan Kategori'
+        }
+      }
+    }
+  });
+}
+
+function drawLineChart(monthLabels, datasetByCategory) {
+  const ctx = document.getElementById('lineChart').getContext('2d');
+  if (window.lineChartInstance) window.lineChartInstance.destroy();
+
+  window.lineChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: monthLabels,
+      datasets: [
+        {
+          label: 'Pokok',
+          data: datasetByCategory.Pokok,
+          borderColor: 'rgba(255, 99, 132, 1)',
+          fill: false
+        },
+        {
+          label: 'Sayuran',
+          data: datasetByCategory.Sayuran,
+          borderColor: 'rgba(54, 162, 235, 1)',
+          fill: false
+        },
+        {
+          label: 'Bumbu',
+          data: datasetByCategory.Bumbu,
+          borderColor: 'rgba(255, 206, 86, 1)',
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: false,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Tren Stok per Bulan'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Jumlah Stok' }
+        },
+        x: {
+          title: { display: true, text: 'Bulan' }
+        }
       }
     }
   });
@@ -194,11 +349,66 @@ function exportTableToExcel() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  saveExportLog('Excel');
+  alert('Laporan berhasil diekspor ke Excel.');
 }
 
-function exportToPDF() {
-  window.print();
+async function exportToPDF() {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const charts = ['stockChart', 'pieChart', 'lineChart'];
+
+  let y = 10;
+
+  for (const id of charts) {
+    const canvas = document.getElementById(id);
+    if (!canvas) continue;
+
+    // Ambil gambar dari canvas
+    const imgData = canvas.toDataURL('image/png');
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+    const ratio = canvasHeight / canvasWidth;
+    const imgWidth = pageWidth - 20; // margin
+    const imgHeight = imgWidth * ratio;
+
+    if (y + imgHeight > pageHeight) {
+      pdf.addPage();
+      y = 10;
+    }
+
+    pdf.addImage(imgData, 'PNG', 10, y, imgWidth, imgHeight);
+    y += imgHeight + 10;
+  }
+
+  pdf.save('grafik_stok.pdf');
+  pdf.text('Laporan Grafik Stok', 10, 10);
+  pdf.setFontSize(12);
+  pdf.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 10, 20);
+  pdf.text(`Waktu: ${new Date().toLocaleTimeString('id-ID')}`, 10, 30);
+  pdf.text('Laporan ini berisi grafik stok bahan baku.', 10, 40);
+  pdf.text('SOP BURTOK', 10, 50);
+  pdf.text('https://sopburtok.giize.com', 10, 60); 
+  pdf.text('© 2023 SOP BURTOK', 10, 70);
+  saveExportLog('PDF');
+  alert('Laporan berhasil diekspor ke PDF.');
+
 }
+
+function saveExportLog(type) {
+  const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
+  logs.push({
+    timestamp: new Date().toLocaleString('id-ID'),
+    action: `Export ${type}`,
+    itemName: 'Grafik Stok',
+    quantity: '-'
+  });
+  localStorage.setItem('activityLogs', JSON.stringify(logs));
+}
+
 
 function logout() {
   fetch(`${API_BASE}/logout`, {
@@ -232,6 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   loadReports();
   loadLogReports();
+  loadLocalExportLogs(); // ✅ Tambahkan ini
 });
 
 setInterval(updateLiveClock, 1000);
