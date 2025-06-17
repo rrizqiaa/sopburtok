@@ -139,6 +139,14 @@
         console.error(err);
         errorDiv.innerText = "Terjadi kesalahan koneksi.";
       }
+
+      
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        loginBtn.click();
+      }
     });
   </script>
 </body>
