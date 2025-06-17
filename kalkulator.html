@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Kalkulator Berat per Porsi</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    .form-kalkulator {
+      max-width: 500px;
+      margin: 30px auto;
+      background-color: #ffffff;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .form-kalkulator label {
+      display: block;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    .form-kalkulator input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .form-kalkulator button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 20px;
+      background-color: #28a745;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .form-kalkulator button:hover {
+      background-color: #218838;
+    }
+
+    .result-box {
+      background-color: #eaf4ea;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <img src="assets/images/logo.png" alt="SOP BURTOK">
+      <h3>SOP BURTOK</h3>
+      <button class="menu-btn" onclick="location.href='dashboard.html'">Home</button>
+      <button class="menu-btn" onclick="location.href='inventory.html'">Inventory</button>
+      <button class="menu-btn" onclick="location.href='production.html'">Production</button>
+      <button class="menu-btn" onclick="location.href='reporting.html'">Reporting</button>
+      <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
+      <button class="menu-btn active" onclick="location.href='kalkulator.html'">Kalkulator</button>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div id="liveClock" style="margin-right: 15px; font-weight: bold;"></div>
+      <button class="toggle-mode-btn" onclick="toggleMode()" style="margin-right: 10px;">🌓</button>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <div class="form-kalkulator">
+        <h2>Kalkulator Berat per Porsi</h2>
+
+        <label for="beratKg">Berat Daging (kg):</label>
+        <input type="number" id="beratKg" placeholder="Contoh: 5" />
+
+        <label for="trimming">Susut karena Trimming (gram):</label>
+        <input type="number" id="trimming" placeholder="Contoh: 100" />
+
+        <label for="masak">Susut karena Masak (%):</label>
+        <input type="number" id="masak" placeholder="Contoh: 10" />
+
+        <label for="targetPorsi">Jumlah Mangkok yang Diinginkan:</label>
+        <input type="number" id="targetPorsi" placeholder="Contoh: 60" />
+
+        <button onclick="hitungPerPorsi()">Hitung Berat per Mangkok</button>
+
+        <div id="hasil" class="result-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function updateLiveClock() {
+      const el = document.getElementById("liveClock");
+      const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+      const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+      const now = new Date();
+      el.textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} - ${now.toLocaleTimeString('id-ID')}`;
+    }
+    setInterval(updateLiveClock, 1000);
+    updateLiveClock();
+
+    function toggleMode() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+
+    function logout() {
+      localStorage.removeItem("token");
+      location.href = "index.html";
+    }
+
+    function hitungPerPorsi() {
+      const beratKg = parseFloat(document.getElementById('beratKg').value) || 0;
+      const trimming = parseFloat(document.getElementById('trimming').value) || 0;
+      const masak = parseFloat(document.getElementById('masak').value) || 0;
+      const targetPorsi = parseFloat(document.getElementById('targetPorsi').value) || 1;
+
+      const beratGram = beratKg * 1000;
+      const bersih = beratGram - trimming;
+      const setelahMasak = bersih * (1 - masak / 100);
+      const gramPerPorsi = (setelahMasak / targetPorsi).toFixed(2);
+
+      document.getElementById('hasil').innerHTML = `
+        <strong>📦 Total berat matang:</strong> ${setelahMasak.toFixed(2)} gram<br>
+        <strong>🍜 Berat per mangkok:</strong> <strong>${gramPerPorsi} gram</strong>
+      `;
+    }
+  </script>
+</body>
+</html>
