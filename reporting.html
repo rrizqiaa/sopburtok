@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
   <title>Reporting - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
@@ -9,11 +10,116 @@
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    canvas#mainChart {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 30px;
+    }
+
+    .export-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .export-buttons button {
+      padding: 10px 15px;
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .export-buttons button:hover {
+      background-color: #2980b9;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-wrapper {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        position: static !important;
+        width: 100% !important;
+        height: auto;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        padding: 10px 0;
+      }
+
+      .sidebar img,
+      .sidebar h3 {
+        display: none;
+      }
+
+      .menu-btn {
+        flex: 1;
+        text-align: center;
+        font-size: 12px;
+        padding: 10px 0;
+      }
+
+      #top-tools {
+        position: static !important;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        background-color: #f0f0f0;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+      }
+
+      #top-tools #liveClock {
+        font-size: 13px;
+        text-align: center;
+      }
+
+      .toggle-mode-btn,
+      .logout-btn {
+        font-size: 18px;
+        background: none;
+        border: none;
+        padding: 4px;
+        cursor: pointer;
+      }
+
+      .logout-btn {
+        color: #e74c3c;
+      }
+
+      .content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 20px !important;
+        box-sizing: border-box;
+      }
+
+      table.stock-table {
+        font-size: 13px;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      select#chartType {
+        width: 100%;
+        max-width: 200px;
+      }
+    }
+  </style>
 </head>
 <body>
 <div class="dashboard-wrapper">
   <div class="sidebar">
-    <img src="assets\images\Logo Sop Burtok Ori.png" alt="SOP BURTOK" />
+    <img src="assets/images/Logo Sop Burtok Ori.png" alt="SOP BURTOK" />
     <h3>SOP BURTOK</h3>
     <button class="menu-btn" onclick="location.href='dashboard.html'">Home</button>
     <button class="menu-btn" onclick="location.href='inventory.html'">Inventory</button>
@@ -22,13 +128,11 @@
     <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
   </div>
 
-  <!-- Tambahkan di bawah <body> atau sebelum <div class="content"> -->
-<div style="position: fixed; top: 10px; right: 20px; z-index: 1000; display: flex; align-items: center; gap: 10px;">
-  <div id="liveClock" style="font-weight: bold;"></div>
-  <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
-  <button class="logout-btn" onclick="logoutUser()">Logout</button>
-</div>
-
+  <div id="top-tools">
+    <div id="liveClock" style="font-weight: bold;"></div>
+    <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
+    <button class="logout-btn" onclick="logoutUser()">Logout</button>
+  </div>
 
   <div class="content">
     <h2>Reporting - Laporan Stok Saat Ini</h2>
@@ -45,7 +149,7 @@
         <option value="line">Line Chart</option>
       </select>
     </div>
-    <canvas id="mainChart" width="800" height="450" style="margin-bottom: 30px;"></canvas>
+    <canvas id="mainChart" width="800" height="450"></canvas>
 
     <table class="stock-table">
       <thead>
@@ -66,7 +170,7 @@
           <th>Judul Laporan</th>
           <th>Isi</th>
           <th>Tanggal</th>
-          <th>sumber</th>
+          <th>Sumber</th>
         </tr>
       </thead>
       <tbody id="logTableBody"></tbody>
@@ -147,6 +251,16 @@ function updateChartType() {
   currentChartType = document.getElementById("chartType").value;
   updateChart();
 }
+
+function logoutUser() {
+      fetch("https://api.sopburtok.giize.com/api/logout", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
+      }).finally(() => {
+        localStorage.clear();
+        window.location.href = "index.html";
+      });
+    }
 
 function updateChart() {
   const canvas = document.getElementById("mainChart");
