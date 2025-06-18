@@ -1,10 +1,14 @@
 /* =========================================
    GLOBAL STYLE
 ========================================= */
-body {
-  background-color: transparent;
-  position: relative; /* untuk stacking konteks */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
   color: #333;
+  background-color: transparent;
+  position: relative;
 }
 
 body::before {
@@ -13,7 +17,7 @@ body::before {
   top: 0; left: 0;
   width: 100vw;
   height: 100vh;
-  background-image: url('/assets/images/bg-panel.png'); /* ✅ Pastikan file ini valid */
+  background-image: url('/assets/images/bg-panel.png');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
@@ -21,64 +25,14 @@ body::before {
   z-index: -1;
 }
 
-
-/* =========================================
-   LOGIN PAGE
-========================================= */
-.login-page {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #fff;
+.content {
+  margin-left: 2200px; /* ganti ini! */
+  padding: 800px 20px 20px 20px;
+  width: calc(100% - 220px);
+  box-sizing: border-box;
 }
 
-.login-page img {
-  width: 100px;
-  margin-bottom: 20px;
-}
 
-.sop-title {
-  font-size: 26px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: #4CAF50;
-}
-
-.login-box {
-  background-color: #f5f7fa;
-  padding: 25px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  width: 300px;
-  text-align: center;
-}
-
-.login-box input,
-.login-box button {
-  width: 90%;
-  padding: 10px;
-  margin: 8px 0;
-  border-radius: 4px;
-}
-
-.login-box input {
-  border: 1px solid #ddd;
-}
-
-.login-box button {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  margin-top: 10px;
-  width: 95%;
-  cursor: pointer;
-}
-
-.login-box button:hover {
-  background-color: #45a049;
-}
 
 /* =========================================
    DASHBOARD WRAPPER & SIDEBAR
@@ -89,13 +43,19 @@ body::before {
 }
 
 .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
   width: 220px;
+  height: 100vh;
   background-color: #2c3e50;
   color: white;
   padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  z-index: 100;
 }
 
 .sidebar img {
@@ -103,11 +63,10 @@ body::before {
   max-width: 150px;
   margin: 20px auto 10px;
   display: block;
-  background-color: rgba(255, 255, 255, 0.9); /* opsional: jika butuh kontras */
-  padding: 5px 10px;                          /* opsional: jika ingin tampak rapi */
-  border-radius: 6px;                         /* opsional: sudut lebih halus */
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 5px 10px;
+  border-radius: 6px;
 }
-
 
 .sidebar h3 {
   margin-bottom: 30px;
@@ -135,15 +94,16 @@ body::before {
    TOP BAR
 ========================================= */
 .top-bar {
-  width: 100%;
-  background-color: #ecf0f1;
-  padding: 10px;
-  display: flex;
-  justify-content: flex-end;
   position: fixed;
   top: 0;
   left: 220px;
   right: 0;
+  width: calc(100% - 220px);
+  background-color: #ecf0f1;
+  padding: 10px;
+  display: flex;
+  justify-content: flex-end;
+  z-index: 1000;
 }
 
 .logout-btn {
@@ -158,109 +118,123 @@ body::before {
 .logout-btn:hover {
   background-color: #c0392b;
 }
+#top-tools {
+  position: fixed;
+  top: 10px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#logoutBtn {
+  padding: 8px 15px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#logoutBtn:hover {
+  background-color: #c0392b;
+}
+
+.toggle-mode-btn {
+  font-size: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+
+
 
 /* =========================================
    CONTENT AREA
 ========================================= */
 .content {
-  padding: 80px 20px 20px 240px;
+  margin-left: 220px;
+  padding: 20px 20px 20px 50px;
   width: 100%;
+}
+
+h2, h3 {
+  color: #2c3e50;
+  margin-bottom: 10px;
 }
 
 /* =========================================
-   PAGE SPECIFIC STYLES
+   TABEL & FORM UMUM
 ========================================= */
-.home-content blockquote {
-  font-size: 24px;
-  text-align: center;
-  color: #555;
-}
-
-.profile-content {
-  max-width: 600px;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.profile-img {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background-color: #ccc;
-  margin-bottom: 15px;
-}
-
-.profile-info label {
-  display: block;
-  margin-top: 10px;
-}
-
-.profile-info input {
+.stock-table {
   width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-.profile-content button {
+  border-collapse: collapse;
   margin-top: 15px;
-  padding: 10px;
-  background-color: #2980b9;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  overflow-x: auto;
+  display: block;
 }
 
-.profile-content button:hover {
-  background-color: #3498db;
+.stock-table th,
+.stock-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.stock-table th {
+  background-color: #34495e;
+  color: white;
 }
 
 /* =========================================
-   INVENTORY AND REPORTING
+   LOG
 ========================================= */
-.inventory-circles,
-.reporting-circles {
+.log-container {
   display: flex;
-  justify-content: space-around;
-  margin-top: 30px;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 30px;
 }
 
-.inventory-circle,
-.reporting-circle {
-  width: 120px;
-  height: 120px;
-  background-color: #3498db;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: 0.3s;
+.log-box {
+  flex: 1;
+  min-width: 350px; /* Bukan 35px ya, ini typo */
+  padding: 35px;
+  box-sizing: border-box;
 }
 
-.inventory-circle:hover,
-.reporting-circle:hover {
-  background-color: #2980b9;
+@media (max-width: 768px) {
+  .log-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .log-box {
+    min-width: 100% !important;
+    padding: 10px !important;
+  }
+
+  .stock-table {
+    width: 100%;
+    overflow-x: auto;
+    display: block;
+  }
+
+  .stock-table th,
+  .stock-table td {
+    white-space: nowrap;
+  }
 }
+
+
 
 /* =========================================
-   STOCK PAGES
+   FORM DAN STYLING TAMBAHAN
 ========================================= */
-.stock-controls button,
-.stock-form button,
-.stock-in-form button,
-.stock-out-form button,
-.production-form button {
-  padding: 8px 15px;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
-}
-
 .stock-form,
 .stock-in-form,
 .stock-out-form,
@@ -270,13 +244,6 @@ body::before {
   border-radius: 8px;
   max-width: 500px;
   margin-bottom: 20px;
-}
-
-.stock-form {
-  background-color: #f1f8e9;
-}
-
-.stock-in-form {
   background-color: #f1f8e9;
 }
 
@@ -299,36 +266,27 @@ body::before {
   border-radius: 4px;
 }
 
-.stock-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
+button {
+  font-size: 14px;
+  transition: 0.3s ease;
+  cursor: pointer;
 }
 
-.stock-table th,
-.stock-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: center;
+button:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
 }
 
-.stock-table th {
-  background-color: #34495e;
-  color: white;
+.stock-controls button,
+.stock-form button,
+.stock-in-form button,
+.stock-out-form button,
+.production-form button {
+  padding: 8px 15px;
+  border-radius: 4px;
+  border: none;
 }
 
-/* =========================================
-   LOW STOCK WARNING
-========================================= */
-.low-stock-warning {
-  background-color: #ffebee;
-  color: #c62828;
-  font-weight: bold;
-}
-
-/* =========================================
-   EXPORT BUTTONS
-========================================= */
 .export-buttons {
   margin-bottom: 15px;
 }
@@ -340,7 +298,6 @@ body::before {
   color: white;
   border: none;
   border-radius: 4px;
-  cursor: pointer;
 }
 
 .export-buttons button:hover {
@@ -348,93 +305,12 @@ body::before {
 }
 
 /* =========================================
-   RESPONSIVE DESIGN
+   LOW STOCK WARNING
 ========================================= */
-@media (max-width: 768px) {
-  .dashboard-wrapper {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-    flex-direction: row;
-    justify-content: space-around;
-    padding: 10px 0;
-  }
-
-  .sidebar h3 {
-    display: none;
-  }
-
-  .menu-btn {
-    flex: 1;
-    text-align: center;
-    font-size: 12px;
-    padding: 8px;
-  }
-
-  .top-bar {
-    left: 0;
-    position: static;
-    width: 100%;
-    justify-content: center;
-    padding: 10px 0;
-  }
-
-  .content {
-    padding: 20px;
-  }
-
-  .export-buttons button,
-  .stock-in-form button,
-  .stock-out-form button,
-  .production-form button {
-    width: 100%;
-    margin-bottom: 10px;
-  }
-}
-
-@media (min-width: 769px) {
-  .top-bar {
-    display: flex !important;
-    justify-content: flex-end !important;
-    position: fixed;
-    top: 0;
-    left: 220px;
-    right: 0;
-    width: calc(100% - 220px);
-    padding: 10px;
-    background-color: #ecf0f1;
-    z-index: 1000;
-  }
-}
-
-/* =========================================
-   UTILITY CLASSES
-========================================= */
-.hidden {
-  display: none;
-}
-
-button {
-  font-size: 14px;
-  transition: 0.3s ease;
-}
-
-button:hover {
-  opacity: 0.9;
-  transform: scale(1.02);
-}
-
-h2,
-h3 {
-  color: #2c3e50;
-  margin-bottom: 10px;
-}
-
-.stock-table {
-  overflow-x: auto;
-  display: block;
+.low-stock-warning {
+  background-color: #ffebee;
+  color: #c62828;
+  font-weight: bold;
 }
 
 /* =========================================
@@ -450,19 +326,6 @@ body.dark-mode .top-bar {
   background-color: #1f1f1f;
   color: #e0e0e0;
 }
-.alert-box {
-  display: inline-block;
-  background-color: #fff4f4;
-  padding: 15px;
-  border-radius: 8px;
-  max-width: 100%;
-  overflow-x: auto;
-  margin-bottom: 20px;
-}
-.alert-box h2 {
-  margin-top: 0;
-}
-
 
 body.dark-mode .content,
 body.dark-mode .login-page,
@@ -497,57 +360,162 @@ body.dark-mode .stock-table td {
   color: #e0e0e0;
 }
 
-/* File: style.css (yang sudah kamu punya) */
+/* =========================================
+   RESPONSIVE DESIGN
+========================================= */
+@media (max-width: 768px) {
+  .dashboard-wrapper {
+    flex-direction: column;
+  }
 
-/* ... style existing ... */
-
-@media screen and (max-width: 768px) {
   .sidebar {
+    position: static !important;
+    width: 100% !important;
+    height: auto;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0;
+  }
+
+  .sidebar img,
+  .sidebar h3 {
     display: none;
   }
 
-  .main-content {
-    margin: 0;
-    padding: 10px;
-  }
-
-  table {
-    width: 100%;
+  .menu-btn {
+    flex: 1;
+    text-align: center;
     font-size: 12px;
-    overflow-x: auto;
+    padding: 10px 0;
+  }
+
+  .top-bar {
+    position: static !important;
+    width: 100%;
+    justify-content: center !important;
+    padding: 10px;
+    flex-wrap: wrap;
+    left: 0 !important;
+    right: 0 !important;
+  }
+
+  .content {
+    margin-left: 0 !important;
+    padding: 20px !important;
+  }
+
+  .stock-table {
+    font-size: 12px;
+  }
+
+  .export-buttons button,
+  .stock-in-form button,
+  .stock-out-form button,
+  .production-form button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}
+
+/* Mobile  */
+/* Dashboard */
+/* MOBILE STYLE KHUSUS TOOLS ATAS */
+@media (max-width: 768px) {
+  #top-tools {
+    position: static !important;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    background-color: #f0f0f0;
+    padding: 10px;
+    z-index: 1;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  #top-tools #liveClock {
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .toggle-mode-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    padding: 5px;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  #logoutBtn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    padding: 5px;
+    cursor: pointer;
+    color: #e74c3c;
+  }
+
+  #logoutBtn::before {
+    content: "🔓";
+  }
+
+  #logoutBtn::after {
+    content: "";
+  }
+
+  /* Sembunyikan teks logout hanya di mobile */
+  #logoutBtn {
+    font-size: 20px;
+    color: #e74c3c;
+    width: auto;
+  }
+
+  #logoutBtn::before {
+    content: "🔓";
+  }
+
+  #logoutBtn::after {
+    content: "";
+  }
+}
+/* Inventory */
+@media (max-width: 768px) {
+  /* Perbaiki layout tombol + input */
+  #btnAddStock,
+  #importFile,
+  #addStockForm input,
+  #addStockForm select,
+  #addStockForm button {
+    width: 100% !important;
+    margin-bottom: 10px;
+  }
+
+  #addStockForm div {
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+
+  /* Buat semua tabel bisa discroll horizontal */
+  .stock-table {
     display: block;
+    overflow-x: auto;
+    width: 100%;
   }
 
-  td, th {
+  .stock-table th,
+  .stock-table td {
     white-space: nowrap;
+    font-size: 13px;
+  }
+
+  .content {
+    padding: 20px !important;
+    margin-left: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box;
   }
 }
-
-/* =========================================
-   PRINT STYLES
-========================================= */
-@media (max-width: 768px) {
-  .log-row {
-    flex-direction: column;
-  }
-}
-.log-container {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  margin-bottom: 30px;
-}
-
-.log-box {
-  flex: 1;
-  min-width: 350px;
-}
-
-@media (max-width: 768px) {
-  .log-container {
-    flex-direction: column;
-  }
-}
-
-

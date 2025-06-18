@@ -2,15 +2,17 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
   <title>Dashboard - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
   <div class="dashboard-wrapper">
+    
     <!-- Sidebar -->
     <div class="sidebar">
-      <img src="assets\images\Logo Sop Burtok Ori.png" alt="SOP BURTOK">
+      <img src="assets/images/Logo Sop Burtok Ori.png" alt="SOP BURTOK">
       <h3>SOP BURTOK</h3>
       <button class="menu-btn active" onclick="location.href='dashboard.html'">Home</button>
       <button class="menu-btn" onclick="location.href='inventory.html'">Inventory</button>
@@ -19,58 +21,70 @@
       <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
     </div>
 
-   <div style="position: fixed; top: 10px; right: 20px; z-index: 1000; display: flex; align-items: center; gap: 10px;">
-  <div id="liveClock" style="font-weight: bold;"></div>
-  <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
-  <button class="logout-btn" onclick="logoutUser()">Logout</button>
-</div>
-
     <!-- Content -->
     <div class="content"> 
+      
+      <!-- Fixed Top Right Tools (Clock, Theme, Logout) -->
+     <div id="top-tools">
+  <div id="liveClock"></div>
+  <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
+  <button class="logout-btn" onclick="logoutUser()" id="logoutBtn">Logout</button>
+</div>
+
+
+
+
+      <!-- Main Title -->
       <h2>Log Aktivitas</h2>
+
+      <!-- Logs -->
       <div class="log-container">
+        
         <!-- Inventory Log -->
         <div class="log-box">
           <h3>Inventory</h3>
-          <table class="stock-table">
-            <thead>
-              <tr>
-                <th>Waktu</th>
-                <th>Aksi</th>
-                <th>Nama Bahan Baku</th>
-                <th>Jumlah</th>
-              </tr>
-            </thead>
-            <tbody id="inventoryLogBody"></tbody>
-          </table>
+          <div style="overflow-x: auto;">
+            <table class="stock-table">
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Aksi</th>
+                  <th>Nama Bahan Baku</th>
+                  <th>Jumlah</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryLogBody"></tbody>
+            </table>
+          </div>
         </div>
 
         <!-- Production Log -->
         <div class="log-box">
           <h3>Production</h3>
-          <table class="stock-table">
-            <thead>
-              <tr>
-                <th>Waktu</th>
-                <th>Aksi</th>
-                <th>Nama Produk</th>
-                <th>Jumlah</th>
-              </tr>
-            </thead>
-            <tbody id="productionLogBody"></tbody>
-          </table>
+          <div style="overflow-x: auto;">
+            <table class="stock-table">
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Aksi</th>
+                  <th>Nama Produk</th>
+                  <th>Jumlah</th>
+                </tr>
+              </thead>
+              <tbody id="productionLogBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Clock -->
+  <!-- Clock Script -->
   <script>
     function updateLiveClock() {
       const el = document.getElementById("liveClock");
       const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-      const months = ['Januari','Februari','Maret','April','Mei','Juni',
-                      'Juli','Agustus','September','Oktober','November','Desember'];
+      const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
       const now = new Date();
       el.textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} - ${now.toLocaleTimeString('id-ID')}`;
     }
@@ -91,7 +105,7 @@
     });
   </script>
 
-  <!-- Log Rendering -->
+  <!-- Data Fetching -->
   <script>
     const token = localStorage.getItem("token");
     if (!token) window.location.href = "index.html";
@@ -124,8 +138,6 @@
       const tbody = document.getElementById(tableId);
       tbody.innerHTML = "";
 
-      const isInventory = tableId === "inventoryLogBody" || tableId === "productionLogBody";
-
       data
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         .slice(0, 10)
@@ -133,13 +145,7 @@
           const nama = (item[nameField] || "-").toLowerCase();
           const label = item[nameField] || "-";
           const jumlah = item[valueField] || 0;
-
-          let satuan = "";
-          if (nama === "air" || nama === "minyak") {
-            satuan = "Liter";
-          } else {
-            satuan = "Kg";
-          }
+          const satuan = (nama === "air" || nama === "minyak") ? "Liter" : "Kg";
 
           const row = document.createElement("tr");
           row.innerHTML = `
