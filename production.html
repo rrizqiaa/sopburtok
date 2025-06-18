@@ -2,26 +2,17 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
   <title>Production - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
   <style>
-  @media (max-width: 768px) {
-    .flex-container {
-      flex-direction: column !important;
-    }
-  }
-</style>
-  <style>
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
+      font-family: Arial, sans-serif;
       background-color: #f0f0f0;
     }
     .dashboard-wrapper {
       display: flex;
-      height: 100vh;
-      width: 100%; /* Ensure dashboard-wrapper takes full width */
     }
     .sidebar {
       width: 250px;
@@ -51,94 +42,67 @@
     .menu-btn.active {
       background-color: #1abc9c;
     }
-    /* Modified top-bar style for a larger size */
-    .top-bar {
-      background-color: #ecf0f1;
-      padding: 20px 20px; /* Increased vertical padding */
+    .header-floating {
+      position: fixed;
+      top: 10px;
+      right: 10px;
       display: flex;
-      justify-content: space-between;
+      gap: 10px;
+      z-index: 999;
       align-items: center;
-      /* Removed width: 100%; and box-sizing: border-box; from here as it will be part of a flex item */
-    }
-    .content-wrapper { /* New wrapper for top-bar and grid-wrapper */
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
     }
     .content {
       flex-grow: 1;
       padding: 20px;
     }
-    .stock-table {
+    .grid-wrapper {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+    .card h3 {
+      text-align: center;
+    }
+    .card input {
       width: 100%;
-      border-collapse: collapse;
-    }
-    .stock-table th, .stock-table td {
-      border: 1px solid #ddd;
       padding: 8px;
+      margin-bottom: 10px;
     }
-    .stock-table th {
-      background-color: #2c3e50;
+    .card button {
+      width: 100%;
+      background-color: #27ae60;
       color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+    }
+    .result {
+      margin-top: 10px;
+      background-color: #ecf0f1;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: center;
     }
     .dark-mode {
-      background-color: #2c3e50 !important; 
-      color: white !important; 
+      background-color: #2c3e50 !important;
+      color: white !important;
     }
-.card {
-  background: #fff;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.card h3 {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.card input {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-}
-
-.card button {
-  width: 100%;
-  background-color: #27ae60;
-  color: white;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-}
-
-.result {
-  margin-top: 10px;
-  background-color: #ecf0f1;
-  padding: 10px;
-  border-radius: 5px;
-  text-align: center;
-}
-
-/* Tambahan: perbaiki tata letak grid */
-.grid-wrapper {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 20px;
-  padding: 20px;
-  margin: 0 auto;
-  max-width: 1200px;
-}
   </style>
-  <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
   <div class="dashboard-wrapper">
     <div class="sidebar">
-      <img src="assets\images\Logo Sop Burtok Ori.png" alt="SOP BURTOK" />
+      <img src="assets/images/Logo Sop Burtok Ori.png" alt="SOP BURTOK" />
       <h3>SOP BURTOK</h3>
       <button class="menu-btn" onclick="location.href='dashboard.html'">Home</button>
       <button class="menu-btn" onclick="location.href='inventory.html'">Inventory</button>
@@ -147,170 +111,142 @@
       <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
     </div>
 
-    <div class="content-wrapper">
-        <div class="top-bar">
-            <div id="liveClock" style="margin-right: 15px; font-weight: bold;"></div>
-            <button class="toggle-mode-btn" onclick="toggleMode()" style="margin-right: 10px;">🌓</button>
-            <button class="logout-btn" onclick="logoutUser()">Logout</button>
-        </div>
+    <!-- Tambahkan di bawah <body> atau sebelum <div class="content"> -->
+<div style="position: fixed; top: 10px; right: 20px; z-index: 1000; display: flex; align-items: center; gap: 10px;">
+  <div id="liveClock" style="font-weight: bold;"></div>
+  <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
+  <button class="logout-btn" onclick="logoutUser()">Logout</button>
+</div>
 
+
+      <div class="content">
+        <h2>Produksi - Perhitungan Pemakaian Daging</h2>
         <div class="grid-wrapper">
-            <div class="card">
-                <h3>Daging Terpakai Kasir</h3>
-                <label>Sop Komplit (40gr):</label>
-                <input type="number" id="sopKomplit" />
+          <div class="card">
+            <h3>Daging Terpakai Kasir</h3>
+            <label>Sop Komplit (40gr):</label>
+            <input type="number" id="sopKomplit" />
+            <label>Sop Reguler (40gr):</label>
+            <input type="number" id="sopReguler" />
+            <label>Sop Kecil (20gr):</label>
+            <input type="number" id="sopKecil" />
+            <label>Dry Komplit (45gr):</label>
+            <input type="number" id="dryKomplit" />
+            <label>Dry Reguler (45gr):</label>
+            <input type="number" id="dryReguler" />
+            <label>Dry Kecil (25gr):</label>
+            <input type="number" id="dryKecil" />
+            <label>Extra Daging (20gr):</label>
+            <input type="number" id="extraDaging" />
+            <label>Extra Dry (25gr):</label>
+            <input type="number" id="extraDry" />
+            <button onclick="hitungDagingKasir()">Hitung Daging Kasir</button>
+            <div class="result" id="hasilKasir">Daging Terpakai Kasir: - gr</div>
+          </div>
 
-                <label>Sop Reguler (40gr):</label>
-                <input type="number" id="sopReguler" />
+          <div class="card">
+            <h3>Daging Terpakai Stok</h3>
+            <label>Daging Opening (gr):</label>
+            <input type="number" id="opening" />
+            <label>Daging Penambahan (gr):</label>
+            <input type="number" id="penambahan" />
+            <label>Daging Closing (gr):</label>
+            <input type="number" id="closing" />
+            <button onclick="hitungDagingStok()">Hitung Daging Stok</button>
+            <div class="result" id="hasilStok">Daging Terpakai Stok: - gr</div>
+          </div>
 
-                <label>Sop Kecil (20gr):</label>
-                <input type="number" id="sopKecil" />
+          <div class="card">
+            <h3>Selisih Total</h3>
+            <label>Daging Terpakai Kasir (B):</label>
+            <input type="number" id="kasirTerpakai" />
+            <label>Daging Terpakai Stok (A):</label>
+            <input type="number" id="stokTerpakai" />
+            <button onclick="hitungSelisihManual()">Hitung Selisih Total (C)</button>
+            <div class="result" id="hasilSelisihManual">Selisih Total: - gr</div>
+          </div>
 
-                <label>Dry Komplit (45gr):</label>
-                <input type="number" id="dryKomplit" />
-
-                <label>Dry Reguler (45gr):</label>
-                <input type="number" id="dryReguler" />
-
-                <label>Dry Kecil (25gr):</label>
-                <input type="number" id="dryKecil" />
-
-                <label>Extra Daging (20gr):</label>
-                <input type="number" id="extraDaging" />
-
-                <label>Extra Dry (25gr):</label>
-                <input type="number" id="extraDry" />
-
-                <button onclick="hitungDagingKasir()">Hitung Daging Kasir</button>
-                <div class="result" id="hasilKasir">Daging Terpakai Kasir: - gr</div>
-            </div>
-
-            <div class="card">
-                <h3>Daging Terpakai Stok</h3>
-                <label>Daging Opening (gr):</label>
-                <input type="number" id="opening" />
-
-                <label>Daging Penambahan (gr):</label>
-                <input type="number" id="penambahan" />
-
-                <label>Daging Closing (gr):</label>
-                <input type="number" id="closing" />
-
-                <button onclick="hitungDagingStok()">Hitung Daging Stok</button>
-                <div class="result" id="hasilStok">Daging Terpakai Stok: - gr</div>
-            </div>
-
-            <div class="card">
-                <h3>Selisih Total</h3>
-                <label for="kasirTerpakai">Daging Terpakai Kasir (B):</label>
-                <input type="number" id="kasirTerpakai" />
-
-                <label for="stokTerpakai">Daging Terpakai Stok (A):</label>
-                <input type="number" id="stokTerpakai" />
-
-                <button onclick="hitungSelisihManual()">Hitung Selisih Total (C)</button>
-                <div class="result" id="hasilSelisihManual">Selisih Total: - gr</div>
-            </div>
-
-            <div class="card">
-                <h3>Persentase Selisih</h3>
-                <label>Selisih Total (gr):</label>
-                <input type="number" id="selisihPersen" />
-
-                <label>Daging Terpakai Kasir (gr):</label>
-                <input type="number" id="kasirTotal" />
-
-                <button onclick="hitungPersentase()">Hitung Persentase</button>
-                <div class="result" id="hasilPersentase">Persentase Selisih: - %</div>
-            </div>
+          <div class="card">
+            <h3>Persentase Selisih</h3>
+            <label>Selisih Total (gr):</label>
+            <input type="number" id="selisihPersen" />
+            <label>Daging Terpakai Kasir (gr):</label>
+            <input type="number" id="kasirTotal" />
+            <button onclick="hitungPersentase()">Hitung Persentase</button>
+            <div class="result" id="hasilPersentase">Persentase Selisih: - %</div>
+          </div>
         </div>
-    </div> </div> <script>
-  function hitungDagingKasir() {
-    const get = (id) => parseFloat(document.getElementById(id).value) || 0;
-    const totalKasir =
-      get("sopKomplit") * 40 +
-      get("sopReguler") * 40 +
-      get("sopKecil") * 20 +
-      get("dryKomplit") * 45 +
-      get("dryReguler") * 45 +
-      get("dryKecil") * 25 +
-      get("extraDaging") * 20 +
-      get("extraDry") * 25;
-    document.getElementById("hasilKasir").innerText = `Daging Terpakai Kasir: ${totalKasir} gr`;
-    document.getElementById("kasirTerpakai").value = totalKasir;
-    document.getElementById("kasirTotal").value = totalKasir;
-  }
-
-  function hitungDagingStok() {
-    const opening = parseFloat(document.getElementById("opening").value) || 0;
-    const penambahan = parseFloat(document.getElementById("penambahan").value) || 0;
-    const closing = parseFloat(document.getElementById("closing").value) || 0;
-    const totalStok = opening + penambahan - closing;
-    document.getElementById("hasilStok").innerText = `Daging Terpakai Stok: ${totalStok} gr`;
-    document.getElementById("stokTerpakai").value = totalStok;
-  }
-
-  function hitungSelisihManual() {
-    const b = parseFloat(document.getElementById("kasirTerpakai").value) || 0;
-    const a = parseFloat(document.getElementById("stokTerpakai").value) || 0;
-    const c = b - a;
-    document.getElementById("hasilSelisihManual").innerText = `Selisih Total: ${c} gr`;
-    document.getElementById("selisihPersen").value = c;
-  }
-
-  function hitungPersentase() {
-    const selisih = parseFloat(document.getElementById("selisihPersen").value) || 0;
-    const totalKasir = parseFloat(document.getElementById("kasirTotal").value) || 0;
-
-    if (totalKasir === 0) {
-      document.getElementById("hasilPersentase").innerText = "Persentase Selisih: tidak dapat dihitung (kasir = 0)";
-      return;
-    }
-
-    const persen = (selisih / totalKasir) * 100;
-    document.getElementById("hasilPersentase").innerText = `Persentase Selisih: ${persen.toFixed(2)} %`;
-  }
-  </script>
-
+      </div>
+    </div>
+  </div>
 
   <script>
+    const token = localStorage.getItem("token");
+    if (!token) window.location.href = "index.html";
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const userRole = user.role || "";
+
     function updateLiveClock() {
       const el = document.getElementById("liveClock");
       const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-      const months = ['Januari','Februari','Maret','April','Mei','Juni',
-                      'Juli','Agustus','September','Oktober','November','Desember'];
+      const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
       const now = new Date();
       el.textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} - ${now.toLocaleTimeString('id-ID')}`;
     }
     setInterval(updateLiveClock, 1000);
     updateLiveClock();
-  </script>
 
-  <script>
     function toggleMode() {
       const isDark = document.body.classList.toggle("dark-mode");
       localStorage.setItem("theme", isDark ? "dark" : "light");
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      if (localStorage.getItem("theme") === "dark") {
-        document.body.classList.add("dark-mode");
-      }
-    });
-  </script>
-
-  <script>
     function logoutUser() {
       fetch("https://api.sopburtok.giize.com/api/logout", {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Accept": "application/json"
-        }
+        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
       }).finally(() => {
         localStorage.clear();
         window.location.href = "index.html";
       });
+    }
+
+    function hitungDagingKasir() {
+      const get = id => parseFloat(document.getElementById(id).value) || 0;
+      const totalKasir = get("sopKomplit") * 40 + get("sopReguler") * 40 + get("sopKecil") * 20 +
+                         get("dryKomplit") * 45 + get("dryReguler") * 45 + get("dryKecil") * 25 +
+                         get("extraDaging") * 20 + get("extraDry") * 25;
+      document.getElementById("hasilKasir").innerText = `Daging Terpakai Kasir: ${totalKasir} gr`;
+      document.getElementById("kasirTerpakai").value = totalKasir;
+      document.getElementById("kasirTotal").value = totalKasir;
+    }
+
+    function hitungDagingStok() {
+      const opening = parseFloat(document.getElementById("opening").value) || 0;
+      const penambahan = parseFloat(document.getElementById("penambahan").value) || 0;
+      const closing = parseFloat(document.getElementById("closing").value) || 0;
+      const totalStok = opening + penambahan - closing;
+      document.getElementById("hasilStok").innerText = `Daging Terpakai Stok: ${totalStok} gr`;
+      document.getElementById("stokTerpakai").value = totalStok;
+    }
+
+    function hitungSelisihManual() {
+      const b = parseFloat(document.getElementById("kasirTerpakai").value) || 0;
+      const a = parseFloat(document.getElementById("stokTerpakai").value) || 0;
+      const c = b - a;
+      document.getElementById("hasilSelisihManual").innerText = `Selisih Total: ${c} gr`;
+      document.getElementById("selisihPersen").value = c;
+    }
+
+    function hitungPersentase() {
+      const selisih = parseFloat(document.getElementById("selisihPersen").value) || 0;
+      const totalKasir = parseFloat(document.getElementById("kasirTotal").value) || 0;
+      if (totalKasir === 0) {
+        document.getElementById("hasilPersentase").innerText = "Persentase Selisih: tidak dapat dihitung (kasir = 0)";
+        return;
+      }
+      const persen = (selisih / totalKasir) * 100;
+      document.getElementById("hasilPersentase").innerText = `Persentase Selisih: ${persen.toFixed(2)} %`;
     }
   </script>
 </body>

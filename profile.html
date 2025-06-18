@@ -57,11 +57,13 @@
     <button class="menu-btn active" onclick="location.href='profile.html'">Profile</button>
   </div>
 
-  <div class="top-bar">
-    <div id="liveClock" style="margin-right: 15px; font-weight: bold;"></div>
-    <button class="toggle-mode-btn" onclick="toggleMode()" style="margin-right: 10px;">🌓</button>
-    <button class="logout-btn" onclick="logout()">Logout</button>
-  </div>
+  <!-- Tambahkan di bawah <body> atau sebelum <div class="content"> -->
+<div style="position: fixed; top: 10px; right: 20px; z-index: 1000; display: flex; align-items: center; gap: 10px;">
+  <div id="liveClock" style="font-weight: bold;"></div>
+  <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
+  <button class="logout-btn" onclick="logoutUser()">Logout</button>
+</div>
+
 
   <div class="content">
 <div class="profile-content-flex">
@@ -114,8 +116,9 @@
           <input id="new_hp" type="text" placeholder="No HP (opsional)"><br>
           <input id="new_alamat" type="text" placeholder="Alamat (opsional)"><br>
           <select id="new_role">
-            <option value="staff">Staf</option>
             <option value="admin">Admin</option>
+            <option value="manager">Manager</option>
+            <option value="staff">Staf</option>
           </select><br>
           <button onclick="createUser()">Buat Akun</button>
         </div>

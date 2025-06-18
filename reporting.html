@@ -9,7 +9,6 @@
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
 </head>
 <body>
 <div class="dashboard-wrapper">
@@ -21,27 +20,32 @@
     <button class="menu-btn" onclick="location.href='production.html'">Production</button>
     <button class="menu-btn active" onclick="location.href='reporting.html'">Reporting</button>
     <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
-
   </div>
 
-  <div class="top-bar">
-    <div id="liveClock" style="margin-right: 15px; font-weight: bold;"></div>
-    <button class="toggle-mode-btn" onclick="toggleMode()" style="margin-right: 10px;">🌓</button>
-    <button class="logout-btn" onclick="logout()">Logout</button>
-  </div>
+  <!-- Tambahkan di bawah <body> atau sebelum <div class="content"> -->
+<div style="position: fixed; top: 10px; right: 20px; z-index: 1000; display: flex; align-items: center; gap: 10px;">
+  <div id="liveClock" style="font-weight: bold;"></div>
+  <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
+  <button class="logout-btn" onclick="logoutUser()">Logout</button>
+</div>
+
 
   <div class="content">
     <h2>Reporting - Laporan Stok Saat Ini</h2>
-
-    <div class="export-buttons">
+    <div class="export-buttons" id="exportButtons">
       <button onclick="exportToPDF()">Export to PDF</button>
       <button onclick="exportTableToExcel()">Export to Excel</button>
     </div>
 
-    <canvas id="stockChart" width="800" height="450" style="margin-bottom: 30px;"></canvas>
-    <canvas id="pieChart" width="500" height="500" style="margin-bottom: 30px;"></canvas>
-    <canvas id="lineChart" width="800" height="450" style="margin-bottom: 30px;"></canvas>
-
+    <div style="margin-bottom: 15px;">
+      <label for="chartType">Tipe Grafik:</label>
+      <select id="chartType" onchange="updateChartType()">
+        <option value="bar">Bar Chart</option>
+        <option value="pie">Pie Chart</option>
+        <option value="line">Line Chart</option>
+      </select>
+    </div>
+    <canvas id="mainChart" width="800" height="450" style="margin-bottom: 30px;"></canvas>
 
     <table class="stock-table">
       <thead>
@@ -74,8 +78,15 @@
 const API_BASE = 'https://api.sopburtok.giize.com/api';
 const token = localStorage.getItem('token');
 if (!token) location.href = 'index.html';
+const user = JSON.parse(localStorage.getItem("user") || "{}");
+const userRole = user.role || "";
 
 let chartInstance = null;
+let currentChartType = "bar";
+let currentChartLabels = [];
+let currentChartData = [];
+let currentLineLabels = [];
+let currentLineDatasets = {};
 
 async function loadReports() {
   try {
@@ -90,11 +101,8 @@ async function loadReports() {
     const tbody = document.getElementById('reportingTableBody');
     tbody.innerHTML = '';
 
-    const kategoriMap = {
-      Pokok: 0,
-      Sayuran: 0,
-      Bumbu: 0
-    };
+    const kategoriMap = { Pokok: 0, Sayuran: 0, Bumbu: 0 };
+    const trendMap = {};
 
     data.forEach(item => {
       const kategori = item.category?.toLowerCase();
@@ -102,315 +110,90 @@ async function loadReports() {
       else if (kategori === "sayuran") kategoriMap.Sayuran += item.stock;
       else if (kategori === "bumbu") kategoriMap.Bumbu += item.stock;
 
-      // Menentukan satuan
-      let satuan = 'kg';
-      const namaLower = item.name.toLowerCase();
-      if (namaLower.includes('air') || namaLower.includes('minyak')) {
-        satuan = 'liter';
-      }
-
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${item.name}</td>
-        <td>${item.category}</td>
-        <td>${item.entry_date}</td>
-        <td>${item.stock} ${satuan}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    const labels = ["Pokok", "Sayuran", "Bumbu"];
-    const quantities = [kategoriMap.Pokok, kategoriMap.Sayuran, kategoriMap.Bumbu];
-
-    const trendMap = {};
-
-    data.forEach(item => {
-      const kategori = item.category?.toLowerCase();
       const bulan = new Date(item.entry_date).toLocaleString('id-ID', { month: 'short', year: 'numeric' });
-
-      if (!trendMap[bulan]) {
-        trendMap[bulan] = { Pokok: 0, Sayuran: 0, Bumbu: 0 };
-      }
-
+      if (!trendMap[bulan]) trendMap[bulan] = { Pokok: 0, Sayuran: 0, Bumbu: 0 };
       if (kategori === "pokok") trendMap[bulan].Pokok += item.stock;
       else if (kategori === "sayuran") trendMap[bulan].Sayuran += item.stock;
       else if (kategori === "bumbu") trendMap[bulan].Bumbu += item.stock;
+
+      let satuan = 'kg';
+      const namaLower = item.name.toLowerCase();
+      if (namaLower.includes('air') || namaLower.includes('minyak')) satuan = 'liter';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${item.name}</td><td>${item.category}</td><td>${item.entry_date}</td><td>${item.stock} ${satuan}</td>`;
+      tbody.appendChild(tr);
     });
 
-    const monthLabels = Object.keys(trendMap).sort((a, b) => {
-      const [ma, ya] = a.split(' ');
-      const [mb, yb] = b.split(' ');
-      const monthMap = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, Mei: 4, Jun: 5, Jul: 6, Agu: 7, Sep: 8, Okt: 9, Nov: 10, Des: 11 };
-      return new Date(ya, monthMap[ma]) - new Date(yb, monthMap[mb]);
-    });
+    currentChartLabels = ["Pokok", "Sayuran", "Bumbu"];
+    currentChartData = [kategoriMap.Pokok, kategoriMap.Sayuran, kategoriMap.Bumbu];
 
-    const datasetByCategory = {
+    const monthLabels = Object.keys(trendMap).sort((a, b) => new Date("01 " + a) - new Date("01 " + b));
+    currentLineLabels = monthLabels;
+    currentLineDatasets = {
       Pokok: monthLabels.map(bln => trendMap[bln].Pokok),
       Sayuran: monthLabels.map(bln => trendMap[bln].Sayuran),
       Bumbu: monthLabels.map(bln => trendMap[bln].Bumbu)
     };
 
-    const canvas = document.getElementById('stockChart');
-    if (canvas && canvas.getContext) {
-      drawChart(labels, quantities);
-      drawPieChart(labels, quantities);
-      drawLineChart(monthLabels, datasetByCategory);
-    }
-
+    updateChart();
   } catch (err) {
     console.error('Gagal memuat laporan:', err);
-    const tbody = document.getElementById('reportingTableBody');
-    tbody.innerHTML = '<tr><td colspan="4">Gagal memuat data.</td></tr>';
-  } finally {
-    const tbody = document.getElementById('reportingTableBody');
-    if (!tbody.innerHTML.trim()) {
-      tbody.innerHTML = '<tr><td colspan="4">Tidak ada data tersedia.</td></tr>';
-    }
+    document.getElementById('reportingTableBody').innerHTML = '<tr><td colspan="4">Gagal memuat data.</td></tr>';
   }
 }
 
-async function loadLogReports() {
-  try {
-    const res = await fetch(`${API_BASE}/reporting`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    });
-    const data = await res.json();
-
-    const tbody = document.getElementById('logTableBody');
-    tbody.innerHTML = '';
-    data.forEach(item => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${item.report_title}</td>
-        <td>${item.content}</td>
-        <td>${item.report_date}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-  } catch (err) {
-    console.error('Gagal memuat log laporan:', err);
-  }
+function updateChartType() {
+  currentChartType = document.getElementById("chartType").value;
+  updateChart();
 }
 
-function loadLocalExportLogs() {
-  const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
-  const tbody = document.getElementById('logTableBody');
+function updateChart() {
+  const canvas = document.getElementById("mainChart");
+  const ctx = canvas.getContext("2d");
 
-  logs.slice(-10).reverse().forEach(log => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${log.action}</td>
-      <td>${log.itemName}</td>
-      <td>${log.timestamp}</td>
-      <td>${log.lokal}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function drawChart(labels, values) {
-  const canvas = document.getElementById('stockChart');
-  if (!canvas || !canvas.getContext) {
-    console.warn("Canvas #stockChart tidak valid.");
-    return;
-  }
-
-  const ctx = canvas.getContext('2d');
   if (chartInstance) chartInstance.destroy();
 
-  chartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Jumlah Stok',
-        data: values,
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: false,
-      plugins: {
-        legend: { display: false },
-        title: { display: true, text: 'Grafik Stok Bahan Baku' }
-      }
-    }
-  });
-}
-
-function drawPieChart(labels, values) {
-  const pieCanvas = document.getElementById('pieChart');
-  if (!pieCanvas || !pieCanvas.getContext) return;
-
-  const ctx = pieCanvas.getContext('2d');
-  if (window.pieChartInstance) window.pieChartInstance.destroy();
-
-  window.pieChartInstance = new Chart(ctx, {
-    type: 'pie',
-    data: {
-      labels: labels,
-      datasets: [{
-        data: values,
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.7)',
-          'rgba(54, 162, 235, 0.7)',
-          'rgba(255, 206, 86, 0.7)'
-        ]
-      }]
-    },
-    options: {
-      responsive: false, // ⚠️ Pastikan ini false untuk kontrol manual ukuran
-      plugins: {
-        legend: { position: 'bottom' },
-        title: {
-          display: true,
-          text: 'Distribusi Stok Berdasarkan Kategori'
-        }
-      }
-    }
-  });
-}
-
-function drawLineChart(monthLabels, datasetByCategory) {
-  const ctx = document.getElementById('lineChart').getContext('2d');
-  if (window.lineChartInstance) window.lineChartInstance.destroy();
-
-  window.lineChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: monthLabels,
-      datasets: [
-        {
-          label: 'Pokok',
-          data: datasetByCategory.Pokok,
-          borderColor: 'rgba(255, 99, 132, 1)',
-          fill: false
-        },
-        {
-          label: 'Sayuran',
-          data: datasetByCategory.Sayuran,
-          borderColor: 'rgba(54, 162, 235, 1)',
-          fill: false
-        },
-        {
-          label: 'Bumbu',
-          data: datasetByCategory.Bumbu,
-          borderColor: 'rgba(255, 206, 86, 1)',
-          fill: false
-        }
-      ]
-    },
-    options: {
-      responsive: false,
-      plugins: {
-        title: {
-          display: true,
-          text: 'Tren Stok per Bulan'
-        }
+  if (currentChartType === "bar") {
+    chartInstance = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: currentChartLabels,
+        datasets: [{
+          label: "Jumlah Stok",
+          data: currentChartData,
+          backgroundColor: "rgba(75, 192, 192, 0.6)"
+        }]
       },
-      scales: {
-        y: {
-          beginAtZero: true,
-          title: { display: true, text: 'Jumlah Stok' }
-        },
-        x: {
-          title: { display: true, text: 'Bulan' }
-        }
-      }
-    }
-  });
-}
-
-function exportTableToExcel() {
-  const tableHTML = `
-    <table border="1">
-      <tr><th>Nama</th><th>Kategori</th><th>Tanggal Masuk</th><th>Jumlah Tersedia</th></tr>
-      ${Array.from(document.querySelectorAll("#reportingTableBody tr")).map(tr => {
-        const td = tr.querySelectorAll("td");
-        const tgl = new Date(td[2].textContent);
-        const formatted = `${String(tgl.getDate()).padStart(2, '0')}/${String(tgl.getMonth()+1).padStart(2, '0')}/${tgl.getFullYear()}`;
-        return `<tr>
-          <td>${td[0].textContent}</td>
-          <td>${td[1].textContent}</td>
-          <td>${formatted}</td>
-          <td>${td[3].textContent}</td>
-        </tr>`;
-      }).join("")}
-    </table>
-  `;
-
-  const blob = new Blob(["\ufeff" + tableHTML], { type: 'application/vnd.ms-excel' });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "laporan_stok.xls";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  saveExportLog('Excel');
-  alert('Laporan berhasil diekspor ke Excel.');
-}
-
-async function exportToPDF() {
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('p', 'mm', 'a4');
-  const charts = ['stockChart', 'pieChart', 'lineChart'];
-
-  let y = 10;
-
-  for (const id of charts) {
-    const canvas = document.getElementById(id);
-    if (!canvas) continue;
-
-    // Ambil gambar dari canvas
-    const imgData = canvas.toDataURL('image/png');
-
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
-    const ratio = canvasHeight / canvasWidth;
-    const imgWidth = pageWidth - 20; // margin
-    const imgHeight = imgWidth * ratio;
-
-    if (y + imgHeight > pageHeight) {
-      pdf.addPage();
-      y = 10;
-    }
-
-    pdf.addImage(imgData, 'PNG', 10, y, imgWidth, imgHeight);
-    y += imgHeight + 10;
+      options: { responsive: false }
+    });
+  } else if (currentChartType === "pie") {
+    chartInstance = new Chart(ctx, {
+      type: "pie",
+      data: {
+        labels: currentChartLabels,
+        datasets: [{
+          data: currentChartData,
+          backgroundColor: ['rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)', 'rgba(255, 206, 86, 0.7)']
+        }]
+      },
+      options: { responsive: false }
+    });
+  } else if (currentChartType === "line") {
+    chartInstance = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: currentLineLabels,
+        datasets: [
+          { label: "Pokok", data: currentLineDatasets.Pokok, borderColor: "rgba(255, 99, 132, 1)", fill: false },
+          { label: "Sayuran", data: currentLineDatasets.Sayuran, borderColor: "rgba(54, 162, 235, 1)", fill: false },
+          { label: "Bumbu", data: currentLineDatasets.Bumbu, borderColor: "rgba(255, 206, 86, 1)", fill: false }
+        ]
+      },
+      options: { responsive: false }
+    });
   }
-
-  pdf.save('grafik_stok.pdf');
-  pdf.text('Laporan Grafik Stok', 10, 10);
-  pdf.setFontSize(12);
-  pdf.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 10, 20);
-  pdf.text(`Waktu: ${new Date().toLocaleTimeString('id-ID')}`, 10, 30);
-  pdf.text('Laporan ini berisi grafik stok bahan baku.', 10, 40);
-  pdf.text('SOP BURTOK', 10, 50);
-  pdf.text('https://sopburtok.giize.com', 10, 60); 
-  pdf.text('© 2023 SOP BURTOK', 10, 70);
-  saveExportLog('PDF');
-  alert('Laporan berhasil diekspor ke PDF.');
-
 }
-
-function saveExportLog(type) {
-  const logs = JSON.parse(localStorage.getItem('activityLogs')) || [];
-  logs.push({
-    timestamp: new Date().toLocaleString('id-ID'),
-    action: `Export ${type}`,
-    itemName: 'Grafik Stok',
-    quantity: '-'
-  });
-  localStorage.setItem('activityLogs', JSON.stringify(logs));
-}
-
 
 function logout() {
   fetch(`${API_BASE}/logout`, {
@@ -438,18 +221,13 @@ function toggleMode() {
   localStorage.setItem("theme", isDark ? "dark" : "light");
 }
 
-// Inisialisasi saat halaman dimuat
 document.addEventListener("DOMContentLoaded", () => {
-  if (localStorage.getItem("theme") === "dark") {
-    document.body.classList.add("dark-mode");
-  }  
+  if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark-mode");
+  if (userRole === "staff") document.getElementById("exportButtons").style.display = "none";
   loadReports();
-  loadLogReports();
-  loadLocalExportLogs(); // ✅ Tambahkan ini
+  updateLiveClock();
+  setInterval(updateLiveClock, 1000);
 });
-
-setInterval(updateLiveClock, 1000);
-updateLiveClock();
 </script>
 </body>
 </html>

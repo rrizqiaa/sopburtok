@@ -2,12 +2,25 @@
    GLOBAL STYLE
 ========================================= */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f9fafc;
+  background-color: transparent;
+  position: relative; /* untuk stacking konteks */
   color: #333;
 }
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('/assets/images/bg-panel.png'); /* ✅ Pastikan file ini valid */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0;
+  z-index: -1;
+}
+
 
 /* =========================================
    LOGIN PAGE
@@ -86,8 +99,8 @@ body {
 }
 
 .sidebar img {
-  width: 100%;
-  max-width: 200px;
+  width: 90%;
+  max-width: 150px;
   margin: 20px auto 10px;
   display: block;
   background-color: rgba(255, 255, 255, 0.9); /* opsional: jika butuh kontras */
@@ -536,3 +549,5 @@ body.dark-mode .stock-table td {
     flex-direction: column;
   }
 }
+
+
