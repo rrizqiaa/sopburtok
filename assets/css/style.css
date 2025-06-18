@@ -86,9 +86,15 @@ body {
 }
 
 .sidebar img {
-  width: 80px;
-  margin-bottom: 10px;
+  width: 100%;
+  max-width: 200px;
+  margin: 20px auto 10px;
+  display: block;
+  background-color: rgba(255, 255, 255, 0.9); /* opsional: jika butuh kontras */
+  padding: 5px 10px;                          /* opsional: jika ingin tampak rapi */
+  border-radius: 6px;                         /* opsional: sudut lebih halus */
 }
+
 
 .sidebar h3 {
   margin-bottom: 30px;
@@ -431,6 +437,19 @@ body.dark-mode .top-bar {
   background-color: #1f1f1f;
   color: #e0e0e0;
 }
+.alert-box {
+  display: inline-block;
+  background-color: #fff4f4;
+  padding: 15px;
+  border-radius: 8px;
+  max-width: 100%;
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+.alert-box h2 {
+  margin-top: 0;
+}
+
 
 body.dark-mode .content,
 body.dark-mode .login-page,
