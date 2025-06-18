@@ -21,6 +21,7 @@
     .dashboard-wrapper {
       display: flex;
       height: 100vh;
+      width: 100%; /* Ensure dashboard-wrapper takes full width */
     }
     .sidebar {
       width: 250px;
@@ -50,12 +51,19 @@
     .menu-btn.active {
       background-color: #1abc9c;
     }
+    /* Modified top-bar style for a larger size */
     .top-bar {
       background-color: #ecf0f1;
-      padding: 10px 20px;
+      padding: 20px 20px; /* Increased vertical padding */
       display: flex;
       justify-content: space-between;
       align-items: center;
+      /* Removed width: 100%; and box-sizing: border-box; from here as it will be part of a flex item */
+    }
+    .content-wrapper { /* New wrapper for top-bar and grid-wrapper */
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
     }
     .content {
       flex-grow: 1;
@@ -77,12 +85,58 @@
       background-color: #2c3e50 !important; 
       color: white !important; 
     }
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card h3 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.card input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+.card button {
+  width: 100%;
+  background-color: #27ae60;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+}
+
+.result {
+  margin-top: 10px;
+  background-color: #ecf0f1;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+/* Tambahan: perbaiki tata letak grid */
+.grid-wrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  margin: 0 auto;
+  max-width: 1200px;
+}
   </style>
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
   <div class="dashboard-wrapper">
-    <!-- Sidebar -->
     <div class="sidebar">
       <img src="assets\images\Logo Sop Burtok Ori.png" alt="SOP BURTOK" />
       <h3>SOP BURTOK</h3>
@@ -91,27 +145,134 @@
       <button class="menu-btn active" onclick="location.href='production.html'">Production</button>
       <button class="menu-btn" onclick="location.href='reporting.html'">Reporting</button>
       <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
-
     </div>
 
-    <!-- Top Bar -->
-    <div class="top-bar">
-      <div id="liveClock" style="margin-right: 15px; font-weight: bold;"></div>
-      <button class="toggle-mode-btn" onclick="toggleMode()" style="margin-right: 10px;">🌓</button>
-      <button class="logout-btn" onclick="logoutUser()">Logout</button>
-    </div>
+    <div class="content-wrapper">
+        <div class="top-bar">
+            <div id="liveClock" style="margin-right: 15px; font-weight: bold;"></div>
+            <button class="toggle-mode-btn" onclick="toggleMode()" style="margin-right: 10px;">🌓</button>
+            <button class="logout-btn" onclick="logoutUser()">Logout</button>
+        </div>
 
-    <!-- Main Content -->
-    <div class="content">
-      
-      <h2>Production - Penggunaan Bahan Baku</h2>
+        <div class="grid-wrapper">
+            <div class="card">
+                <h3>Daging Terpakai Kasir</h3>
+                <label>Sop Komplit (40gr):</label>
+                <input type="number" id="sopKomplit" />
 
-</div>
-      
-    </div>
-  </div>
+                <label>Sop Reguler (40gr):</label>
+                <input type="number" id="sopReguler" />
 
-  <!-- Clock -->
+                <label>Sop Kecil (20gr):</label>
+                <input type="number" id="sopKecil" />
+
+                <label>Dry Komplit (45gr):</label>
+                <input type="number" id="dryKomplit" />
+
+                <label>Dry Reguler (45gr):</label>
+                <input type="number" id="dryReguler" />
+
+                <label>Dry Kecil (25gr):</label>
+                <input type="number" id="dryKecil" />
+
+                <label>Extra Daging (20gr):</label>
+                <input type="number" id="extraDaging" />
+
+                <label>Extra Dry (25gr):</label>
+                <input type="number" id="extraDry" />
+
+                <button onclick="hitungDagingKasir()">Hitung Daging Kasir</button>
+                <div class="result" id="hasilKasir">Daging Terpakai Kasir: - gr</div>
+            </div>
+
+            <div class="card">
+                <h3>Daging Terpakai Stok</h3>
+                <label>Daging Opening (gr):</label>
+                <input type="number" id="opening" />
+
+                <label>Daging Penambahan (gr):</label>
+                <input type="number" id="penambahan" />
+
+                <label>Daging Closing (gr):</label>
+                <input type="number" id="closing" />
+
+                <button onclick="hitungDagingStok()">Hitung Daging Stok</button>
+                <div class="result" id="hasilStok">Daging Terpakai Stok: - gr</div>
+            </div>
+
+            <div class="card">
+                <h3>Selisih Total</h3>
+                <label for="kasirTerpakai">Daging Terpakai Kasir (B):</label>
+                <input type="number" id="kasirTerpakai" />
+
+                <label for="stokTerpakai">Daging Terpakai Stok (A):</label>
+                <input type="number" id="stokTerpakai" />
+
+                <button onclick="hitungSelisihManual()">Hitung Selisih Total (C)</button>
+                <div class="result" id="hasilSelisihManual">Selisih Total: - gr</div>
+            </div>
+
+            <div class="card">
+                <h3>Persentase Selisih</h3>
+                <label>Selisih Total (gr):</label>
+                <input type="number" id="selisihPersen" />
+
+                <label>Daging Terpakai Kasir (gr):</label>
+                <input type="number" id="kasirTotal" />
+
+                <button onclick="hitungPersentase()">Hitung Persentase</button>
+                <div class="result" id="hasilPersentase">Persentase Selisih: - %</div>
+            </div>
+        </div>
+    </div> </div> <script>
+  function hitungDagingKasir() {
+    const get = (id) => parseFloat(document.getElementById(id).value) || 0;
+    const totalKasir =
+      get("sopKomplit") * 40 +
+      get("sopReguler") * 40 +
+      get("sopKecil") * 20 +
+      get("dryKomplit") * 45 +
+      get("dryReguler") * 45 +
+      get("dryKecil") * 25 +
+      get("extraDaging") * 20 +
+      get("extraDry") * 25;
+    document.getElementById("hasilKasir").innerText = `Daging Terpakai Kasir: ${totalKasir} gr`;
+    document.getElementById("kasirTerpakai").value = totalKasir;
+    document.getElementById("kasirTotal").value = totalKasir;
+  }
+
+  function hitungDagingStok() {
+    const opening = parseFloat(document.getElementById("opening").value) || 0;
+    const penambahan = parseFloat(document.getElementById("penambahan").value) || 0;
+    const closing = parseFloat(document.getElementById("closing").value) || 0;
+    const totalStok = opening + penambahan - closing;
+    document.getElementById("hasilStok").innerText = `Daging Terpakai Stok: ${totalStok} gr`;
+    document.getElementById("stokTerpakai").value = totalStok;
+  }
+
+  function hitungSelisihManual() {
+    const b = parseFloat(document.getElementById("kasirTerpakai").value) || 0;
+    const a = parseFloat(document.getElementById("stokTerpakai").value) || 0;
+    const c = b - a;
+    document.getElementById("hasilSelisihManual").innerText = `Selisih Total: ${c} gr`;
+    document.getElementById("selisihPersen").value = c;
+  }
+
+  function hitungPersentase() {
+    const selisih = parseFloat(document.getElementById("selisihPersen").value) || 0;
+    const totalKasir = parseFloat(document.getElementById("kasirTotal").value) || 0;
+
+    if (totalKasir === 0) {
+      document.getElementById("hasilPersentase").innerText = "Persentase Selisih: tidak dapat dihitung (kasir = 0)";
+      return;
+    }
+
+    const persen = (selisih / totalKasir) * 100;
+    document.getElementById("hasilPersentase").innerText = `Persentase Selisih: ${persen.toFixed(2)} %`;
+  }
+  </script>
+
+
   <script>
     function updateLiveClock() {
       const el = document.getElementById("liveClock");
@@ -125,7 +286,6 @@
     updateLiveClock();
   </script>
 
-  <!-- Theme -->
   <script>
     function toggleMode() {
       const isDark = document.body.classList.toggle("dark-mode");
@@ -139,15 +299,6 @@
     });
   </script>
 
-  <!-- Data Stok -->
-
-  </script>
-  <script>
-
-</script>
-
-
-  <!-- Logout -->
   <script>
     function logoutUser() {
       fetch("https://api.sopburtok.giize.com/api/logout", {
