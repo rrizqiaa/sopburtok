@@ -4,7 +4,46 @@
   <meta charset="UTF-8">
   <title>Profile - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
-</head>
+  <style>
+    .profile-content-flex {
+      display: flex;
+      gap: 40px;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .equal-box {
+      flex: 1;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      min-width: 300px;
+      box-sizing: border-box;
+    }
+
+    .equal-box h2 {
+      margin: 0 0 16px 0;
+    }
+
+    .star {
+      cursor: pointer;
+      color: #ccc;
+    }
+    .star.selected {
+      color: gold;
+    }
+
+    @media (max-width: 768px) {
+      .profile-content-flex {
+        flex-direction: column;
+      }
+    }
+  </style></head>
 <body>
 <div class="dashboard-wrapper">
   <div class="sidebar">
@@ -15,8 +54,6 @@
     <button class="menu-btn" onclick="location.href='production.html'">Production</button>
     <button class="menu-btn" onclick="location.href='reporting.html'">Reporting</button>
     <button class="menu-btn active" onclick="location.href='profile.html'">Profile</button>
-    <button class="menu-btn" onclick="location.href='kalkulator.html'">kalkulator</button>
-
   </div>
 
   <div class="top-bar">
@@ -26,24 +63,44 @@
   </div>
 
   <div class="content">
-    <div class="profile-content">
-      <h2>Halaman Profile</h2>
-      <div class="profile-info">
-        <label>Nama</label>
-        <input id="nama" type="text" placeholder="Nama Anda">
+<div class="profile-content-flex">
+  <div class="profile-info" style="flex: 1; margin-right: 20px;">
+    <h2>Halaman Profile</h2>
+    <label>Nama</label>
+    <input id="nama" type="text" placeholder="Nama Anda">
 
-        <label>Email</label>
-        <input id="email" type="text" disabled>
+    <label>Email</label>
+    <input id="email" type="text" disabled>
 
-        <label>No. HP</label>
-        <input id="hp" type="text" placeholder="08xxxxxxxx">
+    <label>No. HP</label>
+    <input id="hp" type="text" placeholder="08xxxxxxxx">
 
-        <label>Alamat</label>
-        <input id="alamat" type="text" placeholder="Alamat lengkap">
+    <label>Alamat</label>
+    <input id="alamat" type="text" placeholder="Alamat lengkap">
 
-        <button onclick="updateProfile()">Update</button>
-      </div>
+    <button onclick="updateProfile()">Update</button>
+  </div>
+    <hr style="margin: 40px 0;">
 
+  <div class="logbook-section" style="flex: 1;">
+    <h2>Logbook</h2>
+
+    <label for="log-comment">Komentar</label>
+    <textarea id="log-comment" placeholder="Tulis komentar..." rows="3" style="width: 100%;"></textarea>
+
+    <label for="log-rating">Rating</label>
+    <div id="log-rating" style="font-size: 24px; margin-bottom: 10px;">
+      ★★★★★
+    </div>
+
+    <button onclick="addLogEntry()">Tambah Log</button>
+
+    <h3 style="margin-top: 30px;">Riwayat Logbook</h3>
+    <div id="logbook-entries"></div>
+  </div>
+</div>
+
+      
       <!-- Admin-only section -->
       <div id="admin-section" style="display: none; margin-top: 40px;">
         <button onclick="toggleForm()" style="margin-bottom: 10px;">+ Tambah Akun Baru</button>
@@ -277,6 +334,92 @@ function toggleMode() {
   const isDark = document.body.classList.toggle('dark-mode');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
 }
+let selectedRating = 0;
+const stars = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  setupRatingStars();
+  renderLogbook();
+});
+
+function setupRatingStars() {
+  const ratingContainer = document.getElementById('log-rating');
+  ratingContainer.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const star = document.createElement('span');
+    star.classList.add('star');
+    star.innerHTML = '★';
+    star.dataset.value = i;
+    star.onclick = () => setRating(i);
+    stars.push(star);
+    ratingContainer.appendChild(star);
+  }
+}
+
+function setRating(value) {
+  selectedRating = value;
+  stars.forEach((star, i) => {
+    if (i < value) {
+      star.classList.add('selected');
+    } else {
+      star.classList.remove('selected');
+    }
+  });
+}
+
+function addLogEntry() {
+  const comment = document.getElementById('log-comment').value.trim();
+  if (!comment || selectedRating === 0) {
+    alert('Komentar dan rating harus diisi.');
+    return;
+  }
+
+const logEntry = {
+  timestamp: new Date().toLocaleString('id-ID'),
+  comment,
+  rating: selectedRating,
+  user: document.getElementById('nama')?.value || 'Tidak diketahui'
+};
+
+  const logs = JSON.parse(localStorage.getItem('logbook') || '[]');
+  logs.unshift(logEntry);
+  localStorage.setItem('logbook', JSON.stringify(logs));
+
+  document.getElementById('log-comment').value = '';
+  setRating(0);
+  renderLogbook();
+}
+
+function renderLogbook() {
+  const container = document.getElementById('logbook-entries');
+  container.innerHTML = '';
+
+  let logs = JSON.parse(localStorage.getItem('logbook') || '[]');
+
+  // Filter log yang valid saja
+  logs = logs.filter(entry => entry.user !== undefined && entry.user !== null);
+
+  // Simpan ulang ke localStorage (bersihkan yang tidak valid)
+  localStorage.setItem('logbook', JSON.stringify(logs));
+
+  if (logs.length === 0) {
+    container.innerHTML = '<p><em>Belum ada entri logbook.</em></p>';
+    return;
+  }
+
+  logs.forEach(entry => {
+    const div = document.createElement('div');
+    div.style.borderBottom = '1px solid #ccc';
+    div.style.padding = '8px 0';
+    div.innerHTML = `
+      <div><strong>${entry.timestamp}</strong> - <em>${entry.user}</em></div>
+      <div>${'★'.repeat(entry.rating)}${'☆'.repeat(5 - entry.rating)}</div>
+      <div>${entry.comment}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
 </script>
 
 </body>
