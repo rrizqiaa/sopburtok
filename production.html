@@ -105,63 +105,9 @@
     <div class="content">
       
       <h2>Production - Penggunaan Bahan Baku</h2>
-<!-- Flex Container -->
-<div class="flex-container" style="display: flex; gap: 20px; margin-bottom: 20px;">
-  <!-- Gunakan Bahan Baku -->
-  <div style="flex: 1; background-color: #e7f7e6; padding: 15px; border-radius: 5px;">
-    <h4>Gunakan Bahan Baku</h4>
-    <select id="selectBahan">
-      <option>-- Pilih Bahan Baku --</option>
-    </select>
-    <input id="jumlah" type="number" placeholder="Jumlah yang Digunakan" />
-    <button id="btnGunakan">Gunakan</button>
-  </div>
 
-  <!-- Kalkulator Berat per Porsi -->
-  <div style="flex: 1; background-color: #e7f7e6; padding: 15px; border-radius: 5px;">
-    <h4>Kalkulator Berat per Porsi</h4>
-    <input id="beratDaging" type="number" placeholder="Berat Daging (kg)" style="margin-bottom: 5px;" /><br />
-    <input id="trimming" type="number" placeholder="Susut karena Trimming (gram)" style="margin-bottom: 5px;" /><br />
-    <input id="susutMasak" type="number" placeholder="Susut karena Masak (%)" style="margin-bottom: 5px;" /><br />
-    <input id="jumlahMangkok" type="number" placeholder="Jumlah Mangkuk yang Diinginkan" style="margin-bottom: 10px;" /><br />
-    <button onclick="hitungBeratPerMangkok()">Hitung Berat per Mangkok</button>
-    <p id="hasilKalkulator" style="margin-top: 10px; font-weight: bold;"></p>
-  </div>
 </div>
-      <!-- Script Kalkulator -->
-<script>
-  function hitungBeratPerMangkok() {
-    const beratDaging = parseFloat(document.getElementById("beratDaging").value) * 1000; // dari kg ke gram
-    const trimming = parseFloat(document.getElementById("trimming").value);
-    const susutMasak = parseFloat(document.getElementById("susutMasak").value);
-    const jumlahMangkok = parseInt(document.getElementById("jumlahMangkok").value);
-
-    if (isNaN(beratDaging) || isNaN(trimming) || isNaN(susutMasak) || isNaN(jumlahMangkok) || jumlahMangkok <= 0) {
-      document.getElementById("hasilKalkulator").textContent = "Mohon isi semua kolom dengan benar.";
-      return;
-    }
-
-    const setelahTrimming = beratDaging - trimming;
-    const setelahMasak = setelahTrimming - (susutMasak / 100 * setelahTrimming);
-    const beratPerMangkok = setelahMasak / jumlahMangkok;
-
-    document.getElementById("hasilKalkulator").textContent = 
-      `Berat per mangkok: ${beratPerMangkok.toFixed(2)} gram`;
-  }
-</script>
-
-      <!-- Tabel stok -->
-      <table class="stock-table">
-        <thead>
-          <tr>
-            <th>Nama</th>
-            <th>Kategori</th>
-            <th>Tanggal Masuk</th>
-            <th>Jumlah Tersedia</th>
-          </tr>
-        </thead>
-        <tbody id="stockTableBody"></tbody>
-      </table>
+      
     </div>
   </div>
 
@@ -194,96 +140,10 @@
   </script>
 
   <!-- Data Stok -->
-  <script>
-    const token = localStorage.getItem("token");
-    if (!token) window.location.href = "index.html";
 
-    async function loadStock() {
-      try {
-        const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
-          headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
-        });
-        const data = await res.json();
-        renderStockTable(data);
-        renderDropdown(data);
-      } catch (err) {
-        console.error("Gagal memuat data:", err);
-        document.getElementById("stockTableBody").innerHTML = "<tr><td colspan='4'>Gagal memuat data.</td></tr>";
-      }
-    }
-
-    function renderStockTable(data) {
-      const tbody = document.getElementById("stockTableBody");
-      tbody.innerHTML = "";
-
-      data.forEach(item => {
-        const row = document.createElement("tr");
-        const nameLower = item.name?.toLowerCase() || "";
-        const unit = (nameLower === "air" || nameLower === "minyak") ? "Liter" : "Kg";
-
-        row.innerHTML = `
-          <td>${item.name}</td>
-          <td>${item.category}</td>
-          <td>${item.entry_date}</td>
-          <td>${item.stock} ${unit}</td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
-
-    function renderDropdown(data) {
-      const select = document.getElementById("selectBahan");
-      data.forEach(item => {
-        const option = document.createElement("option");
-        option.value = item.id;
-        option.textContent = item.name;
-        select.appendChild(option);
-      });
-    }
-
-    loadStock();
   </script>
   <script>
-document.getElementById("btnGunakan").addEventListener("click", gunakanBahanBaku);
 
-  async function gunakanBahanBaku() {
-    const bahanId = document.getElementById("selectBahan").value;
-    const jumlah = document.getElementById("jumlah").value;
-
-    if (!bahanId || !jumlah || jumlah <= 0) {
-      alert("Pilih bahan baku dan masukkan jumlah yang valid.");
-      return;
-    }
-
-    try {
-      const res = await fetch("https://api.sopburtok.giize.com/api/production/use", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Accept": "application/json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          bahan_id: bahanId,
-          jumlah: jumlah
-        })
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        alert("Gagal menggunakan bahan: " + result.message);
-        return;
-      }
-
-      alert("Bahan berhasil digunakan!");
-      loadStock(); // refresh data stok
-
-    } catch (error) {
-      console.error("Terjadi kesalahan:", error);
-      alert("Terjadi kesalahan saat memproses permintaan.");
-    }
-  }
 </script>
 
 
