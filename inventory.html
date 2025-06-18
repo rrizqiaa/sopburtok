@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- Penting untuk mobile -->
   <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
   <title>Inventory - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
@@ -9,6 +10,7 @@
 </head>
 <body>
   <div class="dashboard-wrapper">
+    
     <!-- Sidebar -->
     <div class="sidebar">
       <img src="assets/images/Logo Sop Burtok Ori.png" alt="SOP BURTOK" />
@@ -20,69 +22,79 @@
       <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
     </div>
 
-    <!-- Top Bar -->
-   <div style="position: fixed; top: 10px; right: 20px; z-index: 1000; display: flex; align-items: center; gap: 10px;">
-  <div id="liveClock" style="font-weight: bold;"></div>
-  <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
-  <button class="logout-btn" onclick="logoutUser()">Logout</button>
-</div>
+    <!-- Top Tools: jam, darkmode, logout -->
+    <div id="top-tools">
+      <div id="liveClock" style="font-weight: bold;"></div>
+      <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
+      <button class="logout-btn" onclick="logoutUser()" id="logoutBtn">Logout</button>
+    </div>
 
     <!-- Content -->
     <div class="content">
       <h2>⚠️ Peringatan Bahan Baku</h2>
-      <table class="stock-table">
-        <thead>
-          <tr>
-            <th>Nama</th>
-            <th>Masalah</th>
-          </tr>
-        </thead>
-        <tbody id="warningTableBody"></tbody>
-      </table>
-
-      <h2 style="margin-top: 30px;">Inventory Bahan Baku</h2>
-      <button id="btnAddStock" onclick="showAddForm()">+ Tambah Bahan Baku</button>
-      <input type="file" id="importFile" accept=".csv" onchange="handleImport(event)" style="margin: 10px 0;" />
-
-      <div id="addStockForm" class="hidden" style="margin-top: 20px;">
-        <input id="stockName" placeholder="Nama Bahan Baku" />
-        <select id="stockCategory">
-          <option value="Pokok">Pokok</option>
-          <option value="Daging">Daging</option>
-          <option value="Sayuran">Sayuran</option>
-          <option value="Bumbu">Bumbu</option>
-          <option value="Packaging">Packaging</option>
-          <option value="Lain - lain">Lain - lain</option>
-        </select>
-        <input id="stockEntry" type="date" />
-        <div style="display: flex; gap: 8px; margin-top: 8px;">
-          <input id="stockAmount" type="number" placeholder="Jumlah" style="width: 100px;" />
-          <select id="stockUnit">
-            <option value="gr">gr</option>
-            <option value="kg">kg</option>
-            <option value="ml">ml</option>
-            <option value="ltr">ltr</option>
-            <option value="pcs">pcs</option>
-            <option value="pack">pack</option>
-          </select>
-        </div>
-        <button onclick="addInventory()">Simpan</button>
-        <button onclick="hideAddForm()">Batal</button>
+      <div style="overflow-x:auto">
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>Masalah</th>
+            </tr>
+          </thead>
+          <tbody id="warningTableBody"></tbody>
+        </table>
       </div>
 
-      <table class="stock-table">
-        <thead>
-          <tr>
-            <th>Nama</th>
-            <th>Kategori</th>
-            <th>Tanggal Masuk</th>
-            <th>Jumlah</th>
-            <th>Satuan</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="stockTableBody"></tbody>
-      </table>
+       <h2>Inventory Bahan Baku</h2>
+
+<div class="inventory-action-row">
+  <button id="btnAddStock" onclick="toggleAddForm()">+ Tambah Bahan Baku</button>
+  <input type="file" id="importFile" accept=".csv" onchange="handleImport(event)" />
+</div>
+
+<!-- FORM TAMBAH BAHAN -->
+<div id="addStockForm" class="hidden">
+  <input id="stockName" placeholder="Nama Bahan Baku" />
+  <select id="stockCategory">
+    <option value="Pokok">Pokok</option>
+    <option value="Daging">Daging</option>
+    <option value="Sayuran">Sayuran</option>
+    <option value="Bumbu">Bumbu</option>
+    <option value="Packaging">Packaging</option>
+    <option value="Lain - lain">Lain - lain</option>
+  </select>
+  <input id="stockEntry" type="date" />
+
+  <div class="stock-row">
+    <input id="stockAmount" type="number" placeholder="Jumlah" />
+    <select id="stockUnit">
+      <option value="gr">gr</option>
+      <option value="kg">kg</option>
+      <option value="ml">ml</option>
+      <option value="ltr">ltr</option>
+      <option value="pcs">pcs</option>
+      <option value="pack">pack</option>
+    </select>
+  </div>
+
+  <button onclick="addInventory()">Simpan</button>
+  <button onclick="hideAddForm()">Batal</button>
+</div>
+
+      <div style="overflow-x:auto">
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>Kategori</th>
+              <th>Tanggal Masuk</th>
+              <th>Jumlah</th>
+              <th>Satuan</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="stockTableBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -99,6 +111,16 @@
         document.getElementById("addStockForm").style.display = "none";
       });
     }
+
+
+    function toggleAddForm() {
+  const form = document.getElementById("addStockForm");
+  form.classList.toggle("hidden");
+}
+
+function hideAddForm() {
+  document.getElementById("addStockForm").classList.add("hidden");
+}
 
     function updateLiveClock() {
       const el = document.getElementById("liveClock");

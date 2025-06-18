@@ -32,6 +32,19 @@ body::before {
   box-sizing: border-box;
 }
 
+#addStockForm div {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.inventory-action-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  flex-wrap: nowrap;
+}
 
 
 /* =========================================
@@ -482,9 +495,55 @@ body.dark-mode .stock-table td {
     content: "";
   }
 }
+
+
 /* Inventory */
 @media (max-width: 768px) {
-  /* Perbaiki layout tombol + input */
+  .dashboard-wrapper {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: static !important;
+    width: 100% !important;
+    height: auto;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 0;
+  }
+
+  .sidebar img,
+  .sidebar h3 {
+    display: none;
+  }
+
+  .menu-btn {
+    flex: 1;
+    text-align: center;
+    font-size: 12px;
+    padding: 10px 0;
+  }
+
+  .content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 20px !important;
+    box-sizing: border-box;
+  }
+
+  .stock-table {
+    display: block;
+    overflow-x: auto;
+    width: 100%;
+    font-size: 13px;
+  }
+
+  .stock-table th,
+  .stock-table td {
+    white-space: nowrap;
+  }
+
   #btnAddStock,
   #importFile,
   #addStockForm input,
@@ -499,23 +558,98 @@ body.dark-mode .stock-table td {
     gap: 0 !important;
   }
 
-  /* Buat semua tabel bisa discroll horizontal */
-  .stock-table {
-    display: block;
-    overflow-x: auto;
-    width: 100%;
+  /* Top tools style konsisten dengan dashboard */
+  #top-tools {
+    position: static !important;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
   }
 
-  .stock-table th,
-  .stock-table td {
-    white-space: nowrap;
+  #top-tools #liveClock {
     font-size: 13px;
   }
 
-  .content {
-    padding: 20px !important;
-    margin-left: 0 !important;
-    width: 100% !important;
-    box-sizing: border-box;
+  .toggle-mode-btn {
+    font-size: 18px;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+
+  .logout-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #e74c3c;
+    padding: 4px;
+  }
+
+  .logout-btn::before {
+    content: "🔓";
+  }
+
+  .logout-btn::after {
+    content: "";
+  }
+
+  .logout-btn {
+    color: transparent !important;
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+.inventory-action-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: nowrap;
+}
+
+#addStockForm {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  max-width: 600px;
+}
+
+#addStockForm input,
+#addStockForm select {
+  margin: 5px 0;
+  padding: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#addStockForm .stock-row {
+  display: flex;
+  gap: 10px;
+}
+
+#addStockForm .stock-row input,
+#addStockForm .stock-row select {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .inventory-action-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #addStockForm .stock-row {
+    flex-direction: column;
   }
 }
