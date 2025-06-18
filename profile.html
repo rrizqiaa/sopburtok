@@ -331,15 +331,15 @@ function updateLiveClock() {
 }
 
 function toggleMode() {
-  const isDark = document.body.classList.toggle('dark-mode');
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  const isDark = document.body.classList.toggle("dark-mode");
+  localStorage.setItem("theme", isDark ? "dark" : "light");
 }
-let selectedRating = 0;
-const stars = [];
 
-document.addEventListener('DOMContentLoaded', () => {
-  setupRatingStars();
-  renderLogbook();
+// Inisialisasi saat halaman dimuat
+document.addEventListener("DOMContentLoaded", () => {
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark-mode");
+  }
 });
 
 function setupRatingStars() {
