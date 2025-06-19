@@ -135,12 +135,14 @@
   </div>
 
  <div class="content">
-    <h2>Reporting - Laporan Stok Saat Ini</h2>
-    <div class="export-buttons" id="exportButtons">
-      <button onclick="exportToPDF()">Export to PDF</button>
-      <button onclick="exportTableToCSV()">Export to Excel</button>
-    </div>
+  <h2>Reporting - Laporan Stok Saat Ini</h2>
+  <div class="export-buttons" id="exportButtons">
+    <button onclick="exportToPDF()">Export to PDF</button>
+    <button onclick="exportTableToCSV()">Export to Excel</button>
+  </div>
 
+  <!-- ✅ Mulai area yang akan di-export -->
+  <div id="pdfExportArea">
     <div style="margin-bottom: 15px;">
       <label for="chartType">Tipe Grafik:</label>
       <select id="chartType" onchange="updateChartType()">
@@ -149,6 +151,7 @@
         <option value="line">Line Chart</option>
       </select>
     </div>
+
     <canvas id="mainChart" width="800" height="450"></canvas>
 
     <table class="stock-table">
@@ -162,20 +165,24 @@
       </thead>
       <tbody id="reportingTableBody"></tbody>
     </table>
-
-    <h2 style="margin-top: 50px;">Log Aktivitas</h2>
-    <table class="stock-table">
-      <thead>
-        <tr>
-          <th>Judul Laporan</th>
-          <th>Isi</th>
-          <th>Tanggal</th>
-          <th>Sumber</th>
-        </tr>
-      </thead>
-      <tbody id="logTableBody"></tbody>
-    </table>
   </div>
+  <!-- ✅ Tutup area export PDF -->
+
+  <!-- Log Aktivitas tidak termasuk dalam PDF -->
+  <h2 style="margin-top: 50px;">Log Aktivitas</h2>
+  <table class="stock-table">
+    <thead>
+      <tr>
+        <th>Judul Laporan</th>
+        <th>Isi</th>
+        <th>Tanggal</th>
+        <th>Sumber</th>
+      </tr>
+    </thead>
+    <tbody id="logTableBody"></tbody>
+  </table>
+</div>
+
 </div>
 
 <script>
@@ -350,8 +357,6 @@ function exportTableToCSV() {
   document.body.removeChild(a);
 }
 
-
-
 function exportToPDF() {
   const area = document.getElementById("pdfExportArea");
 
@@ -379,7 +384,11 @@ function exportToPDF() {
       pdf.addImage(imgData, "PNG", 10, y, imgWidth, imgHeight);
     }
 
-    pdf.save("laporan_stok.pdf");
+    const username = (user.name || "pengguna").replace(/\s+/g, "_");
+    const today = new Date().toISOString().slice(0, 10);
+    const filename = `laporan_stok_${username}_${today}.pdf`;
+    pdf.save(filename);
+
   });
 }
 
