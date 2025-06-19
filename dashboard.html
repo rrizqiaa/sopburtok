@@ -9,40 +9,29 @@
 </head>
 <body>
   <div class="dashboard-wrapper">
-    
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <img src="assets/images/Logo Sop Burtok Ori.png" alt="SOP BURTOK">
-      <h3>SOP BURTOK</h3>
-      <button class="menu-btn active" onclick="location.href='dashboard.html'">Home</button>
-      <button class="menu-btn" onclick="location.href='inventory.html'">Inventory</button>
-      <button class="menu-btn" onclick="location.href='production.html'">Production</button>
-      <button class="menu-btn" onclick="location.href='reporting.html'">Reporting</button>
-      <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
-    </div>
+  <div class="sidebar">
+    <img src="assets/images/Logo Sop Burtok Ori.png" alt="SOP BURTOK" />
+    <h3>SOP BURTOK</h3>
+    <button class="menu-btn active" onclick="location.href='dashboard.html'">Home</button>
+    <button class="menu-btn" onclick="location.href='inventory.html'">Inventory</button>
+    <button class="menu-btn" onclick="location.href='production.html'">Production</button>
+    <button class="menu-btn" onclick="location.href='reporting.html'">Reporting</button>
+    <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
+  </div>
 
-    <!-- Content -->
-    <div class="content"> 
-      
-      <!-- Fixed Top Right Tools (Clock, Theme, Logout) -->
-     <div id="top-tools">
-  <div id="liveClock"></div>
-  <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
-  <button class="logout-btn" onclick="logoutUser()" id="logoutBtn">Logout</button>
-</div>
+  <div id="top-tools">
+    <div id="liveClock" style="font-weight: bold;"></div>
+    <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
+    <button class="logout-btn" onclick="logoutUser()">Logout</button>
+  </div>
 
 
 
-
-      <!-- Main Title -->
-      <h2>Log Aktivitas</h2>
-
-      <!-- Logs -->
-      <div class="log-container">
-        
+  <div class="content"></div>
+      <!-- Main Title -->   
         <!-- Inventory Log -->
         <div class="log-box">
-          <h3>Inventory</h3>
+          <h3>Log</h3>
           <div style="overflow-x: auto;">
             <table class="stock-table">
               <thead>
@@ -56,7 +45,9 @@
               <tbody id="inventoryLogBody"></tbody>
             </table>
           </div>
-        </div>
+          </div>
+        
+        
 
         <!-- Production Log -->
         <div class="log-box">
@@ -74,10 +65,9 @@
               <tbody id="productionLogBody"></tbody>
             </table>
           </div>
-        </div>
-      </div>
+          </div>
     </div>
-  </div>
+
 
   <!-- Clock Script -->
   <script>

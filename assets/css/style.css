@@ -26,8 +26,8 @@ body::before {
 }
 
 .content {
-  margin-left: 2200px; /* ganti ini! */
-  padding: 800px 20px 20px 20px;
+  margin-left: 220px; /* ganti ini! */
+  padding: 80px 20px 20px 20px;
   width: calc(100% - 220px);
   box-sizing: border-box;
 }
@@ -215,7 +215,7 @@ h2, h3 {
 
 .log-box {
   flex: 1;
-  min-width: 350px; /* Bukan 35px ya, ini typo */
+  min-width: 350px; 
   padding: 35px;
   box-sizing: border-box;
 }
@@ -434,67 +434,8 @@ body.dark-mode .stock-table td {
 /* Mobile  */
 /* Dashboard */
 /* MOBILE STYLE KHUSUS TOOLS ATAS */
-@media (max-width: 768px) {
-  #top-tools {
-    position: static !important;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    background-color: #f0f0f0;
-    padding: 10px;
-    z-index: 1;
-    border-radius: 8px;
-    margin-bottom: 10px;
-  }
 
-  #top-tools #liveClock {
-    font-size: 13px;
-    text-align: center;
-  }
 
-  .toggle-mode-btn {
-    background: none;
-    border: none;
-    font-size: 20px;
-    padding: 5px;
-    cursor: pointer;
-    line-height: 1;
-  }
-
-  #logoutBtn {
-    background: none;
-    border: none;
-    font-size: 20px;
-    padding: 5px;
-    cursor: pointer;
-    color: #e74c3c;
-  }
-
-  #logoutBtn::before {
-    content: "🔓";
-  }
-
-  #logoutBtn::after {
-    content: "";
-  }
-
-  /* Sembunyikan teks logout hanya di mobile */
-  #logoutBtn {
-    font-size: 20px;
-    color: #e74c3c;
-    width: auto;
-  }
-
-  #logoutBtn::before {
-    content: "🔓";
-  }
-
-  #logoutBtn::after {
-    content: "";
-  }
-}
 
 
 /* Inventory */
@@ -599,9 +540,7 @@ body.dark-mode .stock-table td {
     content: "";
   }
 
-  .logout-btn {
-    color: transparent !important;
-  }
+  
 }
 
 .hidden {
@@ -787,3 +726,6 @@ body.dark-mode .stock-table td {
     padding: 20px;
   }
 }
+
+/* Profile */
+

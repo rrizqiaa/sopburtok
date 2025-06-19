@@ -134,11 +134,11 @@
     <button class="logout-btn" onclick="logoutUser()">Logout</button>
   </div>
 
-  <div class="content">
+ <div class="content">
     <h2>Reporting - Laporan Stok Saat Ini</h2>
     <div class="export-buttons" id="exportButtons">
       <button onclick="exportToPDF()">Export to PDF</button>
-      <button onclick="exportTableToExcel()">Export to Excel</button>
+      <button onclick="exportTableToCSV()">Export to Excel</button>
     </div>
 
     <div style="margin-bottom: 15px;">
@@ -321,6 +321,68 @@ function logout() {
     location.href = "index.html";
   });
 }
+
+function exportTableToCSV() {
+  const table = document.querySelector('.stock-table');
+  const rows = table.querySelectorAll('tr');
+  let csv = [];
+
+  rows.forEach(row => {
+    let cols = row.querySelectorAll('th, td');
+    let rowData = Array.from(cols).map(col => `"${col.innerText.trim()}"`).join(',');
+    csv.push(rowData);
+  });
+
+  const csvString = csv.join('\n');
+  const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+
+  const username = (user.name || "pengguna").replace(/\s+/g, "_");
+  const today = new Date().toISOString().slice(0, 10);
+  const filename = `laporan_stok_${username}_${today}.csv`;
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+
+
+function exportToPDF() {
+  const area = document.getElementById("pdfExportArea");
+
+  html2canvas(area, { scale: 2 }).then(canvas => {
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jspdf.jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4"
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const imgWidth = pageWidth - 20;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let y = 10;
+    if (imgHeight > pageHeight - 20) {
+      // jika melebihi satu halaman
+      pdf.addImage(imgData, "PNG", 10, y, imgWidth, pageHeight - 20);
+      pdf.addPage();
+      pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+    } else {
+      pdf.addImage(imgData, "PNG", 10, y, imgWidth, imgHeight);
+    }
+
+    pdf.save("laporan_stok.pdf");
+  });
+}
+
 
 function updateLiveClock() {
   const el = document.getElementById('liveClock');

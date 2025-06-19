@@ -2,49 +2,133 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
   <title>Profile - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
-  <style>
-    .profile-content-flex {
-      display: flex;
-      gap: 40px;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-top: 20px;
-      flex-wrap: wrap;
+<style>
+  @media (max-width: 768px) {
+    .dashboard-wrapper {
+      flex-direction: column;
     }
 
-    .equal-box {
+    .sidebar {
+      position: static !important;
+      width: 100% !important;
+      height: auto;
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 0;
+    }
+
+    .sidebar img,
+    .sidebar h3 {
+      display: none;
+    }
+
+    .menu-btn {
       flex: 1;
-      padding: 20px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+      text-align: center;
+      font-size: 12px;
+      padding: 10px 0;
+    }
+
+    #top-tools {
+      position: static !important;
       display: flex;
-      flex-direction: column;
-      min-width: 300px;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      background-color: #f0f0f0;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    #top-tools #liveClock {
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .toggle-mode-btn,
+    .logout-btn {
+      font-size: 18px;
+      background: none;
+      border: none;
+      padding: 4px;
+      cursor: pointer;
+    }
+
+    .logout-btn {
+      color: #e74c3c;
+    }
+
+    .content {
+      margin-left: 0 !important;
+      width: 100% !important;
+      padding: 20px !important;
       box-sizing: border-box;
     }
 
-    .equal-box h2 {
-      margin: 0 0 16px 0;
+    .profile-content-flex {
+      flex-direction: column !important;
+      gap: 20px !important;
+      padding: 0 10px;
     }
 
-    .star {
-      cursor: pointer;
-      color: #ccc;
-    }
-    .star.selected {
-      color: gold;
+    .equal-box,
+    .profile-info,
+    .logbook-section {
+      width: 100% !important;
+      margin-right: 0 !important;
+      padding: 15px;
+      box-sizing: border-box;
     }
 
-    @media (max-width: 768px) {
-      .profile-content-flex {
-        flex-direction: column;
-      }
+    .profile-info input,
+    .logbook-section textarea,
+    .logbook-section select,
+    #formBuatUser input,
+    #formBuatUser select {
+      width: 100% !important;
+      margin-bottom: 10px;
     }
-  </style></head>
+
+    #admin-section button {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    #formBuatUser {
+      padding: 10px !important;
+    }
+
+    #userListSection .user-row {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+    }
+
+    /* Responsive font sizes for headings */
+    .profile-info h2,
+    .logbook-section h2,
+    .logbook-section h3 {
+      font-size: 20px;
+    }
+
+    label,
+    input,
+    textarea,
+    select,
+    button {
+      font-size: 14px;
+    }
+  }
+</style>
+</head>
 <body>
 <div class="dashboard-wrapper">
   <div class="sidebar">
@@ -58,11 +142,11 @@
   </div>
 
   <!-- Tambahkan di bawah <body> atau sebelum <div class="content"> -->
-<div style="position: fixed; top: 10px; right: 20px; z-index: 1000; display: flex; align-items: center; gap: 10px;">
-  <div id="liveClock" style="font-weight: bold;"></div>
-  <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
-  <button class="logout-btn" onclick="logoutUser()">Logout</button>
-</div>
+<div id="top-tools">
+    <div id="liveClock" style="font-weight: bold;"></div>
+    <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
+    <button class="logout-btn" onclick="logoutUser()">Logout</button>
+  </div>
 
 
   <div class="content">
