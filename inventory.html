@@ -51,8 +51,15 @@
   <input type="file" id="importFile" accept=".csv" onchange="handleImport(event)" />
 </div>
 
+<div class="inventory-action-row">
+  <button id="toggleEditMode" onclick="toggleEditMode()">✏️ Edit Mode</button>
+  <button onclick="deleteSelectedItems()">🗑️ Hapus Terpilih</button>
+</div>
+
+
 <!-- FORM TAMBAH BAHAN -->
 <div id="addStockForm" class="hidden">
+  <input id="stockSKU" placeholder="SKU (opsional)" />
   <input id="stockName" placeholder="Nama Bahan Baku" />
   <select id="stockCategory">
     <option value="Pokok">Pokok</option>
@@ -83,15 +90,17 @@
       <div style="overflow-x:auto">
         <table class="stock-table">
           <thead>
-            <tr>
-              <th>Nama</th>
-              <th>Kategori</th>
-              <th>Tanggal Masuk</th>
-              <th>Jumlah</th>
-              <th>Satuan</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
+              <tr>
+                <th><input type="checkbox" onclick="toggleSelectAll(this)" /></th>
+                <th>SKU</th>
+                <th>Nama</th>
+                <th>Kategori</th>
+                <th>Tanggal Masuk</th>
+                <th>Jumlah</th>
+                <th>Satuan</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
           <tbody id="stockTableBody"></tbody>
         </table>
       </div>
@@ -183,10 +192,12 @@ function hideAddForm() {
 
       data.forEach(item => {
         const row = document.createElement("tr");
-        const unit = item.unit || ((item.name?.toLowerCase() === "air" || item.name?.toLowerCase() === "minyak") ? "ml" : "gr");
-        const isEditable = userRole !== "staff";
+        const unit = item.unit || "gr";
+        const isEditable = window.editMode && userRole !== "staff";
 
         row.innerHTML = `
+          <td><input type="checkbox" class="stock-checkbox" value="${item.id}" /></td>
+          <td>${isEditable ? `<input value="${item.sku || ''}" onchange="updateInventory(${item.id}, 'sku', this.value)" />` : (item.sku || '-')}</td>
           <td>${isEditable ? `<input value="${item.name}" onchange="updateInventory(${item.id}, 'name', this.value)" />` : item.name}</td>
           <td>
             ${isEditable ? `
@@ -219,6 +230,42 @@ function hideAddForm() {
         tbody.appendChild(row);
       });
     }
+
+    // Fungsi untuk toggle edit mode
+    window.editMode = false;
+    function toggleEditMode() {
+      window.editMode = !window.editMode;
+      loadInventory();
+    }
+
+    // Fungsi hapus terpilih
+    async function deleteSelectedItems() {
+      const selected = Array.from(document.querySelectorAll(".stock-checkbox:checked")).map(cb => cb.value);
+      if (selected.length === 0) return alert("❗Tidak ada item yang dipilih.");
+
+      const konfirmasi = confirm(`Yakin ingin menghapus ${selected.length} item?`);
+      if (!konfirmasi) return;
+
+      for (const id of selected) {
+        await fetch(`https://api.sopburtok.giize.com/api/inventory/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json"
+          }
+        });
+      }
+
+      alert(`✅ ${selected.length} item berhasil dihapus.`);
+      loadInventory();
+    }
+
+    // Select All Checkbox
+    function toggleSelectAll(masterCheckbox) {
+      const checkboxes = document.querySelectorAll(".stock-checkbox");
+      checkboxes.forEach(cb => cb.checked = masterCheckbox.checked);
+    }
+
 
     function checkStockAlerts(data) {
       const warningTable = document.getElementById("warningTableBody");
@@ -254,6 +301,7 @@ function hideAddForm() {
     async function addInventory() {
       const body = {
         name: document.getElementById("stockName").value,
+        sku: document.getElementById("stockSKU").value,
         category: document.getElementById("stockCategory").value,
         entry_date: document.getElementById("stockEntry").value,
         stock: parseFloat(document.getElementById("stockAmount").value),
@@ -341,6 +389,55 @@ function hideAddForm() {
         }
       });
     }
+
+async function handleDeleteMultiple() {
+  const jumlahHapus = parseInt(document.getElementById("deleteCount").value);
+  const urutan = document.getElementById("deleteSort").value;
+
+  if (isNaN(jumlahHapus) || jumlahHapus <= 0) {
+    return alert("Masukkan jumlah yang valid untuk dihapus.");
+  }
+
+  try {
+    const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json"
+      }
+    });
+    const data = await res.json();
+
+    const sorted = data.sort((a, b) => {
+      return urutan === "asc" ? a.stock - b.stock : b.stock - a.stock;
+    });
+
+    const toDelete = sorted.slice(0, jumlahHapus);
+
+    if (toDelete.length === 0) return alert("Tidak ada item yang dapat dihapus.");
+
+    const konfirmasi = confirm(`Yakin ingin menghapus ${toDelete.length} item?\n${toDelete.map(i => "- " + i.name).join("\n")}`);
+    if (!konfirmasi) return;
+
+    for (const item of toDelete) {
+      await fetch(`https://api.sopburtok.giize.com/api/inventory/${item.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json"
+        }
+      });
+    }
+
+    alert(`✅ ${toDelete.length} item berhasil dihapus.`);
+    loadInventory();
+
+  } catch (err) {
+    console.error("Gagal menghapus:", err);
+    alert("❌ Terjadi kesalahan saat menghapus data.");
+  }
+}
+
+
 
     function formatDate(dateStr) {
       if (!dateStr) return new Date().toISOString().split("T")[0];

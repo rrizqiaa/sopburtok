@@ -243,6 +243,9 @@ h2, h3 {
   }
 }
 
+.inventory-action-row input[type="number"] {
+  padding: 6px;
+}
 
 
 /* =========================================
