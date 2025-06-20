@@ -293,42 +293,65 @@
     }
 
     function renderLogbook() {
-      const tbody = document.getElementById("logbookBody");
-      const sumSel = document.getElementById("sumSelisih");
-      const sumPer = document.getElementById("sumPersen");
-      const avgSel = document.getElementById("avgSelisih");
-      const avgPer = document.getElementById("avgPersen");
-
-      const data = JSON.parse(localStorage.getItem("logbookProduksi") || "[]");
-
-      tbody.innerHTML = "";
-      let totalSel = 0, totalPer = 0;
-
-      data.forEach((entry, index) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${entry.tanggal}</td>
-          <td>${entry.selisih} gr</td>
-          <td>${entry.persen} %</td>
-          <td>
-            <button onclick="hapusLogbook(${index})" 
-              style="padding:4px 8px;font-size:12px;color:white;background:#e74c3c;border:none;border-radius:4px;cursor:pointer;">
-              Hapus
-            </button>
-          </td>
-        `;
-        tbody.appendChild(row);
-
-        totalSel += parseFloat(entry.selisih);
-        totalPer += parseFloat(entry.persen);
-      });
-
-
-      sumSel.textContent = `${totalSel} gr`;
-      sumPer.textContent = `${totalPer.toFixed(2)} %`;
-      avgSel.textContent = data.length ? `${(totalSel / data.length).toFixed(2)} gr` : "-";
-      avgPer.textContent = data.length ? `${(totalPer / data.length).toFixed(2)} %` : "-";
+  fetch("https://api.sopburtok.giize.com/api/production", {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Accept": "application/json"
     }
+  })
+  .then(res => res.json())
+  .then(data => {
+    const tbody = document.getElementById("logbookBody");
+    const sumSel = document.getElementById("sumSelisih");
+    const sumPer = document.getElementById("sumPersen");
+    const avgSel = document.getElementById("avgSelisih");
+    const avgPer = document.getElementById("avgPersen");
+
+    tbody.innerHTML = "";
+    let totalSel = 0, totalPer = 0;
+    let validCount = 0;
+
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    data.forEach(entry => {
+      // Pastikan data valid
+      if (!entry.used_date || entry.selisih_total === null || entry.persentase_selisih === null) return;
+
+      const row = document.createElement("tr");
+
+      let aksiHtml = "-";
+      if (user.role === "admin") {
+        aksiHtml = `
+          <button onclick="hapusLogbook(${entry.id})"
+            style="padding:4px 8px;font-size:12px;color:white;background:#e74c3c;border:none;border-radius:4px;cursor:pointer;">
+            Hapus
+          </button>`;
+      }
+
+      row.innerHTML = `
+        <td>${entry.used_date}</td>
+        <td>${entry.selisih_total} gr</td>
+        <td>${entry.persentase_selisih} %</td>
+        <td>${aksiHtml}</td>
+      `;
+      tbody.appendChild(row);
+
+      totalSel += parseFloat(entry.selisih_total);
+      totalPer += parseFloat(entry.persentase_selisih);
+      validCount++;
+    });
+
+    // Tampilkan total dan rata-rata
+    sumSel.textContent = `${totalSel} gr`;
+    sumPer.textContent = `${totalPer.toFixed(2)} %`;
+    avgSel.textContent = validCount ? `${(totalSel / validCount).toFixed(2)} gr` : "-";
+    avgPer.textContent = validCount ? `${(totalPer / validCount).toFixed(2)} %` : "-";
+  })
+  .catch(error => {
+    console.error("❌ Gagal ambil log produksi dari API:", error);
+  });
+}
+
 
       // Panggil saat halaman dimuat
       document.addEventListener("DOMContentLoaded", renderLogbook);
@@ -491,6 +514,28 @@ function hitungPersentase() {
   });
 }
 
+function hapusLogbook(id) {
+  if (!confirm("Yakin ingin menghapus log produksi ini?")) return;
+
+  fetch(`https://api.sopburtok.giize.com/api/production/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${localStorage.getItem("token")}`,
+      "Accept": "application/json"
+    }
+  })
+  .then(response => {
+    if (!response.ok) throw new Error("Gagal hapus data");
+    return response.json();
+  })
+  .then(data => {
+    alert("✅ Data berhasil dihapus.");
+    renderLogbook();
+  })
+  .catch(error => {
+    console.error("❌ Gagal hapus:", error);
+  });
+}
 
 
   </script>
