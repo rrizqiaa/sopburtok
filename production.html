@@ -400,6 +400,7 @@
       })
       .then(data => {
         console.log("✅ Data berhasil dikirim ke backend:", data);
+         renderLogbook();
       })
       .catch(error => {
         console.error("❌ Gagal kirim ke backend:", error);
