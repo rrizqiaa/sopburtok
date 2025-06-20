@@ -206,6 +206,9 @@
   margin-right: 5px;
 }
 
+#admin-section button:nth-of-type(2) {
+  font-weight: bold;
+}
   </style>
 </head>
 <body>
@@ -252,8 +255,8 @@
       <div class="logbook-section">
         <h2>Logbook</h2>
 
-        <label for="log-comment">Komentar</label>
-        <textarea id="log-comment" rows="3" placeholder="Tulis komentar..."></textarea>
+        <label for="log-comment">Notes</label>
+        <textarea id="log-comment" rows="3" placeholder="Tambahkan Notes..."></textarea>
 
         <label for="log-rating">Rating</label>
         <div id="log-rating" class="rating-stars">★★★★★</div>
@@ -266,7 +269,7 @@
       </div>
 
       <!-- Admin Section -->
-      <div id="admin-section" style="display: none; margin-top: 40px;">
+      <div id="admin-section" style="display: none; margin-top: 15px;">
         <button onclick="toggleForm()">+ Tambah Akun Baru</button>
 
         <div id="formBuatUser" style="display: none; border: 1px solid #ccc; padding: 15px; margin-top: 10px;">
@@ -310,6 +313,14 @@
       renderLogbook();
       updateLiveClock();
       setInterval(updateLiveClock, 1000);
+      
+      // === Tambahkan kode ini di sini ===
+      const tambahAkunButton = document.querySelector('#admin-section > button:first-child');
+      if (tambahAkunButton) {
+        tambahAkunButton.style.fontWeight = 'bold';
+      }
+      // =================================
+
     });
 
     function fetchProfile() {
