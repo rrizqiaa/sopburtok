@@ -9,6 +9,7 @@
   <!-- Library SheetJS untuk membaca XLSX/CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
+  
 /* ========  DESKTOP  (≥1024 px)  ======== */
 .grid-wrapper{
   display:grid;
@@ -121,6 +122,17 @@
       <h2>Produksi - Perhitungan Pemakaian Daging</h2>
       <div class="grid-wrapper">
         <!-- Baris 1 -->
+
+<div class="card">
+  <label for="inventorySelect"><strong>Pilih Bahan Daging:</strong></label>
+  <select id="inventorySelect">
+    <option value="">-- Pilih Daging --</option>
+  </select>
+</div>
+
+
+
+
         <!-- Stok -->
         <div class="card">
           <h3>Daging Terpakai Stok</h3>
@@ -170,6 +182,7 @@
                   <th>Tanggal</th>
                   <th>Selisih Total (gr)</th>
                   <th>Persentase Selisih (%)</th>
+                  <th>Aksi</th
                 </tr>
               </thead>
               <tbody id="logbookBody"></tbody>
@@ -215,6 +228,8 @@
       </div>
     </div>
   </div>
+</body>
+</html>
 
   <!-- Script tetap -->
   <script>
@@ -246,6 +261,11 @@
         window.location.href = "index.html";
       });
     }
+
+    const select = document.getElementById("inventorySelect");
+      const inventoryId = parseInt(select.value);
+      const bahanNama = select.options[select.selectedIndex].getAttribute("data-name");
+
 
     function hitungDagingKasir() {
       const get = id => parseFloat(document.getElementById(id).value) || 0;
@@ -302,6 +322,25 @@
       renderLogbook();
     }
 
+    function hitungPersentase() {
+  const selisih = parseFloat(document.getElementById("selisihPersen").value) || 0;
+  const totalKasir = parseFloat(document.getElementById("kasirTotal").value) || 0;
+  if (totalKasir === 0) {
+    document.getElementById("hasilPersentase").innerText = "Persentase Selisih: tidak dapat dihitung (kasir = 0)";
+    return;
+  }
+
+  const persen = (selisih / totalKasir) * 100;
+  document.getElementById("hasilPersentase").innerText = `Persentase Selisih: ${persen.toFixed(2)} %`;
+
+  // Simpan ke localStorage
+  simpanKeLogbook();
+
+  // 🟢 Tambahkan ini agar data terkirim ke backend
+  kirimLogbookKeBackend();
+}
+
+
     function renderLogbook() {
       const tbody = document.getElementById("logbookBody");
       const sumSel = document.getElementById("sumSelisih");
@@ -314,17 +353,25 @@
       tbody.innerHTML = "";
       let totalSel = 0, totalPer = 0;
 
-      data.forEach(entry => {
+      data.forEach((entry, index) => {
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${entry.tanggal}</td>
           <td>${entry.selisih} gr</td>
-          <td>${entry.persen} %</td>`;
+          <td>${entry.persen} %</td>
+          <td>
+            <button onclick="hapusLogbook(${index})" 
+              style="padding:4px 8px;font-size:12px;color:white;background:#e74c3c;border:none;border-radius:4px;cursor:pointer;">
+              Hapus
+            </button>
+          </td>
+        `;
         tbody.appendChild(row);
 
         totalSel += parseFloat(entry.selisih);
         totalPer += parseFloat(entry.persen);
       });
+
 
       sumSel.textContent = `${totalSel} gr`;
       sumPer.textContent = `${totalPer.toFixed(2)} %`;
@@ -334,7 +381,61 @@
 
       // Panggil saat halaman dimuat
       document.addEventListener("DOMContentLoaded", renderLogbook);
-      
+    function hapusLogbook(index) {
+        const data = JSON.parse(localStorage.getItem("logbookProduksi") || "[]");
+        data.splice(index, 1); // Hapus 1 elemen dari array di posisi index
+        localStorage.setItem("logbookProduksi", JSON.stringify(data));
+        renderLogbook(); // Refresh tabel setelah hapus
+      }
+
+
+
+     function kirimLogbookKeBackend() {
+  const token = localStorage.getItem("token");
+
+  const stok = parseFloat(document.getElementById("stokTerpakai").value) || 0;
+  const kasir = parseFloat(document.getElementById("kasirTerpakai").value) || 0;
+  const selisih = kasir - stok;
+  const persen = kasir ? ((selisih / kasir) * 100).toFixed(2) : 0;
+  const status = selisih >= 0 ? "surplus" : "defisit";
+
+  // ✅ Ambil inventory_id & nama dari dropdown saat fungsi dipanggil
+  const select = document.getElementById("inventorySelect");
+  const inventoryId = parseInt(select.value);
+  const bahanNama = select.options[select.selectedIndex]?.getAttribute("data-name") || "Tidak dipilih";
+
+  
+
+  fetch("https://api.sopburtok.giize.com/api/production", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      inventory_id: inventoryId,
+      bahan_baku_nama: bahanNama,
+      quantity_used: stok,
+      used_date: new Date().toISOString().split("T")[0],
+      selisih_total: selisih,
+      persentase_selisih: persen,
+      status: status
+    })
+  })
+  .then(response => {
+    if (!response.ok) throw new Error("Gagal simpan log produksi");
+    return response.json();
+  })
+  .then(data => {
+    console.log("✅ Data berhasil dikirim ke backend:", data);
+  })
+  .catch(error => {
+    console.error("❌ Gagal kirim ke backend:", error);
+  });
+}
+
+
     /* --- Tambahkan di bawah renderLogbook() atau di akhir skrip --- */
     function importKasirData () {
       const fileEl = document.getElementById('fileKasir');
@@ -388,6 +489,39 @@
       reader.readAsArrayBuffer(file);
     }
 
+
+    document.addEventListener("DOMContentLoaded", function () {
+  fetchInventories();
+});
+
+function fetchInventories() {
+  const token = localStorage.getItem("token");
+  fetch("https://api.sopburtok.giize.com/api/inventory", {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Accept": "application/json"
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    const select = document.getElementById("inventorySelect");
+    data.forEach(item => {
+      // Filter: hanya bahan yang namanya mengandung "daging" (non-case-sensitive)
+      if (item.name.toLowerCase().includes("daging")) {
+        const option = document.createElement("option");
+        option.value = item.id;
+        option.text = item.name;
+        option.setAttribute("data-name", item.name);
+        select.appendChild(option);
+      }
+    });
+  })
+  .catch(err => {
+    console.error("❌ Gagal memuat inventory:", err);
+  });
+}
+
   </script>
 </body>
-</html>~
+</html>
+
