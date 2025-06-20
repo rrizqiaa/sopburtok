@@ -214,9 +214,19 @@
           
           <div class="result" id="hasilPersentase">Persentase Selisih: - %</div>
         </div>
+
+      
       </div>
+       <select id="arsipSelect"></select>
+<button onclick="generateArsip()">Buat Arsip</button>
+<button onclick="downloadArsip()">Download Arsip</button>
     </div>
+
   </div>
+
+ 
+
+
 </body>
 </html>
 
@@ -250,6 +260,112 @@
         window.location.href = "index.html";
       });
     }
+
+const arsipPrefix = "arsipLogbook_"; // format arsipLogbook_2025_06
+
+function arsipkanLogbook() {
+  const bulanTahun = document.getElementById("arsipSelect").value;
+  if (!bulanTahun) return alert("Pilih bulan terlebih dahulu.");
+
+  const [year, month] = bulanTahun.split("-");
+  fetch(`https://api.sopburtok.giize.com/api/production/archive/monthly?month=${month}&year=${year}`, {
+    headers: { "Authorization": `Bearer ${token}` }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (!data || data.length === 0) return alert("Tidak ada data untuk bulan ini.");
+    
+    // Simpan ke LocalStorage sebagai backup arsip
+    localStorage.setItem(`${arsipPrefix}${year}_${month}`, JSON.stringify(data));
+
+    // Hapus dari server
+    return fetch(`https://api.sopburtok.giize.com/api/production/archive/monthly/${year}/${month}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+  })
+  .then(() => {
+    alert("✅ Data diarsipkan dan dihapus dari server.");
+    renderLogbook();
+  })
+  .catch(err => console.error("❌ Error arsip:", err));
+}
+
+function unduhArsip() {
+  const bulanTahun = document.getElementById("arsipSelect").value;
+  const [year, month] = bulanTahun.split("-");
+  const dataStr = localStorage.getItem(`${arsipPrefix}${year}_${month}`);
+  if (!dataStr) return alert("Data arsip tidak ditemukan di localStorage.");
+
+  const data = JSON.parse(dataStr);
+  const rows = [["Tanggal", "Bahan Baku", "Qty Digunakan", "Selisih", "% Selisih", "Status"]];
+  data.forEach(d => {
+    rows.push([
+      d.used_date, d.bahan_baku_nama, d.quantity_used,
+      d.selisih_total, d.persentase_selisih + " %", d.status
+    ]);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Arsip");
+  XLSX.writeFile(wb, `Arsip_Produksi_${year}_${month}.xlsx`);
+}
+
+// Inisialisasi select bulan-tahun
+function populateArsipSelect() {
+  const select = document.getElementById("arsipSelect");
+  const now = new Date();
+  for (let i = 0; i < 12; i++) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const y = date.getFullYear();
+    const m = (date.getMonth() + 1).toString().padStart(2, "0");
+    const option = document.createElement("option");
+    option.value = `${y}-${m}`;
+    option.textContent = `${m}/${y}`;
+    select.appendChild(option);
+  }
+}
+document.addEventListener("DOMContentLoaded", populateArsipSelect);
+
+function initArsipSelect() {
+  const select = document.getElementById("arsipSelect");
+  const now = new Date();
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const option = document.createElement("option");
+    option.value = `${y}-${m}`;
+    option.textContent = `${m}/${y}`;
+    select.appendChild(option);
+  }
+}
+
+function generateArsip() {
+  const [year, month] = document.getElementById("arsipSelect").value.split("-");
+  fetch(`https://api.sopburtok.giize.com/api/production/archive/generate/${year}/${month}`, {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${token}` }
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert("✅ Arsip berhasil dibuat di server.");
+  })
+  .catch(err => alert("❌ Gagal membuat arsip: " + err));
+}
+
+function downloadArsip() {
+  const [year, month] = document.getElementById("arsipSelect").value.split("-");
+  const link = document.createElement("a");
+  link.href = `https://api.sopburtok.giize.com/api/production/archive/download/${year}/${month}`;
+  link.setAttribute("download", "");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+document.addEventListener("DOMContentLoaded", initArsipSelect);
 
 
     function hitungDagingKasir() {

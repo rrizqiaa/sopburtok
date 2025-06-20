@@ -355,6 +355,7 @@ function exportTableToCSV() {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
+  logExportActivity(`Export Excel - ${filename}`);
 }
 
 function exportToPDF() {
@@ -388,9 +389,68 @@ function exportToPDF() {
     const today = new Date().toISOString().slice(0, 10);
     const filename = `laporan_stok_${username}_${today}.pdf`;
     pdf.save(filename);
+    logExportActivity(`Export PDF - ${filename}`);
 
   });
 }
+
+async function loadActivityLogs() {
+  try {
+    const res = await fetch(`${API_BASE}/activity-log`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const logs = await res.json();
+
+    const tbody = document.getElementById("logTableBody");
+    tbody.innerHTML = '';
+
+    logs.forEach(log => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${log.document_title}</td>
+        <td>${log.action}</td>
+        <td>${new Date(log.created_at).toLocaleString('id-ID')}</td>
+        <td>${log.name}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error('Gagal memuat log aktivitas:', err);
+    document.getElementById("logTableBody").innerHTML =
+      `<tr><td colspan="4">Gagal memuat log aktivitas.</td></tr>`;
+  }
+}
+
+
+function logExportActivity(judulLaporan) {
+  fetch(`${API_BASE}/activity-log`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ document_title: judulLaporan })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log('Log aktivitas tercatat:', data.message);
+  })
+  .catch(err => {
+    console.error('Gagal mencatat log aktivitas:', err);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (localStorage.getItem("theme") === "dark")
+    document.body.classList.add("dark-mode");
+
+  if (userRole === "staff") document.getElementById("exportButtons").style.display = "none";
+
+  loadReports();
+  loadActivityLogs(); // <= Tambahkan ini
+  updateLiveClock();
+  setInterval(updateLiveClock, 1000);
+});
 
 
 function updateLiveClock() {
