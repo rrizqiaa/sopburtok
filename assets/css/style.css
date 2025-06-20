@@ -728,4 +728,14 @@ body.dark-mode .stock-table td {
 }
 
 /* Profile */
-
+/* Horizontal Layout untuk Selisih dan Persentase */
+.horizontal-wrapper {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.horizontal-wrapper .card {
+  flex: 1;
+  min-width: 300px;
+}
