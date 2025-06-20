@@ -530,7 +530,6 @@ function hapusLogbook(id) {
     return response.json();
   })
   .then(data => {
-    alert("✅ Data berhasil dihapus.");
     renderLogbook();
   })
   .catch(error => {
