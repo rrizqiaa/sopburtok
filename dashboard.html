@@ -30,8 +30,8 @@
       <!-- Main Title --> 
         <!-- Inventory Log -->
         <div class="log-box">
-          <h2>Log</h2>
-          <h3>Inventory</h3>
+          <h2>Log Aktivitas</h2>
+          <h3>Inventory Bahan Baku</h3>
           <div style="overflow-x: auto;">
             <table class="stock-table">
               <thead>
@@ -50,18 +50,17 @@
         <!-- Production Log -->
         <div class="log-box">
           <h2> </h2>
-          <h3>Production</h3>
-          <div style="overflow-x: auto;">
+            <h3>Logbook Hasil Produksi</h3>
             <table class="stock-table">
               <thead>
                 <tr>
-                  <th>Waktu</th>
+                  <th>Tanggal</th>
                   <th>Aksi</th>
                   <th>Nama Produk</th>
-                  <th>Jumlah</th>
+                  <th>Selisih & Persentase</th>
                 </tr>
               </thead>
-              <tbody id="productionLogBody"></tbody>
+              <tbody id="logbookBodyDashboard"></tbody>
             </table>
           </div>
           </div>
@@ -95,60 +94,73 @@
   </script>
 
   <!-- Data Fetching -->
-  <script>
-    const token = localStorage.getItem("token");
-    if (!token) window.location.href = "index.html";
+<script>
+  const token = localStorage.getItem("token");
+  if (!token) window.location.href = "index.html";
 
-    async function fetchLogs() {
-      try {
-        const [inventoryRes, productionRes] = await Promise.all([
-          fetch("https://api.sopburtok.giize.com/api/inventory", {
-            headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
-          }),
-          fetch("https://api.sopburtok.giize.com/api/production", {
-            headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
-          })
-        ]);
+  /* ---------------- INVENTORY API ---------------- */
+  async function fetchLogs() {
+    try {
+      // Ambil hanya data inventory
+      const inventoryRes  = await fetch("https://api.sopburtok.giize.com/api/inventory", {
+        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
+      });
+      const inventoryData = await inventoryRes.json();
 
-        const inventoryData = await inventoryRes.json();
-        const productionData = await productionRes.json();
-
-        renderLogs(inventoryData, "inventoryLogBody", "Penambahan Stok", "name", "stock");
-        renderLogs(productionData, "productionLogBody", "Produksi", "product_name", "quantity_produced");
-
-      } catch (error) {
-        console.error("Gagal memuat log:", error);
-        document.getElementById("inventoryLogBody").innerHTML = "<tr><td colspan='4'>Gagal memuat log inventory.</td></tr>";
-        document.getElementById("productionLogBody").innerHTML = "<tr><td colspan='4'>Gagal memuat log produksi.</td></tr>";
-      }
+      renderLogs(inventoryData, "inventoryLogBody",
+                 "Penambahan Stok", "name", "stock");
+    } catch (err) {
+      console.error("Gagal memuat log:", err);
+      document.getElementById("inventoryLogBody").innerHTML =
+        "<tr><td colspan='4'>Gagal memuat log inventory.</td></tr>";
     }
+  }
 
-    function renderLogs(data, tableId, actionText, nameField, valueField) {
-      const tbody = document.getElementById(tableId);
-      tbody.innerHTML = "";
+  /* ---------- FUNGSIONAL UMUM UNTUK RENDER TABEL ---------- */
+  function renderLogs(data, tableId, actionText, nameField, valueField) {
+    const tbody = document.getElementById(tableId);
+    tbody.innerHTML = "";
 
-      data
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-        .slice(0, 10)
-        .forEach(item => {
-          const nama = (item[nameField] || "-").toLowerCase();
-          const label = item[nameField] || "-";
-          const jumlah = item[valueField] || 0;
-          const satuan = (nama === "air" || nama === "minyak") ? "Liter" : "Kg";
+    data
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 10)
+      .forEach(item => {
+        const nama    = (item[nameField] || "-").toLowerCase();
+        const label   = item[nameField]   || "-";
+        const jumlah  = item[valueField]  || 0;
+        const satuan  = (nama === "air" || nama === "minyak") ? "Liter" : "Kg";
 
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${new Date(item.created_at).toLocaleString("id-ID")}</td>
-            <td>${actionText}</td>
-            <td>${label}</td>
-            <td>${jumlah} ${satuan}</td>
-          `;
-          tbody.appendChild(row);
-        });
-    }
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${new Date(item.created_at).toLocaleString("id-ID")}</td>
+          <td>${actionText}</td>
+          <td>${label}</td>
+          <td>${jumlah} ${satuan}</td>`;
+        tbody.appendChild(row);
+      });
+  }
 
-    fetchLogs();
-  </script>
+  /* ------------ TABEL LOGBOOK PRODUKSI DARI localStorage ------------ */
+  function renderLogbookFromStorage() {
+    const tbody = document.getElementById("logbookBodyDashboard");
+    const data  = JSON.parse(localStorage.getItem("logbookProduksi") || "[]");
+
+    tbody.innerHTML = "";
+    data.forEach(entry => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${entry.tanggal}</td>
+        <td>Produksi</td>
+        <td>Sapi</td>
+        <td>${entry.selisih} gr (${entry.persen} %)</td>`;
+      tbody.appendChild(row);
+    });
+  }
+
+  /* ------------------ INITIAL LOAD ------------------ */
+  fetchLogs();              // Inventory
+  renderLogbookFromStorage();  // Logbook Produksi
+</script>
 
   <!-- Logout -->
   <script>

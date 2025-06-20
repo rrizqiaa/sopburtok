@@ -317,7 +317,7 @@ function hideAddForm() {
               category: row.Kategori?.trim() || "Pokok",
               entry_date: formatDate(row.TanggalMasuk),
               stock: parseFloat(row.Jumlah) || 0,
-              unit: row.Satuan?.trim() || "gr"
+              unit: row.Satuan?.trim() || null
             };
 
             try {
