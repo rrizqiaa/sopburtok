@@ -122,17 +122,6 @@
       <h2>Produksi - Perhitungan Pemakaian Daging</h2>
       <div class="grid-wrapper">
         <!-- Baris 1 -->
-
-<div class="card">
-  <label for="inventorySelect"><strong>Pilih Bahan Daging:</strong></label>
-  <select id="inventorySelect">
-    <option value="">-- Pilih Daging --</option>
-  </select>
-</div>
-
-
-
-
         <!-- Stok -->
         <div class="card">
           <h3>Daging Terpakai Stok</h3>
@@ -262,10 +251,6 @@
       });
     }
 
-    const select = document.getElementById("inventorySelect");
-      const inventoryId = parseInt(select.value);
-      const bahanNama = select.options[select.selectedIndex].getAttribute("data-name");
-
 
     function hitungDagingKasir() {
       const get = id => parseFloat(document.getElementById(id).value) || 0;
@@ -294,21 +279,6 @@
       document.getElementById("selisihPersen").value = c;
     }
 
-    function hitungPersentase() {
-      const selisih = parseFloat(document.getElementById("selisihPersen").value) || 0;
-      const totalKasir = parseFloat(document.getElementById("kasirTotal").value) || 0;
-      if (totalKasir === 0) {
-        document.getElementById("hasilPersentase").innerText = "Persentase Selisih: tidak dapat dihitung (kasir = 0)";
-        return;
-      }
-
-      const persen = (selisih / totalKasir) * 100;
-      document.getElementById("hasilPersentase").innerText = `Persentase Selisih: ${persen.toFixed(2)} %`;
-
-      // 🟢 Otomatis simpan setelah hitung
-      simpanKeLogbook();
-    }
-
     function simpanKeLogbook() {
       const tanggal = new Date().toLocaleString('id-ID');
       const selisih = parseFloat(document.getElementById("selisihPersen").value) || 0;
@@ -321,25 +291,6 @@
       localStorage.setItem("logbookProduksi", JSON.stringify(data));
       renderLogbook();
     }
-
-    function hitungPersentase() {
-  const selisih = parseFloat(document.getElementById("selisihPersen").value) || 0;
-  const totalKasir = parseFloat(document.getElementById("kasirTotal").value) || 0;
-  if (totalKasir === 0) {
-    document.getElementById("hasilPersentase").innerText = "Persentase Selisih: tidak dapat dihitung (kasir = 0)";
-    return;
-  }
-
-  const persen = (selisih / totalKasir) * 100;
-  document.getElementById("hasilPersentase").innerText = `Persentase Selisih: ${persen.toFixed(2)} %`;
-
-  // Simpan ke localStorage
-  simpanKeLogbook();
-
-  // 🟢 Tambahkan ini agar data terkirim ke backend
-  kirimLogbookKeBackend();
-}
-
 
     function renderLogbook() {
       const tbody = document.getElementById("logbookBody");
@@ -390,50 +341,48 @@
 
 
 
-     function kirimLogbookKeBackend() {
-  const token = localStorage.getItem("token");
+    function kirimLogbookKeBackend() {
+      const token = localStorage.getItem("token");
 
-  const stok = parseFloat(document.getElementById("stokTerpakai").value) || 0;
-  const kasir = parseFloat(document.getElementById("kasirTerpakai").value) || 0;
-  const selisih = kasir - stok;
-  const persen = kasir ? ((selisih / kasir) * 100).toFixed(2) : 0;
-  const status = selisih >= 0 ? "surplus" : "defisit";
+      const stok = parseFloat(document.getElementById("stokTerpakai").value) || 0;
+      const kasir = parseFloat(document.getElementById("kasirTerpakai").value) || 0;
+      const selisih = kasir - stok;
+      const persen = kasir ? ((selisih / kasir) * 100).toFixed(2) : 0;
+      const status = selisih >= 0 ? "surplus" : "defisit";
 
-  // ✅ Ambil inventory_id & nama dari dropdown saat fungsi dipanggil
-  const select = document.getElementById("inventorySelect");
-  const inventoryId = parseInt(select.value);
-  const bahanNama = select.options[select.selectedIndex]?.getAttribute("data-name") || "Tidak dipilih";
+      // Tidak lagi mengambil dari dropdown
+      const inventoryId = null; // atau bisa 0
+      const bahanNama = "Tanpa Nama - Input Manual";
 
-  
+      fetch("https://api.sopburtok.giize.com/api/production", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          inventory_id: inventoryId,
+          bahan_baku_nama: bahanNama,
+          quantity_used: stok,
+          used_date: new Date().toISOString().split("T")[0],
+          selisih_total: selisih,
+          persentase_selisih: persen,
+          status: status
+        })
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Gagal simpan log produksi");
+        return response.json();
+      })
+      .then(data => {
+        console.log("✅ Data berhasil dikirim ke backend:", data);
+      })
+      .catch(error => {
+        console.error("❌ Gagal kirim ke backend:", error);
+      });
+    }
 
-  fetch("https://api.sopburtok.giize.com/api/production", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-      "Authorization": `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      inventory_id: inventoryId,
-      bahan_baku_nama: bahanNama,
-      quantity_used: stok,
-      used_date: new Date().toISOString().split("T")[0],
-      selisih_total: selisih,
-      persentase_selisih: persen,
-      status: status
-    })
-  })
-  .then(response => {
-    if (!response.ok) throw new Error("Gagal simpan log produksi");
-    return response.json();
-  })
-  .then(data => {
-    console.log("✅ Data berhasil dikirim ke backend:", data);
-  })
-  .catch(error => {
-    console.error("❌ Gagal kirim ke backend:", error);
-  });
-}
 
 
     /* --- Tambahkan di bawah renderLogbook() atau di akhir skrip --- */
@@ -491,35 +440,58 @@
 
 
     document.addEventListener("DOMContentLoaded", function () {
-  fetchInventories();
 });
 
-function fetchInventories() {
-  const token = localStorage.getItem("token");
-  fetch("https://api.sopburtok.giize.com/api/inventory", {
+function hitungPersentase() {
+  const selisih = parseFloat(document.getElementById("selisihPersen").value) || 0;
+  const kasir = parseFloat(document.getElementById("kasirTotal").value) || 0;
+
+  // Hitung persentase selisih
+  const persen = kasir === 0 ? 0 : ((selisih / kasir) * 100).toFixed(2);
+  document.getElementById("hasilPersentase").innerText = `Persentase Selisih: ${persen} %`;
+
+  // Tambah ke logbook lokal
+  const tanggal = new Date().toLocaleString('id-ID');
+  const logData = JSON.parse(localStorage.getItem("logbookProduksi") || "[]");
+  logData.push({ tanggal, selisih, persen });
+  localStorage.setItem("logbookProduksi", JSON.stringify(logData));
+  renderLogbook();
+
+  // Kirim ke backend
+  const stok = parseFloat(document.getElementById("stokTerpakai").value) || 0;
+  const status = selisih >= 0 ? "surplus" : "defisit";
+  const bahanNama = "Tanpa Nama - Input Manual";
+
+  fetch("https://api.sopburtok.giize.com/api/production", {
+    method: "POST",
     headers: {
-      "Authorization": `Bearer ${token}`,
-      "Accept": "application/json"
-    }
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "Authorization": `Bearer ${localStorage.getItem("token")}`
+    },
+    body: JSON.stringify({
+      inventory_id: null,
+      bahan_baku_nama: bahanNama,
+      quantity_used: stok,
+      used_date: new Date().toISOString().split("T")[0],
+      selisih_total: selisih,
+      persentase_selisih: persen,
+      status: status
+    })
   })
-  .then(res => res.json())
+  .then(response => {
+    if (!response.ok) throw new Error("Gagal kirim ke backend");
+    return response.json();
+  })
   .then(data => {
-    const select = document.getElementById("inventorySelect");
-    data.forEach(item => {
-      // Filter: hanya bahan yang namanya mengandung "daging" (non-case-sensitive)
-      if (item.name.toLowerCase().includes("daging")) {
-        const option = document.createElement("option");
-        option.value = item.id;
-        option.text = item.name;
-        option.setAttribute("data-name", item.name);
-        select.appendChild(option);
-      }
-    });
+    console.log("✅ Tersimpan ke backend:", data);
   })
-  .catch(err => {
-    console.error("❌ Gagal memuat inventory:", err);
+  .catch(error => {
+    console.error("❌ Gagal kirim ke backend:", error);
   });
 }
+
+
 
   </script>
 </body>
