@@ -6,48 +6,95 @@
   <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
   <title>Production - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
-  <style>
-    .grid-wrapper {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    .card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-    }
-    .card h3 {
-      text-align: center;
-    }
-    .card input {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      box-sizing: border-box;
-    }
-    .card button {
-      width: 100%;
-      background-color: #27ae60;
-      color: white;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .result {
-      margin-top: 10px;
-      background-color: #ecf0f1;
-      padding: 10px;
-      border-radius: 5px;
-      text-align: center;
-    }
-  </style>
+  <!-- Library SheetJS untuk membaca XLSX/CSV -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* ========  DESKTOP  (≥1024 px)  ======== */
+.grid-wrapper{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-areas:
+    "stok   kasir   log"
+    "selisih persen empty";
+  gap:20px;
+  max-width:1200px;
+  margin:0 auto;
+}
+
+/* Setiap kartu -------------------------------- */
+.card{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 0 10px rgba(0,0,0,.1);
+  display:flex;
+  flex-direction:column;
+}
+.card h3{text-align:center;}
+.card input{width:100%;padding:8px;margin-bottom:10px;box-sizing:border-box;}
+.card button{width:100%;padding:10px;background:#27ae60;color:#fff;border:none;border-radius:5px;cursor:pointer;}
+.result{margin-top:10px;background:#ecf0f1;padding:10px;border-radius:5px;text-align:center;}
+
+/* Penempatan area -------------------------------- */
+.stok       {grid-area:stok;}
+.kasir      {grid-area:kasir;}
+.logbook    {grid-area:log;}
+.selisih    {grid-area:selisih;}
+.persentase {grid-area:persen;}
+
+/* ======== LOGBOOK TABEL STYLING ======== */
+.logbook-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.logbook-table th,
+.logbook-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+.logbook-table thead {
+  background-color: #f9f9f9;
+  font-weight: bold;
+}
+
+.logbook-table tfoot {
+  background-color: #f1f1f1;
+  font-weight: bold;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+/* ========  TABLET  (768-1023 px)  ======== */
+@media (max-width: 1023px) {
+  .grid-wrapper {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-areas:
+      "stok kasir"
+      "selisih persen"
+      "logbook logbook";
+  }
+}
+
+/* ========  MOBILE  (≤767 px)  ======== */
+@media (max-width: 767px) {
+  .grid-wrapper {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "stok"
+      "kasir"
+      "selisih"
+      "persen"
+      "logbook"; /* 📌 Logbook di posisi terakhir */
+  }
+}
+</style>
 </head>
 <body>
   <div class="dashboard-wrapper">
@@ -73,6 +120,20 @@
     <div class="content">
       <h2>Produksi - Perhitungan Pemakaian Daging</h2>
       <div class="grid-wrapper">
+        <!-- Baris 1 -->
+        <!-- Stok -->
+        <div class="card">
+          <h3>Daging Terpakai Stok</h3>
+          <label>Daging Opening (gr):</label>
+          <input type="number" id="opening" />
+          <label>Daging Penambahan (gr):</label>
+          <input type="number" id="penambahan" />
+          <label>Daging Closing (gr):</label>
+          <input type="number" id="closing" />
+          <button onclick="hitungDagingStok()">Hitung Daging Stok</button>
+          <div class="result" id="hasilStok">Daging Terpakai Stok: - gr</div>
+        </div>        
+        
         <!-- Kasir -->
         <div class="card">
           <h3>Daging Terpakai Kasir</h3>
@@ -94,21 +155,41 @@
           <input type="number" id="extraDry" />
           <button onclick="hitungDagingKasir()">Hitung Daging Kasir</button>
           <div class="result" id="hasilKasir">Daging Terpakai Kasir: - gr</div>
+          <input type="file" id="fileKasir" accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
+          <button onclick="importKasirData()">Impor Data Kasir</button>
+          <div id="importResult"></div>
+        </div>
+        
+        <!-- Logbook -->
+        <div class="card logbook">
+          <h3>Logbook Hasil Produksi</h3>
+          <div class="table-wrapper">
+            <table class="logbook-table">
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Selisih Total (gr)</th>
+                  <th>Persentase Selisih (%)</th>
+                </tr>
+              </thead>
+              <tbody id="logbookBody"></tbody>
+              <tfoot>
+                <tr>
+                  <th>Total</th>
+                  <td id="sumSelisih">-</td>
+                  <td id="sumPersen">-</td>
+                </tr>
+                <tr>
+                  <th>Rata-rata</th>
+                  <td id="avgSelisih">-</td>
+                  <td id="avgPersen">-</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
         </div>
 
-        <!-- Stok -->
-        <div class="card">
-          <h3>Daging Terpakai Stok</h3>
-          <label>Daging Opening (gr):</label>
-          <input type="number" id="opening" />
-          <label>Daging Penambahan (gr):</label>
-          <input type="number" id="penambahan" />
-          <label>Daging Closing (gr):</label>
-          <input type="number" id="closing" />
-          <button onclick="hitungDagingStok()">Hitung Daging Stok</button>
-          <div class="result" id="hasilStok">Daging Terpakai Stok: - gr</div>
-        </div>
-
+        <!-- Baris 2 -->
         <!-- Selisih -->
         <div class="card">
           <h3>Selisih Total</h3>
@@ -128,6 +209,7 @@
           <label>Daging Terpakai Kasir (gr):</label>
           <input type="number" id="kasirTotal" />
           <button onclick="hitungPersentase()">Hitung Persentase</button>
+          
           <div class="result" id="hasilPersentase">Persentase Selisih: - %</div>
         </div>
       </div>
@@ -199,9 +281,113 @@
         document.getElementById("hasilPersentase").innerText = "Persentase Selisih: tidak dapat dihitung (kasir = 0)";
         return;
       }
+
       const persen = (selisih / totalKasir) * 100;
       document.getElementById("hasilPersentase").innerText = `Persentase Selisih: ${persen.toFixed(2)} %`;
+
+      // 🟢 Otomatis simpan setelah hitung
+      simpanKeLogbook();
     }
+
+    function simpanKeLogbook() {
+      const tanggal = new Date().toLocaleString('id-ID');
+      const selisih = parseFloat(document.getElementById("selisihPersen").value) || 0;
+      const persen = parseFloat(document.getElementById("kasirTotal").value) 
+                      ? ((selisih / parseFloat(document.getElementById("kasirTotal").value)) * 100).toFixed(2)
+                      : 0;
+
+      const data = JSON.parse(localStorage.getItem("logbookProduksi") || "[]");
+      data.push({ tanggal, selisih, persen });
+      localStorage.setItem("logbookProduksi", JSON.stringify(data));
+      renderLogbook();
+    }
+
+    function renderLogbook() {
+      const tbody = document.getElementById("logbookBody");
+      const sumSel = document.getElementById("sumSelisih");
+      const sumPer = document.getElementById("sumPersen");
+      const avgSel = document.getElementById("avgSelisih");
+      const avgPer = document.getElementById("avgPersen");
+
+      const data = JSON.parse(localStorage.getItem("logbookProduksi") || "[]");
+
+      tbody.innerHTML = "";
+      let totalSel = 0, totalPer = 0;
+
+      data.forEach(entry => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${entry.tanggal}</td>
+          <td>${entry.selisih} gr</td>
+          <td>${entry.persen} %</td>`;
+        tbody.appendChild(row);
+
+        totalSel += parseFloat(entry.selisih);
+        totalPer += parseFloat(entry.persen);
+      });
+
+      sumSel.textContent = `${totalSel} gr`;
+      sumPer.textContent = `${totalPer.toFixed(2)} %`;
+      avgSel.textContent = data.length ? `${(totalSel / data.length).toFixed(2)} gr` : "-";
+      avgPer.textContent = data.length ? `${(totalPer / data.length).toFixed(2)} %` : "-";
+    }
+
+      // Panggil saat halaman dimuat
+      document.addEventListener("DOMContentLoaded", renderLogbook);
+      
+    /* --- Tambahkan di bawah renderLogbook() atau di akhir skrip --- */
+    function importKasirData () {
+      const fileEl = document.getElementById('fileKasir');
+      const file   = fileEl.files[0];
+      const output = document.getElementById('importResult');
+
+      if (!file) {                                // validasi
+        output.textContent = '⚠️ Pilih file terlebih dahulu.';  
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          /* Parse workbook */
+          const data     = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheet    = workbook.Sheets[workbook.SheetNames[0]];
+          const rows     = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+          /* Map nama menu -> id input */
+          const mapId = {
+            'sop komplit':  'sopKomplit',
+            'sop reguler':  'sopReguler',
+            'sop kecil':    'sopKecil',
+            'dry komplit':  'dryKomplit',
+            'dry reguler':  'dryReguler',
+            'dry kecil':    'dryKecil',
+            'extra daging': 'extraDaging',
+            'extra dry':    'extraDry'
+          };
+
+          /* Isi input sesuai file */
+          rows.forEach(row => {
+            if (row.length < 2) return;                 // skip baris kosong
+            const menu   = String(row[0]).trim().toLowerCase();
+            const jumlah = parseFloat(row[1]) || 0;
+            const id     = mapId[menu];
+            if (id) document.getElementById(id).value = jumlah;
+          });
+
+          /* Hitung ulang total kasir otomatis */
+          hitungDagingKasir();
+          output.textContent = '✅ Data berhasil diimpor.';
+        } catch (err) {
+          console.error(err);
+          output.textContent = '❌ Terjadi kesalahan saat memproses file.';
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
   </script>
 </body>
 </html>
