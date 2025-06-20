@@ -2,16 +2,16 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- Penting untuk mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
   <title>Inventory - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
 </head>
 <body>
   <div class="dashboard-wrapper">
-    
-    <!-- Sidebar -->
     <div class="sidebar">
       <img src="assets/images/Logo Sop Burtok Ori.png" alt="SOP BURTOK" />
       <h3>SOP BURTOK</h3>
@@ -22,17 +22,19 @@
       <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
     </div>
 
-    <!-- Top Tools: jam, darkmode, logout -->
     <div id="top-tools">
-    <div id="liveClock" style="font-weight: bold;"></div>
-    <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
-    <button class="logout-btn" onclick="logoutUser()">Logout</button>
-  </div>
+      <div id="liveClock" style="font-weight: bold;"></div>
+      <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
+      <button class="logout-btn" onclick="logoutUser()">Logout</button>
+    </div>
 
-    <!-- Content -->
     <div class="content">
-      <h2>⚠️ Peringatan Bahan Baku</h2>
-      <div style="overflow-x:auto">
+      <div style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+        <h2 style="margin: 0;">Peringatan Bahan Baku</h2>
+        <button onclick="toggleWarningTable()" id="warningToggleBtn" style="padding: 2px 8px; font-size: 14px;">🔽</button>
+      </div>
+
+      <div id="warningTableContainer" style="overflow-x:auto;">
         <table class="stock-table">
           <thead>
             <tr>
@@ -44,68 +46,67 @@
         </table>
       </div>
 
-       <h2>Inventory Bahan Baku</h2>
 
-<div class="inventory-action-row">
-  <button id="btnAddStock" onclick="toggleAddForm()">+ Tambah Bahan Baku</button>
-  <input type="file" id="importFile" accept=".csv" onchange="handleImport(event)" />
-</div>
+      <h2>Inventory Bahan Baku</h2>
+      <div class="inventory-action-row">
+        <button id="btnAddStock" onclick="toggleAddForm()">+ Tambah Bahan Baku</button>
+        <input type="file" id="importFile" accept=".xlsx" onchange="handleImport(event)" />
+      </div>
 
-<div class="inventory-action-row">
-  <button id="toggleEditMode" onclick="toggleEditMode()">✏️ Edit Mode</button>
-  <button onclick="deleteSelectedItems()">🗑️ Hapus Terpilih</button>
-</div>
+      <div class="inventory-action-row">
+        <button id="toggleEditMode" onclick="toggleEditMode()">✏️ Edit Mode</button>
+        <button onclick="deleteSelectedItems()">🗑️ Hapus Terpilih</button>
+      </div>
 
-
-<!-- FORM TAMBAH BAHAN -->
-<div id="addStockForm" class="hidden">
-  <input id="stockSKU" placeholder="SKU (opsional)" />
-  <input id="stockName" placeholder="Nama Bahan Baku" />
-  <select id="stockCategory">
-    <option value="Pokok">Pokok</option>
-    <option value="Daging">Daging</option>
-    <option value="Sayuran">Sayuran</option>
-    <option value="Bumbu">Bumbu</option>
-    <option value="Packaging">Packaging</option>
-    <option value="Lain - lain">Lain - lain</option>
-  </select>
-  <input id="stockEntry" type="date" />
-
-  <div class="stock-row">
-    <input id="stockAmount" type="number" placeholder="Jumlah" />
-    <select id="stockUnit">
-      <option value="gr">gr</option>
-      <option value="kg">kg</option>
-      <option value="ml">ml</option>
-      <option value="ltr">ltr</option>
-      <option value="pcs">pcs</option>
-      <option value="pack">pack</option>
-    </select>
-  </div>
-
-  <button onclick="addInventory()">Simpan</button>
-  <button onclick="hideAddForm()">Batal</button>
-</div>
+      <div id="addStockForm" class="hidden">
+        <input id="stockSKU" placeholder="SKU (opsional)" />
+        <input id="stockName" placeholder="Nama Bahan Baku" />
+        <select id="stockCategory">
+          <option value="Pokok">Pokok</option>
+          <option value="Daging">Daging</option>
+          <option value="Sayuran">Sayuran</option>
+          <option value="Bumbu">Bumbu</option>
+          <option value="Packaging">Packaging</option>
+          <option value="Lain - lain">Lain - lain</option>
+        </select>
+        <input id="stockEntry" type="date" />
+        <div class="stock-row">
+          <input id="stockAmount" type="number" placeholder="Jumlah" />
+          <select id="stockUnit">
+            <option value="gr">gr</option>
+            <option value="kg">kg</option>
+            <option value="ml">ml</option>
+            <option value="ltr">ltr</option>
+            <option value="pcs">pcs</option>
+            <option value="pack">pack</option>
+          </select>
+        </div>
+        <button onclick="addInventory()">Simpan</button>
+        <button onclick="hideAddForm()">Batal</button>
+      </div>
 
       <div style="overflow-x:auto">
         <table class="stock-table">
           <thead>
-              <tr>
-                <th><input type="checkbox" onclick="toggleSelectAll(this)" /></th>
-                <th>SKU</th>
-                <th>Nama</th>
-                <th>Kategori</th>
-                <th>Tanggal Masuk</th>
-                <th>Jumlah</th>
-                <th>Satuan</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
+            <tr>
+              <th><input type="checkbox" onclick="toggleSelectAll(this)" /></th>
+              <th>No</th>
+              <th>SKU</th> 
+              <th>Nama</th>
+              <th>Kategori</th>
+              <th>Tanggal Masuk</th>
+              <th>Jumlah</th>
+              <th>Satuan</th>
+            </tr>
+          </thead>
           <tbody id="stockTableBody"></tbody>
         </table>
       </div>
     </div>
   </div>
+</body>
+</html>
+
 
   <!-- Script -->
   <script>
@@ -187,56 +188,155 @@ function hideAddForm() {
     }
 
     function renderStockTable(data) {
-      const tbody = document.getElementById("stockTableBody");
-      tbody.innerHTML = "";
+  const tbody = document.getElementById("stockTableBody");
+  tbody.innerHTML = "";
 
-      data.forEach(item => {
-        const row = document.createElement("tr");
-        const unit = item.unit || "gr";
-        const isEditable = window.editMode && userRole !== "staff";
+  data.forEach((item, index) => {
+    const row = document.createElement("tr");
+    const unit = item.unit || "gr";
+    const isEditable = window.editMode && userRole !== "staff";
+    const convertedStock = convertStock(item.stock, unit);
 
-        row.innerHTML = `
-          <td><input type="checkbox" class="stock-checkbox" value="${item.id}" /></td>
-          <td>${isEditable ? `<input value="${item.sku || ''}" onchange="updateInventory(${item.id}, 'sku', this.value)" />` : (item.sku || '-')}</td>
-          <td>${isEditable ? `<input value="${item.name}" onchange="updateInventory(${item.id}, 'name', this.value)" />` : item.name}</td>
-          <td>
-            ${isEditable ? `
-              <select onchange="updateInventory(${item.id}, 'category', this.value)">
-                <option value="Daging" ${item.category === "Daging" ? "selected" : ""}>Daging</option>
-                <option value="Sayuran" ${item.category === "Sayuran" ? "selected" : ""}>Sayuran</option>
-                <option value="Pokok" ${item.category === "Pokok" ? "selected" : ""}>Pokok</option>
-                <option value="Bumbu" ${item.category === "Bumbu" ? "selected" : ""}>Bumbu</option>
-                <option value="Packaging" ${item.category === "Packaging" ? "selected" : ""}>Packaging</option>
-                <option value="Lain - lain" ${item.category === "Lain - lain" ? "selected" : ""}>Lain - lain</option>
-              </select>
-            ` : item.category}
-          </td>
-          <td>${isEditable ? `<input type="date" value="${item.entry_date}" onchange="updateInventory(${item.id}, 'entry_date', this.value)" />` : item.entry_date}</td>
-          <td>${isEditable ? `<input type="number" value="${item.stock}" onchange="updateInventory(${item.id}, 'stock', this.value)" style="width: 80px;" />` : item.stock}</td>
-          <td>
-            ${isEditable ? `
-              <select onchange="updateInventory(${item.id}, 'unit', this.value)">
-                <option value="gr" ${unit === "gr" ? "selected" : ""}>gr</option>
-                <option value="kg" ${unit === "kg" ? "selected" : ""}>kg</option>
-                <option value="ml" ${unit === "ml" ? "selected" : ""}>ml</option>
-                <option value="ltr" ${unit === "ltr" ? "selected" : ""}>ltr</option>
-                <option value="pcs" ${unit === "pcs" ? "selected" : ""}>pcs</option>
-                <option value="pack" ${unit === "pack" ? "selected" : ""}>pack</option>
-              </select>
-            ` : unit}
-          </td>
-          <td>${isEditable ? `<button onclick="deleteInventory(${item.id})">🗑️</button>` : "-"}</td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
+    row.innerHTML = `
+      <td><input type="checkbox" class="stock-checkbox" value="${item.id}" /></td>
+      <td>${index + 1}</td>
+      <td>${isEditable 
+          ? `<input value="${item.sku || ''}" onchange="updateInventory(${item.id}, 'sku', this.value)" />` 
+          : (item.sku || '-')}</td>
+      <td>${isEditable 
+          ? `<input value="${item.name}" onchange="updateInventory(${item.id}, 'name', this.value)" />` 
+          : item.name}</td>
+      <td>
+        ${isEditable ? `
+          <select onchange="updateInventory(${item.id}, 'category', this.value)">
+            <option value="Daging" ${item.category === "Daging" ? "selected" : ""}>Daging</option>
+            <option value="Sayuran" ${item.category === "Sayuran" ? "selected" : ""}>Sayuran</option>
+            <option value="Pokok" ${item.category === "Pokok" ? "selected" : ""}>Pokok</option>
+            <option value="Bumbu" ${item.category === "Bumbu" ? "selected" : ""}>Bumbu</option>
+            <option value="Packaging" ${item.category === "Packaging" ? "selected" : ""}>Packaging</option>
+            <option value="Lain - lain" ${item.category === "Lain - lain" ? "selected" : ""}>Lain - lain</option>
+          </select>
+        ` : item.category}
+      </td>
+      <td>${isEditable 
+          ? `<input type="date" value="${item.entry_date}" onchange="updateInventory(${item.id}, 'entry_date', this.value)" />` 
+          : item.entry_date}</td>
+      <td>
+        ${isEditable ? `
+          <input type="number"
+            value="${convertedStock}"
+            data-base-stock="${item.stock}"
+            data-display-unit="${unit}"
+            onchange="updateStockValue(this, ${item.id})"
+            style="width: 80px;" />
+        ` : `${convertedStock}`}
+      </td>
+
+      <td>
+        ${isEditable ? `
+          <select onchange="updateUnit(this, ${item.id})">
+            <option value="gr" ${unit === "gr" ? "selected" : ""}>gr</option>
+            <option value="kg" ${unit === "kg" ? "selected" : ""}>kg</option>
+            <option value="ml" ${unit === "ml" ? "selected" : ""}>ml</option>
+            <option value="ltr" ${unit === "ltr" ? "selected" : ""}>ltr</option>
+            <option value="pcs" ${unit === "pcs" ? "selected" : ""}>pcs</option>
+            <option value="pack" ${unit === "pack" ? "selected" : ""}>pack</option>
+          </select>
+        ` : unit}
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+
+function convertStock(stock, unit) {
+  if (unit === "kg" || unit === "ltr") {
+    return (stock / 1000).toFixed(2);
+  }
+  return stock;
+}
+
+// Tambahkan/ubah fungsi convertDate seperti ini:
+function convertDate(dateStr) {
+  if (!dateStr) return null;
+  if (typeof dateStr === 'string' && dateStr.includes('/')) {
+    const [day, month, year] = dateStr.split('/');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  }
+  return dateStr; // jika sudah format yyyy-mm-dd
+}
+
+
+function updateStockValue(inputEl, id) {
+  const inputValue = parseFloat(inputEl.value || "0");
+  const unit = inputEl.dataset.displayUnit || "gr";
+
+  let baseValue = inputValue;
+  if (unit === "kg" || unit === "ltr") {
+    baseValue = inputValue * 1000;
+  }
+
+  // Simpan stock dan unit sekaligus
+  updateInventory(id, "stock", baseValue);
+  updateInventory(id, "unit", unit); // <- tambahkan ini
+}
+
+
+  function updateUnit(selectEl, id) {
+  const row = selectEl.closest("tr");
+  const stockInput = row.querySelector("input[type='number']");
+  const oldBase = parseFloat(stockInput.dataset.baseStock || "0");
+  const newUnit = selectEl.value;
+
+  let displayValue = oldBase;
+  if (newUnit === "kg" || newUnit === "ltr") {
+    displayValue = (oldBase / 1000).toFixed(2);
+  }
+
+  // TAMPILKAN hasil baru
+  stockInput.value = displayValue;
+
+  // ⛔ Masalah: ini hanya update visual, bukan menyimpan ke database!
+  stockInput.dataset.displayUnit = newUnit;
+
+  // ✅ FIX: tambahkan pemanggilan untuk menyimpan unit ke server
+ 
+  updateInventory(id, "unit", newUnit);
+console.log("Update unit ke:", newUnit);
+stockInput.dataset.baseStock = oldBase;
+
+}
+
+
+
+
 
     // Fungsi untuk toggle edit mode
-    window.editMode = false;
-    function toggleEditMode() {
-      window.editMode = !window.editMode;
-      loadInventory();
-    }
+    async function toggleEditMode() {
+  window.editMode = !window.editMode;
+  const btn = document.getElementById("toggleEditMode");
+  btn.textContent = window.editMode ? "✅ Selesai Edit" : "✏️ Edit Mode";
+
+  // Saat edit mode diaktifkan, reload tabel agar muncul input & select
+  if (window.editMode) {
+    const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json"
+      }
+    });
+    const data = await res.json();
+    renderStockTable(data); // render ulang DOM dengan input/select
+  } else {
+    // Tunggu agar semua update sempat selesai, lalu reload dari server
+    await new Promise(resolve => setTimeout(resolve, 300));
+    loadInventory();
+  }
+}
+
+
+
 
     // Fungsi hapus terpilih
     async function deleteSelectedItems() {
@@ -299,15 +399,148 @@ function hideAddForm() {
     }
 
     async function addInventory() {
-      const body = {
-        name: document.getElementById("stockName").value,
-        sku: document.getElementById("stockSKU").value,
-        category: document.getElementById("stockCategory").value,
-        entry_date: document.getElementById("stockEntry").value,
-        stock: parseFloat(document.getElementById("stockAmount").value),
-        unit: document.getElementById("stockUnit").value || "gr"
-      };
+  const body = {
+  name: document.getElementById("stockName").value,
+  sku: document.getElementById("stockSKU").value,
+  category: document.getElementById("stockCategory").value,
+  entry_date: document.getElementById("stockEntry").value,
+  stock: parseFloat(document.getElementById("stockAmount").value),
+  unit: document.getElementById("stockUnit").value || "gr" // ✅ WAJIB ADA
+};
 
+
+  const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (res.ok) {
+    alert("✅ Berhasil ditambahkan");
+    hideAddForm();
+    loadInventory();
+  } else {
+    alert("❌ Gagal menambahkan data");
+  }
+}
+
+
+
+    async function updateInventory(id, field, value) {
+  try {
+    const res = await fetch(`https://api.sopburtok.giize.com/api/inventory/${id}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      },
+      body: JSON.stringify({ [field]: value })
+    });
+
+    if (!res.ok) {
+      console.warn(`Gagal update ${field} untuk ID ${id}`);
+    }
+
+    return res.ok;
+  } catch (err) {
+    console.error("Update error:", err);
+    return false;
+  }
+}
+
+
+async function handleImport(event) {
+  const file = event.target.files[0];
+  if (!file) return alert("❗Pilih file CSV atau Excel terlebih dahulu.");
+
+  const fileName = file.name.toLowerCase();
+
+  if (fileName.endsWith(".csv")) {
+  const reader = new FileReader();
+  reader.onload = async function (e) {
+    const csv = e.target.result;
+
+    Papa.parse(csv, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async function (results) {
+        const data = results.data.map(row => {
+          return {
+            Nama: row["Nama"] || row["﻿Nama"] || "", // handle BOM
+            SKU: row["SKU"] || row["﻿SKU"] || "-",
+            Kategori: row["Kategori"] || "Pokok",
+            "Tanggal Masuk": convertDate(row["Tanggal Masuk"]),
+            Jumlah: row["Jumlah"] || "0",
+            Satuan: row["Satuan"] || "gr"
+          };
+        });
+        await importRows(data);
+      }
+    });
+  };
+  reader.readAsText(file);
+}
+ else if (fileName.endsWith(".xlsx") || fileName.endsWith(".xls")) {
+    // ---- EXCEL FILE ----
+    const reader = new FileReader();
+    reader.onload = async function (e) {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      await importRows(json);
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    alert("❌ Format file tidak dikenali. Harus CSV atau Excel (.xlsx/.xls)");
+  }
+}
+
+function convertDate(dateStr) {
+  if (!dateStr.includes("/")) return dateStr;
+  const [day, month, year] = dateStr.split("/");
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+}
+
+function toggleWarningTable() {
+  const tableContainer = document.getElementById("warningTableContainer");
+  const toggleBtn = document.getElementById("warningToggleBtn");
+
+  if (tableContainer.style.display === "none") {
+    tableContainer.style.display = "block";
+    toggleBtn.textContent = "🔽";
+  } else {
+    tableContainer.style.display = "none";
+    toggleBtn.textContent = "▶️";
+  }
+}
+
+
+async function importRows(data) {
+  let success = 0, failed = 0;
+
+  for (const row of data) {
+    const satuan = (row.Satuan || "").toLowerCase().trim();
+    const jumlahStr = (row.Jumlah || "").toString().replace(",", "").trim();
+    const jumlah = parseFloat(jumlahStr) || 0;
+
+    const payload = {
+      name: row.Nama?.trim(),
+      sku: row.SKU?.trim() || "-",
+      category: row.Kategori?.trim() || "Pokok",
+      entry_date: convertDate(row["Tanggal Masuk"]),
+
+      stock: (satuan === "kg" || satuan === "ltr") ? jumlah * 1000 : jumlah,
+      unit: satuan || "gr"
+    };
+
+    try {
       const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
         method: "POST",
         headers: {
@@ -315,80 +548,36 @@ function hideAddForm() {
           "Content-Type": "application/json",
           Accept: "application/json"
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(payload)
       });
-
-      if (res.ok) {
-        alert("✅ Berhasil ditambahkan");
-        hideAddForm();
-        loadInventory();
-      } else {
-        alert("❌ Gagal menambahkan data");
-      }
+      res.ok ? success++ : failed++;
+    } catch {
+      failed++;
     }
+  }
 
-    async function updateInventory(id, field, value) {
-      await fetch(`https://api.sopburtok.giize.com/api/inventory/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          Accept: "application/json"
-        },
-        body: JSON.stringify({ [field]: value })
-      });
-    }
+  alert(`✅ Import selesai:\n✔️ Berhasil: ${success}\n❌ Gagal: ${failed}`);
+  loadInventory();
+}
 
-    async function deleteInventory(id) {
-      if (!confirm("Hapus bahan baku ini?")) return;
-      await fetch(`https://api.sopburtok.giize.com/api/inventory/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
-      });
-      loadInventory();
-    }
+// Format Tanggal dari Excel ke ISO (YYYY-MM-DD)
+function formatExcelDate(value) {
+  if (!value) return null;
+  if (typeof value === 'string' && value.includes('-')) return value;
 
-    async function handleImport(event) {
-      const file = event.target.files[0];
-      if (!file) return alert("❗Pilih file CSV terlebih dahulu.");
+  const excelEpoch = new Date((value - 25569) * 86400 * 1000);
+  return excelEpoch.toISOString().split("T")[0];
+}
 
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: async function(results) {
-          const data = results.data;
-          let success = 0, failed = 0;
+function detectDelimiter(filename) {
+  // Bisa diperluas dengan membaca sampel isi file
+  if (filename.includes(".csv")) {
+    return ";"; // atau "," tergantung file Anda
+  }
+  return ","; // default
+}
 
-          for (const row of data) {
-            const payload = {
-              name: row.Nama?.trim(),
-              category: row.Kategori?.trim() || "Pokok",
-              entry_date: formatDate(row.TanggalMasuk),
-              stock: parseFloat(row.Jumlah) || 0,
-              unit: row.Satuan?.trim() || null
-            };
 
-            try {
-              const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  "Content-Type": "application/json",
-                  Accept: "application/json"
-                },
-                body: JSON.stringify(payload)
-              });
-              res.ok ? success++ : failed++;
-            } catch {
-              failed++;
-            }
-          }
-
-          alert(`✅ Import selesai:\n✔️ Berhasil: ${success}\n❌ Gagal: ${failed}`);
-          loadInventory();
-        }
-      });
-    }
 
 async function handleDeleteMultiple() {
   const jumlahHapus = parseInt(document.getElementById("deleteCount").value);
