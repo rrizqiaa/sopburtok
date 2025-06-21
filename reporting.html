@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="assets/css/style.css" />
   <!-- Chart.js masih dipakai untuk Pie & Line -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -191,7 +192,22 @@ async function loadReports() {
     currentChartLabels = kategoriList;
     currentChartData   = kategoriList.map(k => kategoriMap[k]);
 
-    const monthLabels = Object.keys(trendMap).sort((a, b) => new Date("01 " + a) - new Date("01 " + b));
+// --- Ganti blok lama ini -----------------------------
+// const monthLabels = Object.keys(trendMap)
+//   .sort((a, b) => new Date("01 " + a) - new Date("01 " + b));
+
+// --- Dengan blok baru di bawah -----------------------
+const monthLabels = Object.keys(trendMap).sort((a, b) => {
+  const parse = (str) => {
+    const [mon, yr] = str.split(" ");
+    const idMonths = [
+      "Jan","Feb","Mar","Apr","Mei","Jun",
+      "Jul","Agu","Sep","Okt","Nov","Des"
+    ];
+    return new Date(+yr, idMonths.indexOf(mon));
+  };
+  return parse(a) - parse(b);   // April → Mei → dst.
+});
     currentLineLabels = monthLabels;
     currentLineDatasets = {};
     kategoriList.forEach(kat => {
@@ -226,7 +242,23 @@ function updateChart() {
           backgroundColor: currentChartLabels.map((_, i) => `hsl(${i * 60}, 70%, 60%)`)
         }]
       },
-      options: { responsive: false }
+      options: {
+        responsive: false,
+        plugins: {
+          datalabels: {
+            formatter: (value, ctx) => {
+              const sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+              const percentage = (value * 100 / sum).toFixed(1) + "%";
+              return percentage;
+            },
+            color: '#black',
+            font: {
+              weight: 'bold'
+            }
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
     });
   } else if (currentChartType === "line") {
     chartInstance = new Chart(ctx, {
@@ -245,7 +277,6 @@ function updateChart() {
     });
   }
 }
-
 // ---------- Utils lain (logout, export, live clock, dll) ----------
 function logoutUser() {
   fetch(`${API_BASE}/logout`, {
