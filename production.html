@@ -195,10 +195,10 @@
         <!-- Selisih -->
         <div class="card">
           <h3>Selisih Total</h3>
-          <label>Daging Terpakai Kasir (B):</label>
-          <input type="number" id="kasirTerpakai" />
           <label>Daging Terpakai Stok (A):</label>
           <input type="number" id="stokTerpakai" />
+          <label>Daging Terpakai Kasir (B):</label>
+          <input type="number" id="kasirTerpakai" />
           <button onclick="hitungSelisihManual()">Hitung Selisih Total (C)</button>
           <div class="result" id="hasilSelisihManual">Selisih Total: - gr</div>
         </div>
@@ -388,9 +388,9 @@ document.addEventListener("DOMContentLoaded", initArsipSelect);
     }
 
     function hitungSelisihManual() {
-      const b = parseFloat(document.getElementById("kasirTerpakai").value) || 0;
       const a = parseFloat(document.getElementById("stokTerpakai").value) || 0;
-      const c = b - a;
+      const b = parseFloat(document.getElementById("kasirTerpakai").value) || 0;
+      const c = a - b;
       document.getElementById("hasilSelisihManual").innerText = `Selisih Total: ${c} gr`;
       document.getElementById("selisihPersen").value = c;
     }
