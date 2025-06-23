@@ -131,6 +131,9 @@
             <option value="pack">pack</option>
           </select>
         </div>
+
+        <input id="stockPrice" type="number" placeholder="Harga (Rp)" />
+
         <button onclick="addInventory()">Simpan</button>
         <button onclick="hideAddForm()">Batal</button>
       </div>
@@ -147,6 +150,7 @@
               <th>Tanggal Masuk</th>
               <th>Jumlah</th>
               <th>Satuan</th>
+              <th>Harga</th>
             </tr>
           </thead>
           <tbody id="stockTableBody"></tbody>
@@ -304,6 +308,12 @@ function hideAddForm() {
           </select>
         ` : unit}
       </td>
+
+      <td>
+        ${isEditable 
+          ? `<input type="number" value="${item.unit_price || 0}" onchange="updateInventory(${item.id}, 'unit_price', this.value)" style="width: 80px;" />`
+          : (item.unit_price ? `Rp ${parseInt(item.unit_price).toLocaleString("id-ID")}` : '-')}
+      </td>
     `;
     tbody.appendChild(row);
   });
@@ -459,34 +469,34 @@ stockInput.dataset.baseStock = oldBase;
     }
 
     async function addInventory() {
-  const body = {
-  name: document.getElementById("stockName").value,
-  sku: document.getElementById("stockSKU").value,
-  category: document.getElementById("stockCategory").value,
-  entry_date: document.getElementById("stockEntry").value,
-  stock: parseFloat(document.getElementById("stockAmount").value),
-  unit: document.getElementById("stockUnit").value || "gr" // ✅ WAJIB ADA
-};
+      const body = {
+        name: document.getElementById("stockName").value,
+        sku: document.getElementById("stockSKU").value,
+        category: document.getElementById("stockCategory").value,
+        entry_date: document.getElementById("stockEntry").value,
+        stock: parseFloat(document.getElementById("stockAmount").value),
+        unit: document.getElementById("stockUnit").value || "gr",
+        unit_price: parseFloat(document.getElementById("stockPrice").value) || 0 // <-- ini tambahan
+      };
 
+      const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        },
+        body: JSON.stringify(body)
+      });
 
-  const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    },
-    body: JSON.stringify(body)
-  });
-
-  if (res.ok) {
-    alert("✅ Berhasil ditambahkan");
-    hideAddForm();
-    loadInventory();
-  } else {
-    alert("❌ Gagal menambahkan data");
-  }
-}
+      if (res.ok) {
+        alert("✅ Berhasil ditambahkan");
+        hideAddForm();
+        loadInventory();
+      } else {
+        alert("❌ Gagal menambahkan data");
+      }
+    }
 
 
 
@@ -531,12 +541,13 @@ async function handleImport(event) {
       complete: async function (results) {
         const data = results.data.map(row => {
           return {
-            Nama: row["Nama"] || row["﻿Nama"] || "", // handle BOM
+            Nama: row["Nama"] || row["﻿Nama"] || "",
             SKU: row["SKU"] || row["﻿SKU"] || "-",
             Kategori: row["Kategori"] || "Pokok",
             "Tanggal Masuk": convertDate(row["Tanggal Masuk"]),
             Jumlah: row["Jumlah"] || "0",
-            Satuan: row["Satuan"] || "gr"
+            Satuan: row["Satuan"] || "gr",
+            "Harga": row["Harga"] || "0"
           };
         });
         await importRows(data);
@@ -554,7 +565,8 @@ async function handleImport(event) {
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
       const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-      await importRows(json);
+      await importRows(json);  // langsung saja, tanpa map
+
     };
     reader.readAsArrayBuffer(file);
   } else {
@@ -595,9 +607,9 @@ async function importRows(data) {
       sku: row.SKU?.trim() || "-",
       category: row.Kategori?.trim() || "Pokok",
       entry_date: convertDate(row["Tanggal Masuk"]),
-
       stock: (satuan === "kg" || satuan === "ltr") ? jumlah * 1000 : jumlah,
-      unit: satuan || "gr"
+      unit: satuan || "gr",
+      unit_price: parseFloat((row["Harga"] || "0").toString().replace(/[^0-9]/g, '')) || 0
     };
 
     try {
