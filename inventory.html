@@ -84,6 +84,30 @@
         <button onclick="deleteSelectedItems()">🗑️ Hapus Terpilih</button>
       </div>
 
+      <div class="inventory-action-row" style="gap: 12px;">
+        <label>
+          Filter Kategori:
+          <select id="filterCategory" onchange="applyFilters()">
+            <option value="">Semua</option>
+            <option value="Pokok">Pokok</option>
+            <option value="Daging">Daging</option>
+            <option value="Sayuran">Sayuran</option>
+            <option value="Bumbu">Bumbu</option>
+            <option value="Packaging">Packaging</option>
+            <option value="Lain - lain">Lain - lain</option>
+          </select>
+        </label>
+
+        <label>
+          Urutkan Nama:
+          <select id="sortByName" onchange="applyFilters()">
+            <option value="az">A - Z</option>
+            <option value="za">Z - A</option>
+          </select>
+        </label>
+      </div>
+
+
       <div id="addStockForm" class="hidden">
         <input id="stockSKU" placeholder="SKU (opsional)" />
         <input id="stockName" placeholder="Nama Bahan Baku" />
@@ -141,7 +165,7 @@
 </body>
 </html>
 
-
+  
   <!-- Script -->
   <script>
     const token = localStorage.getItem("token");
@@ -214,12 +238,14 @@ function hideAddForm() {
           headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
         });
         const data = await res.json();
-        renderStockTable(data);
+        inventoryData = data; // simpan data asli
+        applyFilters(); // tampilkan sesuai filter awal
         checkStockAlerts(data);
       } catch (err) {
         console.error("Gagal memuat data:", err);
       }
     }
+    let inventoryData = []; // Simpan data asli untuk filter
 
     function renderStockTable(data) {
   const tbody = document.getElementById("stockTableBody");
@@ -674,6 +700,26 @@ async function handleDeleteMultiple() {
     }
 
     loadInventory();
+
+    function applyFilters() {
+      const filterValue = document.getElementById("filterCategory").value;
+      const sortValue = document.getElementById("sortByName").value;
+
+      let filtered = [...inventoryData];
+
+      if (filterValue) {
+        filtered = filtered.filter(item => item.category === filterValue);
+      }
+
+      if (sortValue === "az") {
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (sortValue === "za") {
+        filtered.sort((a, b) => b.name.localeCompare(a.name));
+      }
+
+      renderStockTable(filtered);
+    }
+
   </script>
 </body>
 </html>
