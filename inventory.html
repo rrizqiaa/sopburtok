@@ -151,6 +151,7 @@
               <th>Jumlah</th>
               <th>Satuan</th>
               <th>Harga</th>
+              <th>Total</th>
             </tr>
           </thead>
           <tbody id="stockTableBody"></tbody>
@@ -314,6 +315,13 @@ function hideAddForm() {
           ? `<input type="number" value="${item.unit_price || 0}" onchange="updateInventory(${item.id}, 'unit_price', this.value)" style="width: 80px;" />`
           : (item.unit_price ? `Rp ${parseInt(item.unit_price).toLocaleString("id-ID")}` : '-')}
       </td>
+      
+      <td>
+        ${item.unit_price && item.stock
+          ? `Rp ${(item.unit_price * item.stock).toLocaleString("id-ID")}`
+          : "-"}
+      </td>
+
     `;
     tbody.appendChild(row);
   });
