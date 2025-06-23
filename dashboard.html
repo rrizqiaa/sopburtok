@@ -32,7 +32,26 @@
         font-size: 12px;
       }
     }
-  </style>
+  /* === Tambahan untuk layout sejajar === */
+  .log-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+  }
+
+  .log-box {
+    flex: 1 1 48%;
+    min-width: 300px;
+  }
+
+  @media (max-width: 768px) {
+    .log-box {
+      flex: 1 1 100%;
+    }
+  }
+</style>
+
 </head>
 <body>
   <div class="dashboard-wrapper">
@@ -53,8 +72,9 @@
   </div>
 
 
-  <div class="content">
-      <!-- Main Title --> 
+    <div class="content">
+      <!-- Tambahkan wrapper flex -->
+      <div class="log-row">
         <!-- Inventory Log -->
         <div class="log-box">
           <h2>Log Aktivitas</h2>
@@ -63,20 +83,22 @@
             <table class="stock-table">
               <thead>
                 <tr>
-                  <th>Waktu</th>
-                  <th>Aksi</th>
+                  <th>Tanggal Masuk</th>
                   <th>Nama Bahan Baku</th>
+                  <th>Kategori</th>
                   <th>Jumlah</th>
+                  <th>Satuan</th>
+                  <th>Riwayat Aktivitas</th>
                 </tr>
               </thead>
-              <tbody id="inventoryLogBody"></tbody>
+              <tbody id="rekapInventoryBody"></tbody>
             </table>
           </div>
-          </div>      
+        </div>
 
-        <!-- Production Log -->
-        <div class="log-box">
-          <h2> </h2>
+          <!-- Production Log -->
+          <div class="log-box">
+            <h2>&nbsp;</h2>
             <h3>Logbook Hasil Produksi</h3>
             <table class="stock-table">
               <thead>
@@ -90,8 +112,8 @@
               <tbody id="logbookBodyDashboard"></tbody>
             </table>
           </div>
-          </div>
-</div>
+        </div>
+      </div>
 
 
   <!-- Clock Script -->
@@ -143,37 +165,83 @@
     }
   }
 
-  /* ---------- FUNGSIONAL UMUM UNTUK RENDER TABEL ---------- */
-  function renderLogs(data, tableId, actionText, nameField, valueField) {
-    const tbody = document.getElementById(tableId);
-    tbody.innerHTML = "";
+async function renderRekapInventory() {
+  const token = localStorage.getItem("token");
+  if (!token) return;
 
-    data
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-      .slice(0, 10)
-      .forEach(item => {
-        const nama    = (item[nameField] || "-").toLowerCase();
-        const label   = item[nameField]   || "-";
-        const jumlah  = item[valueField]  || 0;
-        const satuan  = (nama === "air" || nama === "minyak") ? "Liter" : "Kg";
+  try {
+    const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/json"
+      }
+    });
 
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${new Date(item.created_at).toLocaleString("id-ID")}</td>
-          <td>${actionText}</td>
-          <td>${label}</td>
-          <td>${jumlah} ${satuan}</td>`;
-        tbody.appendChild(row);
-      });
+const data = await res.json();
+
+// Ambil hanya 30 aktivitas terbaru berdasarkan created_at
+const sortedByTime = data
+  .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+  .slice(0, 30);
+
+// Regroup berdasarkan nama bahan
+const grouped = {};
+sortedByTime.forEach(item => {
+  const key = item.name;
+  if (!grouped[key]) grouped[key] = [];
+  grouped[key].push(item);
+});
+
+const tbody = document.getElementById("rekapInventoryBody");
+tbody.innerHTML = "";
+Object.entries(grouped).forEach(([name, entries]) => {
+      const latest = entries.sort((a, b) => new Date(b.entry_date) - new Date(a.entry_date))[0];
+
+      // Buat isi kolom Riwayat Aktivitas
+      const logHTML = entries
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, 10)
+        .map(e => {
+          const tanggal = new Date(e.created_at).toLocaleDateString("id-ID");
+          const jumlah = e.stock || 0;
+          const satuan = e.unit || "gr";
+
+          // Karena hanya inventory masuk, maka semuanya dianggap penambahan
+          const tipe = e.action === "out" ? "Pengurangan" : "Penambahan";
+          return `${tanggal} - ${tipe} ${jumlah} ${satuan}`;
+        }).join("<br>");
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${latest.entry_date || "-"}</td>
+        <td>${name}</td>
+        <td>${latest.category || "-"}</td>
+        <td>${latest.stock}</td>
+        <td>${latest.unit || "-"}</td>
+        <td>${logHTML}</td>
+      `;
+      tbody.appendChild(row);
+    });
+
+  } catch (err) {
+    console.error("Gagal memuat rekap inventory:", err);
   }
+}
+
+// Jalankan fungsi saat halaman dimuat
+renderRekapInventory();
 
   /* ------------ TABEL LOGBOOK PRODUKSI DARI localStorage ------------ */
-  function renderLogbookFromStorage() {
-    const tbody = document.getElementById("logbookBodyDashboard");
-    const data  = JSON.parse(localStorage.getItem("logbookProduksi") || "[]");
+function renderLogbookFromStorage() {
+  const tbody = document.getElementById("logbookBodyDashboard");
+  const data  = JSON.parse(localStorage.getItem("logbookProduksi") || "[]");
 
-    tbody.innerHTML = "";
-    data.forEach(entry => {
+  tbody.innerHTML = "";
+
+  data
+    .sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal))
+    .slice(0, 30)
+    .forEach(entry => {
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>${entry.tanggal}</td>
@@ -182,8 +250,7 @@
         <td>${entry.selisih} gr (${entry.persen} %)</td>`;
       tbody.appendChild(row);
     });
-  }
-
+}
   /* ------------------ INITIAL LOAD ------------------ */
   fetchLogs();              // Inventory
   renderLogbookFromStorage();  // Logbook Produksi
