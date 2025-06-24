@@ -7,34 +7,8 @@
   <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
   <title>Inventory - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-    <style>
-    @media (min-width: 769px) {
-      .mobile-bottom-nav {
-        display: none !important;
-      }
-    }
-    @media (max-width: 768px) {
-      .mobile-bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #fff;
-        border-top: 1px solid #ccc;
-        display: flex;
-        justify-content: space-around;
-        padding: 8px 0;
-        z-index: 1000;
-      }
-      .mobile-bottom-nav button {
-        flex: 1;
-        background: none;
-        border: none;
-        font-size: 12px;
-      }
-    }
-  </style>
 </head>
 <body>
   <div class="dashboard-wrapper">
@@ -48,19 +22,37 @@
       <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
     </div>
 
+    <div class="mobile-bottom-nav">
+      <button onclick="location.href='dashboard.html'" title="Home">
+        <i class="fas fa-home"></i>
+      </button>
+      <button onclick="location.href='inventory.html'" title="Inventory">
+        <i class="fas fa-boxes"></i>
+      </button>
+      <button onclick="location.href='production.html'" title="Production">
+        <i class="fas fa-industry"></i>
+      </button>
+      <button onclick="location.href='reporting.html'" title="Reporting">
+        <i class="fas fa-chart-bar"></i>
+      </button>
+      <button onclick="location.href='profile.html'" title="Profile">
+        <i class="fas fa-user"></i>
+      </button>
+    </div>
+
     <div id="top-tools">
-      <div id="liveClock" style="font-weight: bold;"></div>
+      <div id="liveClock"></div>
       <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
       <button class="logout-btn" onclick="logoutUser()">Logout</button>
     </div>
 
     <div class="content">
-      <div style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-        <h2 style="margin: 0;">Peringatan Bahan Baku</h2>
-        <button onclick="toggleWarningTable()" id="warningToggleBtn" style="padding: 2px 8px; font-size: 14px;">🔽</button>
+      <div class="warning-header">
+        <h2>Peringatan Bahan Baku</h2>
+        <button onclick="toggleWarningTable()" id="warningToggleBtn">🔽</button>
       </div>
 
-      <div id="warningTableContainer" style="overflow-x:auto;">
+      <div id="warningTableContainer">
         <table class="stock-table">
           <thead>
             <tr>
@@ -84,7 +76,7 @@
         <button onclick="deleteSelectedItems()">🗑️ Hapus Terpilih</button>
       </div>
 
-      <div class="inventory-action-row" style="gap: 12px;">
+      <div class="inventory-action-row filter-controls">
         <label>
           Filter Kategori:
           <select id="filterCategory" onchange="applyFilters()">
@@ -138,7 +130,7 @@
         <button onclick="hideAddForm()">Batal</button>
       </div>
 
-      <div style="overflow-x:auto">
+      <div class="table-container">
         <table class="stock-table">
           <thead>
             <tr>
@@ -159,19 +151,12 @@
       </div>
     </div>
   </div>
-  <div class="mobile-bottom-nav">
-  <button onclick="location.href='dashboard.html'">Home</button>
-  <button onclick="location.href='inventory.html'">Inventory</button>
-  <button onclick="location.href='production.html'">Production</button>
-  <button onclick="location.href='reporting.html'">Reporting</button>
-  <button onclick="location.href='profile.html'">Profile</button>
-</div>
+
 
 </body>
 </html>
 
   
-  <!-- Script -->
   <script>
     const token = localStorage.getItem("token");
     if (!token) window.location.href = "index.html";
@@ -342,7 +327,7 @@ function convertDate(dateStr) {
     const [day, month, year] = dateStr.split('/');
     return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
   }
-  return dateStr; // jika sudah format yyyy-mm-dd
+  return dateStr; // jika sudah formatGTUIKit-mm-dd
 }
 
 

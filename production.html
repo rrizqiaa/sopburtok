@@ -6,6 +6,7 @@
   <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
   <title>Production - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <!-- Library SheetJS untuk membaca XLSX/CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -110,123 +111,116 @@
       <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
     </div>
 
-    <!-- Top tools -->
-    <div id="top-tools">
-    <div id="liveClock" style="font-weight: bold;"></div>
-    <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
-    <button class="logout-btn" onclick="logoutUser()">Logout</button>
+    <!-- 🔻 Bottom Navbar -->
+  <div class="mobile-bottom-nav">
+    <button onclick="location.href='dashboard.html'" title="Home">
+      <i class="fas fa-home"></i>
+    </button>
+    <button onclick="location.href='inventory.html'" title="Inventory">
+      <i class="fas fa-boxes"></i>
+    </button>
+    <button onclick="location.href='production.html'" title="Production">
+      <i class="fas fa-industry"></i>
+    </button>
+    <button onclick="location.href='reporting.html'" title="Reporting">
+      <i class="fas fa-chart-bar"></i>
+    </button>
+    <button onclick="location.href='profile.html'" title="Profile">
+      <i class="fas fa-user"></i>
+    </button>
   </div>
 
-    <!-- Content -->
-    <div class="content">
-      <h2>Produksi - Perhitungan Pemakaian Daging</h2>
-      <div class="grid-wrapper">
-        <!-- Baris 1 -->
-        <!-- Stok -->
-        <div class="card">
-          <h3>Daging Terpakai Stok</h3>
-          <label>Daging Opening (gr):</label>
-          <input type="number" id="opening" />
-          <label>Daging Penambahan (gr):</label>
-          <input type="number" id="penambahan" />
-          <label>Daging Closing (gr):</label>
-          <input type="number" id="closing" />
-          <button onclick="hitungDagingStok()">Hitung Daging Stok</button>
-          <div class="result" id="hasilStok">Daging Terpakai Stok: - gr</div>
-        </div>        
-        
-        <!-- Kasir -->
-        <div class="card">
-          <h3>Daging Terpakai Kasir</h3>
-          <label>Sop Komplit (40gr):</label>
-          <input type="number" id="sopKomplit" />
-          <label>Sop Reguler (40gr):</label>
-          <input type="number" id="sopReguler" />
-          <label>Sop Kecil (20gr):</label>
-          <input type="number" id="sopKecil" />
-          <label>Dry Komplit (45gr):</label>
-          <input type="number" id="dryKomplit" />
-          <label>Dry Reguler (45gr):</label>
-          <input type="number" id="dryReguler" />
-          <label>Dry Kecil (25gr):</label>
-          <input type="number" id="dryKecil" />
-          <label>Extra Daging (20gr):</label>
-          <input type="number" id="extraDaging" />
-          <label>Extra Dry (25gr):</label>
-          <input type="number" id="extraDry" />
-          <button onclick="hitungDagingKasir()">Hitung Daging Kasir</button>
-          <div class="result" id="hasilKasir">Daging Terpakai Kasir: - gr</div>
-          <input type="file" id="fileKasir" accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
-          <button onclick="importKasirData()">Impor Data Kasir</button>
-          <div id="importResult"></div>
-        </div>
-        
-        <!-- Logbook -->
-        <div class="card logbook">
-          <h3>Logbook Hasil Produksi</h3>
-          <div class="table-wrapper">
-            <table class="logbook-table">
-              <thead>
-                <tr>
-                  <th>Tanggal</th>
-                  <th>Selisih Total (gr)</th>
-                  <th>Persentase Selisih (%)</th>
-                  <th>Aksi</th
-                </tr>
-              </thead>
-              <tbody id="logbookBody"></tbody>
-              <tfoot>
-                <tr>
-                  <th>Total</th>
-                  <td id="sumSelisih">-</td>
-                  <td id="sumPersen">-</td>
-                </tr>
-                <tr>
-                  <th>Rata-rata</th>
-                  <td id="avgSelisih">-</td>
-                  <td id="avgPersen">-</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        </div>
-
-        <!-- Baris 2 -->
-        <!-- Selisih -->
-        <div class="card">
-          <h3>Selisih Total</h3>
-          <label>Daging Terpakai Stok (A):</label>
-          <input type="number" id="stokTerpakai" />
-          <label>Daging Terpakai Kasir (B):</label>
-          <input type="number" id="kasirTerpakai" />
-          <button onclick="hitungSelisihManual()">Hitung Selisih Total (C)</button>
-          <div class="result" id="hasilSelisihManual">Selisih Total: - gr</div>
-        </div>
-
-        <!-- Persentase -->
-        <div class="card">
-          <h3>Persentase Selisih</h3>
-          <label>Selisih Total (gr):</label>
-          <input type="number" id="selisihPersen" />
-          <label>Daging Terpakai Kasir (gr):</label>
-          <input type="number" id="kasirTotal" />
-          <button onclick="hitungPersentase()">Hitung Persentase</button>
-          
-          <div class="result" id="hasilPersentase">Persentase Selisih: - %</div>
-        </div>
-
-      
-      </div>
-       <select id="arsipSelect"></select>
-<button onclick="generateArsip()">Buat Arsip</button>
-<button onclick="downloadArsip()">Download Arsip</button>
+    <!-- 🕒 Tools Atas -->
+    <div id="top-tools">
+      <div id="liveClock"></div>
+      <button class="toggle-mode-btn">🌓</button>
+      <button class="logout-btn">Logout</button>
     </div>
 
+    <!-- 🔲 Konten Produksi -->
+    <div class="content">
+      <h2>Produksi - Pemakaian Daging</h2>
+
+      <!-- 🥩 Kartu: Daging Terpakai Stok -->
+      <div class="card">
+        <h3>Daging Terpakai Stok</h3>
+        <label>Opening:</label><input type="number" id="opening" />
+        <label>Penambahan:</label><input type="number" id="penambahan" />
+        <label>Closing:</label><input type="number" id="closing" />
+        <button onclick="hitungDagingStok()">Hitung</button>
+        <div class="result" id="hasilStok">Daging Terpakai Stok: - gr</div>
+      </div>
+
+      <!-- 🍱 Kartu: Daging Terpakai Kasir -->
+      <div class="card">
+        <h3>Daging Terpakai Kasir</h3>
+        <label>Sop Komplit (40gr):</label><input id="sopKomplit" />
+        <label>Sop Reguler (40gr):</label><input id="sopReguler" />
+        <label>Sop Kecil (20gr):</label><input id="sopKecil" />
+        <label>Dry Komplit (45gr):</label><input id="dryKomplit" />
+        <label>Dry Reguler (45gr):</label><input id="dryReguler" />
+        <label>Dry Kecil (25gr):</label><input id="dryKecil" />
+        <label>Extra Daging (20gr):</label><input id="extraDaging" />
+        <label>Extra Dry (25gr):</label><input id="extraDry" />
+        <button onclick="hitungDagingKasir()">Hitung</button>
+        <div class="result" id="hasilKasir">Daging Terpakai Kasir: - gr</div>
+
+        <!-- 📤 Import File -->
+        <input type="file" id="fileKasir" />
+        <button onclick="importKasirData()">Impor Data Kasir</button>
+        <div id="importResult"></div>
+      </div>
+
+      <!-- 🧮 Kartu: Selisih Manual -->
+      <div class="card">
+        <h3>Selisih Total</h3>
+        <label>Stok (A):</label><input id="stokTerpakai" />
+        <label>Kasir (B):</label><input id="kasirTerpakai" />
+        <button onclick="hitungSelisihManual()">Hitung Selisih</button>
+        <div class="result" id="hasilSelisihManual">Selisih: - gr</div>
+      </div>
+
+      <!-- 📉 Kartu: Persentase Selisih -->
+      <div class="card">
+        <h3>Persentase Selisih</h3>
+        <label>Selisih (gr):</label><input id="selisihPersen" />
+        <label>Kasir Total:</label><input id="kasirTotal" />
+        <button onclick="hitungPersentase()">Hitung Persen</button>
+        <div class="result" id="hasilPersentase">Persentase: - %</div>
+      </div>
+
+      <!-- 📘 Logbook Produksi -->
+      <div class="card">
+        <h3>Logbook Hasil Produksi</h3>
+        <div class="table-wrapper">
+          <table class="logbook-table">
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Selisih</th>
+                <th>%</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="logbookBody"></tbody>
+            <tfoot>
+              <tr><th>Total</th><td id="sumSelisih">-</td><td id="sumPersen">-</td></tr>
+              <tr><th>Rata-rata</th><td id="avgSelisih">-</td><td id="avgPersen">-</td></tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- 📦 Arsip Produksi -->
+      <div class="card">
+        <h3>Arsip Produksi</h3>
+        <select id="arsipSelect"></select>
+        <button onclick="generateArsip()">Buat Arsip</button>
+        <button onclick="downloadArsip()">Download Arsip</button>
+      </div>
+    </div>
   </div>
-
- 
-
-
+  
 </body>
 </html>
 
