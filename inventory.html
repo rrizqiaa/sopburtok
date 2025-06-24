@@ -312,14 +312,14 @@ function hideAddForm() {
 
       <td>
         ${isEditable 
-          ? `<input type="number" value="${item.unit_price || 0}" onchange="updateInventory(${item.id}, 'unit_price', this.value)" style="width: 80px;" />`
-          : (item.unit_price ? `Rp ${parseInt(item.unit_price).toLocaleString("id-ID")}` : '-')}
+          ? `<input type="number" value="${item.harga || 0}" onchange="updateInventory(${item.id}, 'harga', this.value)" />`
+          : (item.harga ? `Rp ${parseInt(item.harga).toLocaleString("id-ID")}` : '-')}
       </td>
       
       <td>
-        ${item.unit_price && item.stock
-          ? `Rp ${(item.unit_price * item.stock).toLocaleString("id-ID")}`
-          : "-"}
+        ${item.harga && item.stock
+        ? `Rp ${(item.harga * item.stock).toLocaleString("id-ID")}`
+        : "-"}
       </td>
 
     `;
@@ -484,7 +484,7 @@ stockInput.dataset.baseStock = oldBase;
         entry_date: document.getElementById("stockEntry").value,
         stock: parseFloat(document.getElementById("stockAmount").value),
         unit: document.getElementById("stockUnit").value || "gr",
-        unit_price: parseFloat(document.getElementById("stockPrice").value) || 0 // <-- ini tambahan
+        harga: parseFloat(document.getElementById("stockPrice").value) || 0
       };
 
       const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
@@ -617,7 +617,7 @@ async function importRows(data) {
       entry_date: convertDate(row["Tanggal Masuk"]),
       stock: (satuan === "kg" || satuan === "ltr") ? jumlah * 1000 : jumlah,
       unit: satuan || "gr",
-      unit_price: parseFloat((row["Harga"] || "0").toString().replace(/[^0-9]/g, '')) || 0
+      harga: parseFloat((row["Harga"] || "0").toString().replace(/[^0-9]/g, '')) || 0
     };
 
     try {
