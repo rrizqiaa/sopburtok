@@ -34,7 +34,17 @@
         font-size: 12px;
       }
     }
-  </style>
+  
+@media (max-width: 768px) {
+  .content {
+    padding-bottom: 60px;
+  }
+  .mobile-bottom-nav button.active {
+    color: #1976d2;
+    font-weight: bold;
+  }
+}
+</style>
 </head>
 <body>
   <div class="dashboard-wrapper">
@@ -167,6 +177,20 @@
   <button onclick="location.href='profile.html'">Profile</button>
 </div>
 
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const path = window.location.pathname.split('/').pop();
+    const buttons = document.querySelectorAll(".mobile-bottom-nav button");
+
+    buttons.forEach(btn => {
+      const href = btn.getAttribute("onclick").match(/'(.*?)'/)?.[1];
+      if (href === path) {
+        btn.classList.add("active");
+      }
+    });
+  });
+</script>
 </body>
 </html>
 
@@ -741,5 +765,19 @@ async function handleDeleteMultiple() {
     }
 
   </script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const path = window.location.pathname.split('/').pop();
+    const buttons = document.querySelectorAll(".mobile-bottom-nav button");
+
+    buttons.forEach(btn => {
+      const href = btn.getAttribute("onclick").match(/'(.*?)'/)?.[1];
+      if (href === path) {
+        btn.classList.add("active");
+      }
+    });
+  });
+</script>
 </body>
 </html>
