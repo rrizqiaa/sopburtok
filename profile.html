@@ -284,7 +284,7 @@
           <h3>Buat Akun Baru</h3>
           <input id="new_name" type="text" placeholder="Nama Lengkap" >
           <input id="new_email" type="email" placeholder="Email" >
-          <input id="new_password" type="password" placeholder="Password" >
+          <input id="user_password" type="password" placeholder="Password" >
           <input id="new_hp" type="text" placeholder="No HP (opsional)" >
           <input id="new_alamat" type="text" placeholder="Alamat (opsional)" >
           <select id="new_role">
@@ -484,36 +484,45 @@
 
 
     function createUser() {
+      const password = document.getElementById('user_password').value;
+      if (!password || password.trim() === '') {
+        alert('Password harus diisi!');
+        return;
+      }
+
       const data = {
         name: document.getElementById('new_name').value,
         email: document.getElementById('new_email').value,
-        password: document.getElementById('new_password').value,
+        password: password,
         phone: document.getElementById('new_hp').value,
         address: document.getElementById('new_alamat').value,
         role: document.getElementById('new_role').value
       };
+      console.log("Data yang dikirim:", data);
+
 
       fetch(`${API_BASE}/users`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify(data)
       })
-        .then(res => {
-          if (!res.ok) {
-            return res.json().then(err => { throw new Error(err.message); });
-          }
-          return res.json();
-        })
-        .then(response => {
-          alert('Akun berhasil dibuat');
-          fetchUserList(); // Refresh daftar akun
-        })
-        .catch(err => {
-          alert('Gagal membuat akun: ' + err.message);
-        });
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(err => { throw new Error(err.message); });
+        }
+        return res.json();
+      })
+      .then(response => {
+        alert('Akun berhasil dibuat');
+        fetchUserList(); // Refresh daftar akun
+      })
+      .catch(err => {
+        alert('Gagal membuat akun: ' + err.message);
+      });
     }
 
 
