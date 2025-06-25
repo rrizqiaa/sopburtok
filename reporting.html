@@ -18,15 +18,14 @@
     .chart-wrapper {
       position: relative;
       width: 100%;
-      padding-top: 100%; /* aspect ratio 1:1 */
+      max-width: 500px;
+      margin: 0 auto;
     }
 
     canvas#mainChart {
-      position: absolute;
-      top: 0;
-      left: 0;
       width: 100% !important;
-      height: 100% !important;
+      height: auto !important;
+      aspect-ratio: 1/1;
     }
 
     @media (min-width: 769px) {
@@ -301,7 +300,7 @@ function updateChartType() {
         });
       }
     }
-    
+
     function logoutUser() {
       fetch(`${API_BASE}/logout`, {
         method: "POST",
