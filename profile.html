@@ -7,6 +7,56 @@
   <link rel="stylesheet" href="assets/css/style.css" />
   <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
   <style>
+
+@media (max-width: 768px) {
+  .dashboard-wrapper {
+    flex-direction: column;
+  }
+  .sidebar {
+    display: none;
+  }
+  .profile-content-flex {
+    flex-direction: column;
+    padding: 10px;
+  }
+  .profile-info {
+    width: 100%;
+    box-shadow: none;
+    padding: 10px;
+  }
+  #top-tools {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    flex-wrap: wrap;
+  }
+  .mobile-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-top: 1px solid #ccc;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    z-index: 1000;
+  }
+  .mobile-bottom-nav button {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: 14px;
+  }
+  .mobile-bottom-nav button.active {
+    color: #1976d2;
+    font-weight: bold;
+  }
+  .content {
+    padding-bottom: 70px;
+  }
+}
+
     .profile-info {
       background-color: #f9f9f9;
       padding: 20px;
@@ -326,5 +376,26 @@
       .catch(() => alert('Gagal mengubah password'));
   }
 </script>
+
+<div class="mobile-bottom-nav">
+  <button onclick="location.href='dashboard.html'">Home</button>
+  <button onclick="location.href='inventory.html'">Inventory</button>
+  <button onclick="location.href='production.html'">Production</button>
+  <button onclick="location.href='reporting.html'">Reporting</button>
+  <button class="active" onclick="location.href='profile.html'">Profile</button>
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const path = window.location.pathname.split('/').pop();
+    const buttons = document.querySelectorAll(".mobile-bottom-nav button");
+    buttons.forEach(btn => {
+      const href = btn.getAttribute("onclick").match(/'(.*?)'/)?.[1];
+      if (href === path) {
+        btn.classList.add("active");
+      }
+    });
+  });
+</script>
+
 </body>
 </html>
