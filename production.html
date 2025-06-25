@@ -42,6 +42,23 @@
         color: #1976d2;
         font-weight: bold;
       }
+
+      .grid-wrapper {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "stok"
+          "kasir"
+          "selisih"
+          "persen"
+          "logbook";
+      }
+
+      .stok { grid-area: stok; }
+      .kasir { grid-area: kasir; }
+      .selisih { grid-area: selisih; }
+      .persentase { grid-area: persen; }
+      .logbook { grid-area: logbook; }
     }
     .mobile-bottom-nav button i {
       font-size: 18px;
