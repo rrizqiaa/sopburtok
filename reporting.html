@@ -412,6 +412,12 @@ function logExportActivity(judulLaporan) {
     const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
     clockElement.textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} - ${now.toLocaleTimeString('id-ID')}`;
   }
+
+    function toggleMode() {
+    const isDark = document.body.classList.toggle("dark-mode");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  }
+  
 // ---------- Init ----------
 document.addEventListener("DOMContentLoaded", () => {
   if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark-mode");
