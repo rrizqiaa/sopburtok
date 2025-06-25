@@ -7,101 +7,46 @@
   <title>Production - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <!-- Library SheetJS untuk membaca XLSX/CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<style>
-  
-/* ========  DESKTOP  (≥1024 px)  ======== */
-.grid-wrapper{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  grid-template-areas:
-    "stok   kasir   log"
-    "selisih persen empty";
-  gap:20px;
-  max-width:1200px;
-  margin:0 auto;
-}
-
-/* Setiap kartu -------------------------------- */
-.card{
-  background:#fff;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 0 10px rgba(0,0,0,.1);
-  display:flex;
-  flex-direction:column;
-}
-.card h3{text-align:center;}
-.card input{width:100%;padding:8px;margin-bottom:10px;box-sizing:border-box;}
-.card button{width:100%;padding:10px;background:#27ae60;color:#fff;border:none;border-radius:5px;cursor:pointer;}
-.result{margin-top:10px;background:#ecf0f1;padding:10px;border-radius:5px;text-align:center;}
-
-/* Penempatan area -------------------------------- */
-.stok       {grid-area:stok;}
-.kasir      {grid-area:kasir;}
-.logbook    {grid-area:log;}
-.selisih    {grid-area:selisih;}
-.persentase {grid-area:persen;}
-
-/* ======== LOGBOOK TABEL STYLING ======== */
-.logbook-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-  font-size: 14px;
-}
-
-.logbook-table th,
-.logbook-table td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: center;
-}
-
-.logbook-table thead {
-  background-color: #f9f9f9;
-  font-weight: bold;
-}
-
-.logbook-table tfoot {
-  background-color: #f1f1f1;
-  font-weight: bold;
-}
-
-.table-wrapper {
-  overflow-x: auto;
-}
-
-/* ========  TABLET  (768-1023 px)  ======== */
-@media (max-width: 1023px) {
-  .grid-wrapper {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-areas:
-      "stok kasir"
-      "selisih persen"
-      "logbook logbook";
-  }
-}
-
-/* ========  MOBILE  (≤767 px)  ======== */
-@media (max-width: 767px) {
-  .grid-wrapper {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "stok"
-      "kasir"
-      "selisih"
-      "persen"
-      "logbook"; /* 📌 Logbook di posisi terakhir */
-  }
-}
-
-    .mobile-bottom-nav button i {
-  font-size: 18px;
+  <style>
+    @media (min-width: 769px) {
+      .mobile-bottom-nav {
+        display: none !important;
+      }
     }
-</style>
+    @media (max-width: 768px) {
+      .mobile-bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        border-top: 1px solid #ccc;
+        display: flex;
+        justify-content: space-around;
+        padding: 8px 0;
+        z-index: 1000;
+      }
+      .mobile-bottom-nav button {
+        flex: 1;
+        background: none;
+        border: none;
+        font-size: 12px;
+      }
+    }
+    @media (max-width: 768px) {
+      .content {
+        padding-bottom: 60px;
+      }
+      .mobile-bottom-nav button.active {
+        color: #1976d2;
+        font-weight: bold;
+      }
+    }
+    .mobile-bottom-nav button i {
+      font-size: 18px;
+    }
+  </style>
 </head>
 <body>
   <div class="dashboard-wrapper">
@@ -126,10 +71,10 @@
 
     <!-- Top tools -->
     <div id="top-tools">
-    <div id="liveClock" style="font-weight: bold;"></div>
-    <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
-    <button class="logout-btn" onclick="logoutUser()">Logout</button>
-  </div>
+      <div id="liveClock" style="font-weight: bold;"></div>
+      <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
+      <button class="logout-btn" onclick="logoutUser()">Logout</button>
+    </div>
 
     <!-- Content -->
     <div class="content">
