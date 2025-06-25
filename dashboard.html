@@ -7,6 +7,8 @@
   <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
   <title>Dashboard - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <style>
     @media (min-width: 769px) {
       .mobile-bottom-nav {
@@ -62,6 +64,11 @@
         flex: 1 1 100%;
       }
     }
+
+    .mobile-bottom-nav button i {
+  font-size: 18px;
+    }
+
   </style>
 </head>
 <body>
@@ -255,11 +262,11 @@
   </script>
 
   <div class="mobile-bottom-nav">
-    <button onclick="location.href='dashboard.html'">Home</button>
-    <button onclick="location.href='inventory.html'">Inventory</button>
-    <button onclick="location.href='production.html'">Production</button>
-    <button onclick="location.href='reporting.html'">Reporting</button>
-    <button onclick="location.href='profile.html'">Profile</button>
+    <button class="active" onclick="location.href='dashboard.html'"><i class="fas fa-home"></i></button>
+    <button onclick="location.href='inventory.html'"><i class="fas fa-box"></i></button>
+    <button onclick="location.href='production.html'"><i class="fas fa-industry"></i></button>
+    <button onclick="location.href='reporting.html'"><i class="fas fa-chart-bar"></i></button>
+    <button onclick="location.href='profile.html'"><i class="fas fa-user"></i></button>
   </div>
 
   <script>

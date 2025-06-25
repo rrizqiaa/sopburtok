@@ -8,6 +8,8 @@
   <title>Inventory - SOP BURTOK</title>
   <link rel="stylesheet" href="assets/css/style.css" />
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <style>
     @media (min-width: 769px) {
       .mobile-bottom-nav {
@@ -44,6 +46,11 @@
     font-weight: bold;
   }
 }
+
+    .mobile-bottom-nav button i {
+  font-size: 18px;
+    }
+
 </style>
 </head>
 <body>
@@ -169,13 +176,14 @@
       </div>
     </div>
   </div>
+
   <div class="mobile-bottom-nav">
-  <button onclick="location.href='dashboard.html'">Home</button>
-  <button onclick="location.href='inventory.html'">Inventory</button>
-  <button onclick="location.href='production.html'">Production</button>
-  <button onclick="location.href='reporting.html'">Reporting</button>
-  <button onclick="location.href='profile.html'">Profile</button>
-</div>
+    <button onclick="location.href='dashboard.html'"><i class="fas fa-home"></i></button>
+    <button class="active" onclick="location.href='inventory.html'"><i class="fas fa-box"></i></button>
+    <button onclick="location.href='production.html'"><i class="fas fa-industry"></i></button>
+    <button onclick="location.href='reporting.html'"><i class="fas fa-chart-bar"></i></button>
+    <button onclick="location.href='profile.html'"><i class="fas fa-user"></i></button>
+  </div>
 
 
 <script>
