@@ -15,16 +15,26 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-    canvas#mainChart {
-      max-width: 100%;
-      height: auto;
-      margin-bottom: 30px;
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+      padding-top: 100%; /* aspect ratio 1:1 */
     }
+
+    canvas#mainChart {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
     @media (min-width: 769px) {
       .mobile-bottom-nav {
         display: none !important;
       }
     }
+
     @media (max-width: 768px) {
       .mobile-bottom-nav {
         position: fixed;
@@ -45,85 +55,90 @@
         font-size: 12px;
       }
     }
-    /* ... (CSS asli dipertahankan) ... */
-
-        .mobile-bottom-nav button i {
-  font-size: 18px;
+    .mobile-bottom-nav button i {
+      font-size: 18px;
     }
-
   </style>
 </head>
 <body>
-<div class="dashboard-wrapper">
-  <!-- Sidebar, top-tools, dll tetap -->
-  <div class="sidebar">
-    <img src="assets/images/Logo Sop Burtok Ori.png" alt="SOP BURTOK" />
-    <h3>SOP BURTOK</h3>
-    <button class="menu-btn" onclick="location.href='dashboard.html'">Home</button>
-    <button class="menu-btn" onclick="location.href='inventory.html'">Inventory</button>
-    <button class="menu-btn" onclick="location.href='production.html'">Production</button>
-    <button class="menu-btn active" onclick="location.href='reporting.html'">Reporting</button>
-    <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
-  </div>
-
-  <div id="top-tools">
-    <div id="liveClock" style="font-weight: bold;"></div>
-    <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
-    <button class="logout-btn" onclick="logoutUser()">Logout</button>
-  </div>
-
- <div class="content">
-  <h2>Reporting - Laporan Stok Saat Ini</h2>
-  <div class="export-buttons" id="exportButtons">
-    <button onclick="exportToPDF()">Export to PDF</button>
-    <button onclick="exportTableToCSV()">Export to Excel</button>
-  </div>
-
-  <!-- ✅ Mulai area yang akan di-export -->
-  <div id="pdfExportArea">
-    <div style="margin-bottom: 15px;">
-      <label for="chartType">Tipe Grafik:</label>
-        <select id="chartType" onchange="updateChartType()">
-          <option value="pie">Pie Chart</option>
-          <option value="line">Line Chart</option>
-        </select>
+  <div class="dashboard-wrapper">
+    <!-- Sidebar, top-tools, dll tetap -->
+    <div class="sidebar">
+      <img src="assets/images/Logo Sop Burtok Ori.png" alt="SOP BURTOK" />
+      <h3>SOP BURTOK</h3>
+      <button class="menu-btn" onclick="location.href='dashboard.html'">Home</button>
+      <button class="menu-btn" onclick="location.href='inventory.html'">Inventory</button>
+      <button class="menu-btn" onclick="location.href='production.html'">Production</button>
+      <button class="menu-btn active" onclick="location.href='reporting.html'">Reporting</button>
+      <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
     </div>
 
-    <canvas id="mainChart" width="800" height="450"></canvas>
+    <div id="top-tools">
+      <div id="liveClock" style="font-weight: bold;"></div>
+      <button class="toggle-mode-btn" onclick="toggleMode()">🌓</button>
+      <button class="logout-btn" onclick="logoutUser()">Logout</button>
+    </div>
 
-<table class="stock-table">
-  <thead>
-    <tr>
-      <th>No</th>
-      <th>SKU</th>
-      <th>Nama</th>
-      <th>Kategori</th>
-      <th>Tanggal Masuk</th>
-      <th>Jumlah</th>
-      <th>Satuan</th>
-    </tr>
-  </thead>
-  <tbody id="reportingTableBody"></tbody>
-</table>
+    <div class="content">
+      <h2>Reporting - Laporan Stok Saat Ini</h2>
+      <div class="export-buttons" id="exportButtons">
+        <button onclick="exportToPDF()">Export to PDF</button>
+        <button onclick="exportTableToCSV()">Export to Excel</button>
+      </div>
+
+      <!-- ✅ Mulai area yang akan di-export -->
+      <div id="pdfExportArea">
+        <div style="margin-bottom: 15px;">
+          <label for="chartType">Tipe Grafik:</label>
+          <select id="chartType" onchange="updateChartType()">
+            <option value="pie">Pie Chart</option>
+            <option value="line">Line Chart</option>
+          </select>
+        </div>
+
+        <div class="chart-wrapper">
+          <canvas id="mainChart"></canvas>
+        </div>
+
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>SKU</th>
+              <th>Nama</th>
+              <th>Kategori</th>
+              <th>Tanggal Masuk</th>
+              <th>Jumlah</th>
+              <th>Satuan</th>
+            </tr>
+          </thead>
+          <tbody id="reportingTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Log Aktivitas tidak termasuk dalam PDF -->
+      <h2 style="margin-top: 50px;">Log Aktivitas</h2>
+      <table class="stock-table">
+        <thead>
+          <tr>
+            <th>Judul Laporan</th>
+            <th>Isi</th>
+            <th>Tanggal</th>
+            <th>Sumber</th>
+          </tr>
+        </thead>
+        <tbody id="logTableBody"></tbody>
+      </table>
+    </div>
   </div>
-  <!-- ✅ Tutup area export PDF -->
 
-  <!-- Log Aktivitas tidak termasuk dalam PDF -->
-  <h2 style="margin-top: 50px;">Log Aktivitas</h2>
-  <table class="stock-table">
-    <thead>
-      <tr>
-        <th>Judul Laporan</th>
-        <th>Isi</th>
-        <th>Tanggal</th>
-        <th>Sumber</th>
-      </tr>
-    </thead>
-    <tbody id="logTableBody"></tbody>
-  </table>
-</div>
-
-</div>
+  <div class="mobile-bottom-nav">
+    <button onclick="location.href='dashboard.html'"><i class="fas fa-home"></i></button>
+    <button onclick="location.href='inventory.html'"><i class="fas fa-box"></i></button>
+    <button onclick="location.href='production.html'"><i class="fas fa-industry"></i></button>
+    <button class="active" onclick="location.href='reporting.html'"><i class="fas fa-chart-bar"></i></button>
+    <button onclick="location.href='profile.html'"><i class="fas fa-user"></i></button>
+  </div>
 
 <script>
 const API_BASE = 'https://api.sopburtok.giize.com/api';
@@ -233,24 +248,14 @@ function updateChartType() {
   updateChart();
 }
 
-function updateChart() {
-  const canvas = document.getElementById("mainChart");
-  const ctx = canvas.getContext("2d");
+    function updateChart() {
+      const canvas = document.getElementById("mainChart");
+      const ctx = canvas.getContext("2d");
+      if (chartInstance) chartInstance.destroy();
 
-  if (chartInstance) chartInstance.destroy();
-
-  if (currentChartType === "pie") {
-    chartInstance = new Chart(ctx, {
-      type: "pie",
-      data: {
-        labels: currentChartLabels,
-        datasets: [{
-          data: currentChartData,
-          backgroundColor: currentChartLabels.map((_, i) => `hsl(${i * 60}, 70%, 60%)`)
-        }]
-      },
-      options: {
-        responsive: false,
+      const options = {
+        responsive: true,
+        maintainAspectRatio: true,
         plugins: {
           datalabels: {
             formatter: (value, ctx) => {
@@ -258,42 +263,54 @@ function updateChart() {
               const percentage = (value * 100 / sum).toFixed(1) + "%";
               return percentage;
             },
-            color: '#black',
-            font: {
-              weight: 'bold'
-            }
+            color: '#000',
+            font: { weight: 'bold' },
+            clip: false,
+            padding: 6
           }
         }
-      },
-      plugins: [ChartDataLabels]
-    });
-  } else if (currentChartType === "line") {
-    chartInstance = new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: currentLineLabels,
-        datasets: currentChartLabels.map((label, i) => ({
-          label,
-          data: currentLineDatasets[label],
-          borderColor: `hsl(${i * 60}, 70%, 50%)`,
-          fill: false,
-          tension: 0.3
-        }))
-      },
-      options: { responsive: false }
-    });
-  }
-}
-// ---------- Utils lain (logout, export, live clock, dll) ----------
-function logoutUser() {
-  fetch(`${API_BASE}/logout`, {
-    method: "POST",
-    headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
-  }).finally(() => {
-    localStorage.clear();
-    window.location.href = "index.html";
-  });
-}
+      };
+
+      if (currentChartType === "pie") {
+        chartInstance = new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: currentChartLabels,
+            datasets: [{
+              data: currentChartData,
+              backgroundColor: currentChartLabels.map((_, i) => `hsl(${i * 60}, 70%, 60%)`)
+            }]
+          },
+          options,
+          plugins: [ChartDataLabels]
+        });
+      } else if (currentChartType === "line") {
+        chartInstance = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: currentLineLabels,
+            datasets: currentChartLabels.map((label, i) => ({
+              label,
+              data: currentLineDatasets[label],
+              borderColor: `hsl(${i * 60}, 70%, 50%)`,
+              fill: false,
+              tension: 0.3
+            }))
+          },
+          options
+        });
+      }
+    }
+    
+    function logoutUser() {
+      fetch(`${API_BASE}/logout`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
+      }).finally(() => {
+        localStorage.clear();
+        window.location.href = "index.html";
+      });
+    }
 
 // ... (fungsi exportTableToCSV, exportToPDF, loadActivityLogs, logExportActivity, updateLiveClock, toggleMode sama seperti semula) ...
 
@@ -429,13 +446,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-  <div class="mobile-bottom-nav">
-    <button onclick="location.href='dashboard.html'"><i class="fas fa-home"></i></button>
-    <button onclick="location.href='inventory.html'"><i class="fas fa-box"></i></button>
-    <button onclick="location.href='production.html'"><i class="fas fa-industry"></i></button>
-    <button class="active" onclick="location.href='reporting.html'"><i class="fas fa-chart-bar"></i></button>
-    <button onclick="location.href='profile.html'"><i class="fas fa-user"></i></button>
-  </div>
 
 </body>
 </html>
