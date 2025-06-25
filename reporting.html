@@ -18,14 +18,35 @@
     .chart-wrapper {
       position: relative;
       width: 100%;
-      max-width: 500px;
+      max-width: 800px;
       margin: 0 auto;
     }
 
     canvas#mainChart {
       width: 100% !important;
       height: auto !important;
-      aspect-ratio: 1/1;
+    }
+
+    @media (min-width: 769px) {
+      canvas#mainChart.pie-chart {
+        aspect-ratio: 0.5/0.5;
+      }
+      canvas#mainChart.line-chart {
+        aspect-ratio: 16/9;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .chart-wrapper {
+        max-width: 100%;
+        padding: 0 10px;
+      }
+      canvas#mainChart.pie-chart {
+        aspect-ratio: 0.5/0.5;
+      }
+      canvas#mainChart.line-chart {
+        aspect-ratio: 4/3;
+      }
     }
 
     @media (min-width: 769px) {
@@ -59,7 +80,7 @@
     }
   </style>
 </head>
-<body>
+<body>  
   <div class="dashboard-wrapper">
     <!-- Sidebar, top-tools, dll tetap -->
     <div class="sidebar">
@@ -247,9 +268,12 @@ function updateChartType() {
   updateChart();
 }
 
-    function updateChart() {
+function updateChart() {
       const canvas = document.getElementById("mainChart");
       const ctx = canvas.getContext("2d");
+      canvas.classList.remove("pie-chart", "line-chart");
+      canvas.classList.add(currentChartType === "pie" ? "pie-chart" : "line-chart");
+
       if (chartInstance) chartInstance.destroy();
 
       const options = {
@@ -301,7 +325,7 @@ function updateChartType() {
       }
     }
 
-    function logoutUser() {
+function logoutUser() {
       fetch(`${API_BASE}/logout`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
