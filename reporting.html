@@ -170,9 +170,8 @@ if (!token) location.href = 'index.html';
 const user = JSON.parse(localStorage.getItem("user") || "{}");
 const userRole = user.role || "";
 
-// ---------- Variabel chart ----------
 let chartInstance = null;
-let currentChartType = "pie"; // default sekarang pie
+let currentChartType = "pie";
 let currentChartLabels = [];
 let currentChartData = [];
 let currentLineLabels = [];
@@ -187,24 +186,14 @@ async function loadReports() {
       }
     });
     const data = await res.json();
-
     const tbody = document.getElementById('reportingTableBody');
     tbody.innerHTML = '';
 
-    // ------ Kategori yang sama dengan Inventory ------
-    const kategoriList = [
-      "Pokok",
-      "Daging",
-      "Sayuran",
-      "Bumbu",
-      "Packaging",
-      "Lain - lain"
-    ];
-    const kategoriMap = Object.fromEntries(kategoriList.map(k => [k, 0]));
-    const trendMap = {}; // { 'Jan 2025': {Pokok:0, ...}, ... }
+    let totalStok = 0;
+    let totalHarga = 0;
+    const trendMap = {}; // { 'Jan 2025': {stok: x, harga: y}, ... }
 
     data.forEach((item, index) => {
-      // ---- Tabel ----
       const satuan = item.unit || 'gr';
       const jumlahDisplay = (satuan === 'kg' || satuan === 'ltr') ? (item.stock / 1000).toFixed(2) : item.stock;
       const harga = item.harga || 0;
@@ -223,55 +212,38 @@ async function loadReports() {
         <td>${total ? `Rp ${total.toLocaleString("id-ID")}` : '-'}</td>`;
       tbody.appendChild(tr);
 
+      totalStok += parseFloat(item.stock || 0);
+      totalHarga += parseFloat(total || 0);
 
-      // ---- Pie data ----
-      if (kategoriMap[item.category] !== undefined) {
-        kategoriMap[item.category] += item.stock;
-      }
-
-      // ---- Line data (tren per bulan) ----
       const bulan = new Date(item.entry_date).toLocaleString('id-ID', { month: 'short', year: 'numeric' });
-      if (!trendMap[bulan]) {
-        trendMap[bulan] = Object.fromEntries(kategoriList.map(k => [k, 0]));
-      }
-      if (trendMap[bulan][item.category] !== undefined) {
-        trendMap[bulan][item.category] += item.stock;
-      }
+      if (!trendMap[bulan]) trendMap[bulan] = { stok: 0, harga: 0 };
+      trendMap[bulan].stok += parseFloat(item.stock || 0);
+      trendMap[bulan].harga += parseFloat(total || 0);
     });
 
-    // ------ Siapkan data chart ------
-    currentChartLabels = kategoriList;
-    currentChartData   = kategoriList.map(k => kategoriMap[k]);
+    currentChartLabels = ['Jumlah Stok', 'Total Harga'];
+    currentChartData = [totalStok, totalHarga];
 
-// --- Ganti blok lama ini -----------------------------
-// const monthLabels = Object.keys(trendMap)
-//   .sort((a, b) => new Date("01 " + a) - new Date("01 " + b));
-
-// --- Dengan blok baru di bawah -----------------------
-const monthLabels = Object.keys(trendMap).sort((a, b) => {
-  const parse = (str) => {
-    const [mon, yr] = str.split(" ");
-    const idMonths = [
-      "Jan","Feb","Mar","Apr","Mei","Jun",
-      "Jul","Agu","Sep","Okt","Nov","Des"
-    ];
-    return new Date(+yr, idMonths.indexOf(mon));
-  };
-  return parse(a) - parse(b);   // April → Mei → dst.
-});
-    currentLineLabels = monthLabels;
-    currentLineDatasets = {};
-    kategoriList.forEach(kat => {
-      currentLineDatasets[kat] = monthLabels.map(bln => trendMap[bln][kat] || 0);
+    currentLineLabels = Object.keys(trendMap).sort((a, b) => {
+      const parse = (str) => {
+        const [mon, yr] = str.split(" ");
+        const idMonths = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+        return new Date(+yr, idMonths.indexOf(mon));
+      };
+      return parse(a) - parse(b);
     });
+
+    currentLineDatasets = {
+      'Jumlah Stok': currentLineLabels.map(b => trendMap[b].stok),
+      'Total Harga': currentLineLabels.map(b => trendMap[b].harga)
+    };
 
     updateChart();
   } catch (err) {
     console.error('Gagal memuat laporan:', err);
-    document.getElementById('reportingTableBody').innerHTML = '<tr><td colspan="7">Gagal memuat data.</td></tr>';
+    document.getElementById('reportingTableBody').innerHTML = '<tr><td colspan="9">Gagal memuat data.</td></tr>';
   }
 }
-
 function updateChartType() {
   currentChartType = document.getElementById("chartType").value;
   updateChart();
