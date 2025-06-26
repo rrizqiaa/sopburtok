@@ -22,11 +22,12 @@
         bottom: 0;
         left: 0;
         right: 0;
-        background: #fff;
-        border-top: 1px solid #ccc;
+        background: #ffffff;
+        border-top: 1px solid #ddd;
         display: flex;
         justify-content: space-around;
-        padding: 8px 0;
+        padding: 10px 0;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         z-index: 1000;
       }
 
@@ -34,19 +35,34 @@
         flex: 1;
         background: none;
         border: none;
-        font-size: 12px;
+        padding: 6px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #777;
+        transition: color 0.3s ease;
+        font-size: 10px;
+      }
+
+      .mobile-bottom-nav button i {
+        font-size: 20px;
+        margin-bottom: 2px;
+        transition: transform 0.2s ease;
       }
 
       .mobile-bottom-nav button.active {
-        color: #1976d2;
-        font-weight: bold;
+        color: #777;
+        font-weight: 600;
       }
 
-      .content {
-        padding-bottom: 60px; /* Agar konten tidak tertutup nav */
+      .mobile-bottom-nav button.active i {
+        transform: scale(1.2);
+      }
+
+      .mobile-bottom-nav button:active i {
+        transform: scale(1.1);
       }
     }
-
     .log-row {
       display: flex;
       flex-wrap: wrap;
@@ -68,6 +84,12 @@
     .mobile-bottom-nav button i {
   font-size: 18px;
     }
+
+    .mobile-bottom-nav button span {
+  font-size: 10px;
+  margin-top: 2px;
+}
+
 
   </style>
 </head>
@@ -287,11 +309,26 @@
   </script>
 
   <div class="mobile-bottom-nav">
-    <button class="active" onclick="location.href='dashboard.html'"><i class="fas fa-home"></i></button>
-    <button onclick="location.href='inventory.html'"><i class="fas fa-box"></i></button>
-    <button onclick="location.href='production.html'"><i class="fas fa-industry"></i></button>
-    <button onclick="location.href='reporting.html'"><i class="fas fa-chart-bar"></i></button>
-    <button onclick="location.href='profile.html'"><i class="fas fa-user"></i></button>
+    <button class="active" onclick="location.href='dashboard.html'">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </button>
+    <button onclick="location.href='inventory.html'">
+      <i class="fas fa-box"></i>
+      <span>Inventory</span>
+    </button>
+    <button onclick="location.href='production.html'">
+      <i class="fas fa-industry"></i>
+      <span>Production</span>
+    </button>
+    <button onclick="location.href='reporting.html'">
+      <i class="fas fa-chart-bar"></i>
+      <span>Reporting</span>
+    </button>
+    <button onclick="location.href='profile.html'">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </button>
   </div>
 
   <script>
