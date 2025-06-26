@@ -122,6 +122,7 @@
 
         <table class="stock-table">
           <thead>
+          <thead>
             <tr>
               <th>No</th>
               <th>SKU</th>
@@ -130,6 +131,8 @@
               <th>Tanggal Masuk</th>
               <th>Jumlah</th>
               <th>Satuan</th>
+              <th>Harga</th>
+              <th>Total</th>
             </tr>
           </thead>
           <tbody id="reportingTableBody"></tbody>
@@ -204,6 +207,9 @@ async function loadReports() {
       // ---- Tabel ----
       const satuan = item.unit || 'gr';
       const jumlahDisplay = (satuan === 'kg' || satuan === 'ltr') ? (item.stock / 1000).toFixed(2) : item.stock;
+      const harga = item.harga || 0;
+      const total = item.stock ? harga * item.stock : 0;
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${index + 1}</td>
@@ -212,8 +218,11 @@ async function loadReports() {
         <td>${item.category}</td>
         <td>${item.entry_date}</td>
         <td>${jumlahDisplay}</td>
-        <td>${satuan}</td>`;
+        <td>${satuan}</td>
+        <td>Rp ${parseInt(harga).toLocaleString("id-ID")}</td>
+        <td>${total ? `Rp ${total.toLocaleString("id-ID")}` : '-'}</td>`;
       tbody.appendChild(tr);
+
 
       // ---- Pie data ----
       if (kategoriMap[item.category] !== undefined) {
