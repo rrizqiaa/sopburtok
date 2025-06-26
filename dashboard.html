@@ -96,17 +96,20 @@
           <h3>Inventory Bahan Baku</h3>
           <div style="overflow-x: auto;">
             <table class="stock-table">
-              <thead>
-                <tr>
-                  <th>Tanggal Masuk</th>
-                  <th>Nama Bahan Baku</th>
-                  <th>Kategori</th>
-                  <th>Jumlah</th>
-                  <th>Satuan</th>
-                  <th>Riwayat Aktivitas</th>
-                </tr>
-              </thead>
-              <tbody id="rekapInventoryBody"></tbody>
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>SKU</th>
+                <th>Nama</th>
+                <th>Kategori</th>
+                <th>Tanggal Masuk</th>
+                <th>Jumlah</th>
+                <th>Satuan</th>
+                <th>Harga</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody id="rekapInventoryBody"></tbody>
             </table>
           </div>
         </div>
@@ -165,17 +168,35 @@
         });
         const inventoryData = await inventoryRes.json();
 
-        renderLogs(inventoryData, "inventoryLogBody",
-                   "Penambahan Stok", "name", "stock");
+        // Jika tidak ada fungsi renderLogs, hapus atau ganti
+        // renderLogs(inventoryData, "inventoryLogBody", "Penambahan Stok", "name", "stock");
+
+        // ATAU ganti dengan render langsung di sini
+        const tbody = document.getElementById("rekapInventoryBody");
+        tbody.innerHTML = "";
+        inventoryData.slice(0, 30).forEach(item => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.entry_date || "-"}</td>
+            <td>${item.name}</td>
+            <td>${item.category}</td>
+            <td>${item.stock}</td>
+            <td>${item.unit}</td>
+            <td>${item.action}</td>
+          `;
+          tbody.appendChild(row);
+        });
       } catch (err) {
         console.error("Gagal memuat log:", err);
-        document.getElementById("inventoryLogBody").innerHTML =
-          "<tr><td colspan='4'>Gagal memuat log inventory.</td></tr>";
+        const fallback = document.getElementById("rekapInventoryBody");
+        if (fallback) {
+          fallback.innerHTML = "<tr><td colspan='6'>Gagal memuat log inventory.</td></tr>";
+        }
       }
     }
 
+
     async function renderRekapInventory() {
-      const token = localStorage.getItem("token");
       if (!token) return;
 
       try {
@@ -187,34 +208,22 @@
         });
 
         const data = await res.json();
-        const sortedByTime = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 30);
-        const grouped = {};
-        sortedByTime.forEach(item => {
-          const key = item.name;
-          if (!grouped[key]) grouped[key] = [];
-          grouped[key].push(item);
-        });
-
         const tbody = document.getElementById("rekapInventoryBody");
         tbody.innerHTML = "";
-        Object.entries(grouped).forEach(([name, entries]) => {
-          const latest = entries.sort((a, b) => new Date(b.entry_date) - new Date(a.entry_date))[0];
-          const logHTML = entries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 10).map(e => {
-            const tanggal = new Date(e.created_at).toLocaleDateString("id-ID");
-            const jumlah = e.stock || 0;
-            const satuan = e.unit || "gr";
-            const tipe = e.action === "out" ? "Pengurangan" : "Penambahan";
-            return `${tanggal} - ${tipe} ${jumlah} ${satuan}`;
-          }).join("<br>");
 
+        data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 30).forEach((item, index) => {
+          const total = item.harga && item.stock ? item.harga * item.stock : 0;
           const row = document.createElement("tr");
           row.innerHTML = `
-            <td>${latest.entry_date || "-"}</td>
-            <td>${name}</td>
-            <td>${latest.category || "-"}</td>
-            <td>${latest.stock}</td>
-            <td>${latest.unit || "-"}</td>
-            <td>${logHTML}</td>
+            <td>${index + 1}</td>
+            <td>${item.sku || '-'}</td>
+            <td>${item.name}</td>
+            <td>${item.category}</td>
+            <td>${item.entry_date || '-'}</td>
+            <td>${item.stock}</td>
+            <td>${item.unit || 'gr'}</td>
+            <td>${item.harga ? `Rp ${parseInt(item.harga).toLocaleString("id-ID")}` : '-'}</td>
+            <td>${total ? `Rp ${total.toLocaleString("id-ID")}` : '-'}</td>
           `;
           tbody.appendChild(row);
         });
@@ -223,6 +232,7 @@
         console.error("Gagal memuat rekap inventory:", err);
       }
     }
+
 
     renderRekapInventory();
 
