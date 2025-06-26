@@ -115,14 +115,14 @@
           <h2>&nbsp;</h2>
           <h3>Logbook Hasil Produksi</h3>
           <table class="stock-table">
-            <thead>
-              <tr>
-                <th>Tanggal</th>
-                <th>Aksi</th>
-                <th>Nama Produk</th>
-                <th>Selisih & Persentase</th>
-              </tr>
-            </thead>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Selisih Total (gr)</th>
+              <th>Persentase Selisih (%)</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
             <tbody id="logbookBodyDashboard"></tbody>
           </table>
         </div>
@@ -228,19 +228,34 @@
 
     function renderLogbookFromStorage() {
       const tbody = document.getElementById("logbookBodyDashboard");
-      const data  = JSON.parse(localStorage.getItem("logbookProduksi") || "[]");
       tbody.innerHTML = "";
 
-      data.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal)).slice(0, 30).forEach(entry => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${entry.tanggal}</td>
-          <td>Produksi</td>
-          <td>Sapi</td>
-          <td>${entry.selisih} gr (${entry.persen} %)</td>`;
-        tbody.appendChild(row);
+      // Coba fetch dari backend seperti di production.html
+      fetch("https://api.sopburtok.giize.com/api/production", {
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          "Accept": "application/json"
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        data.sort((a, b) => new Date(b.used_date) - new Date(a.used_date)).slice(0, 30).forEach(entry => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${entry.used_date}</td>
+            <td>${entry.selisih_total} gr</td>
+            <td>${entry.persentase_selisih} %</td>
+            <td>-</td>
+          `;
+          tbody.appendChild(row);
+        });
+      })
+      .catch(err => {
+        console.error("❌ Gagal ambil log produksi dari backend:", err);
+        tbody.innerHTML = "<tr><td colspan='4'>Gagal memuat log produksi.</td></tr>";
       });
     }
+
 
     fetchLogs();
     renderLogbookFromStorage();
