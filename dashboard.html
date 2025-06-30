@@ -234,7 +234,10 @@
         tbody.innerHTML = "";
 
         data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 30).forEach((item, index) => {
+          const unit = item.unit || "gr";
+          const stockDisplay = convertStock(item.stock, unit);
           const total = item.harga && item.stock ? item.harga * item.stock : 0;
+
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${index + 1}</td>
@@ -242,13 +245,14 @@
             <td>${item.name}</td>
             <td>${item.category}</td>
             <td>${item.entry_date || '-'}</td>
-            <td>${item.stock}</td>
-            <td>${item.unit || 'gr'}</td>
-            <td>${item.harga ? `Rp ${parseInt(item.harga).toLocaleString("id-ID")}` : '-'}</td>
-            <td>${total ? `Rp ${total.toLocaleString("id-ID")}` : '-'}</td>
+            <td>${stockDisplay}</td>
+            <td>${unit}</td>
+            <td>${item.harga ? formatRupiah(item.harga) : '-'}</td>
+            <td>${total ? formatRupiah(total) : '-'}</td>
           `;
           tbody.appendChild(row);
         });
+
 
       } catch (err) {
         console.error("Gagal memuat rekap inventory:", err);
@@ -277,7 +281,7 @@
             <td>${entry.used_date}</td>
             <td>${entry.selisih_total} gr</td>
             <td>${entry.persentase_selisih} %</td>
-            <td>-</td>
+            <td>-</td>~
           `;
           tbody.appendChild(row);
         });
@@ -289,7 +293,7 @@
     }
 
 
-    fetchLogs();
+    
     renderLogbookFromStorage();
   </script>
 
@@ -344,6 +348,21 @@
       });
     });
   </script>
+
+  <script>
+  function convertStock(stock, unit) {
+    if (unit === "kg" || unit === "ltr") {
+      return (stock / 1000).toFixed(2);
+    }
+    return stock;
+  }
+
+  function formatRupiah(value) {
+    const val = parseInt(value) || 0;
+    return "Rp " + val.toLocaleString("id-ID");
+  }
+</script>
+
 
 </body>
 </html>

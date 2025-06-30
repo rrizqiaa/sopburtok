@@ -409,7 +409,11 @@ document.addEventListener("DOMContentLoaded", initArsipSelect);
       const c = a - b;
       document.getElementById("hasilSelisihManual").innerText = `Selisih Total: ${c} gr`;
       document.getElementById("selisihPersen").value = c;
+
+      // Tambahkan ini agar otomatis hitung persentase & simpan logbook
+      hitungPersentase();
     }
+
 
     function simpanKeLogbook() {
       const tanggal = new Date().toLocaleString('id-ID');
