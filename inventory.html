@@ -143,12 +143,25 @@
         </label>
 
         <label>
-          Urutkan Nama:
-          <select id="sortByName" onchange="applyFilters()">
-            <option value="az">A - Z</option>
-            <option value="za">Z - A</option>
+          Urutkan:
+          <select id="sortBy" onchange="applyFilters()">
+            <option value="name-asc">Nama (A-Z)</option>
+            <option value="name-desc">Nama (Z-A)</option>
+            <option value="sku-asc">SKU (A-Z)</option>
+            <option value="sku-desc">SKU (Z-A)</option>
+            <option value="category-asc">Kategori (A-Z)</option>
+            <option value="category-desc">Kategori (Z-A)</option>
+            <option value="entry_date-asc">Tanggal Terlama</option>
+            <option value="entry_date-desc">Tanggal Terbaru</option>
+            <option value="stock-asc">Jumlah Terkecil</option>
+            <option value="stock-desc">Jumlah Terbesar</option>
+            <option value="harga-asc">Harga Satuan Murah</option>
+            <option value="harga-desc">Harga Satuan Mahal</option>
+            <option value="total-asc">Harga Total Murah</option>
+            <option value="total-desc">Harga Total Mahal</option>
           </select>
         </label>
+
       </div>
 
 
@@ -399,9 +412,11 @@ function hideAddForm() {
       </td>
 
       <td>
-        <input value="${item.keterangan || ''}" 
-              onchange="updateInventory(${item.id}, 'keterangan', this.value); runSentimentAnalysis(this.value, ${item.id})" 
-              placeholder='Tulis keterangan...' />
+        ${isEditable
+          ? `<input value="${item.keterangan || ''}" 
+                    onchange="updateInventory(${item.id}, 'keterangan', this.value); runSentimentAnalysis(this.value, ${item.id})" 
+                    placeholder='Tulis keterangan...' />`
+          : (item.keterangan || '-')}
       </td>
 
       <td id="analisis-${item.id}">
@@ -479,26 +494,27 @@ stockInput.dataset.baseStock = oldBase;
 
     // Fungsi untuk toggle edit mode
     async function toggleEditMode() {
-  window.editMode = !window.editMode;
-  const btn = document.getElementById("toggleEditMode");
-  btn.textContent = window.editMode ? "✅ Selesai Edit" : "✏️ Edit Mode";
+      window.editMode = !window.editMode;
+      const btn = document.getElementById("toggleEditMode");
+      btn.textContent = window.editMode ? "✅ Selesai Edit" : "✏️ Edit Mode";
 
-  // Saat edit mode diaktifkan, reload tabel agar muncul input & select
-  if (window.editMode) {
-    const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json"
+      if (window.editMode) {
+        const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json"
+          }
+        });
+
+        const data = await res.json();
+        inventoryData = data;   // Simpan global
+        applyFilters();         // Terapkan filter & urutan sesuai pilihan user
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 300));
+        loadInventory();
       }
-    });
-    const data = await res.json();
-    renderStockTable(data); // render ulang DOM dengan input/select
-  } else {
-    // Tunggu agar semua update sempat selesai, lalu reload dari server
-    await new Promise(resolve => setTimeout(resolve, 300));
-    loadInventory();
-  }
-}
+    }
+
 
 
 
@@ -809,23 +825,43 @@ async function handleDeleteMultiple() {
     loadInventory();
 
     function applyFilters() {
-      const filterValue = document.getElementById("filterCategory").value;
-      const sortValue = document.getElementById("sortByName").value;
+  const filterValue = document.getElementById("filterCategory").value;
+  const sortValue = document.getElementById("sortBy").value;
 
-      let filtered = [...inventoryData];
+  let filtered = [...inventoryData];
 
-      if (filterValue) {
-        filtered = filtered.filter(item => item.category === filterValue);
-      }
+  // 🔍 Filter Kategori
+  if (filterValue) {
+    filtered = filtered.filter(item => item.category === filterValue);
+  }
 
-      if (sortValue === "az") {
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-      } else if (sortValue === "za") {
-        filtered.sort((a, b) => b.name.localeCompare(a.name));
-      }
+  // 📌 Sorting
+  const [field, direction] = sortValue.split("-");
+  filtered.sort((a, b) => {
+    let valA, valB;
 
-      renderStockTable(filtered);
+    if (field === "total") {
+      valA = (a.harga || 0) * (a.stock || 0);
+      valB = (b.harga || 0) * (b.stock || 0);
+    } else if (field === "entry_date") {
+      valA = new Date(a.entry_date || "1970-01-01");
+      valB = new Date(b.entry_date || "1970-01-01");
+    } else if (field === "stock" || field === "harga") {
+      valA = parseFloat(a[field] || 0);
+      valB = parseFloat(b[field] || 0);
+    } else {
+      valA = (a[field] || "").toString().toLowerCase();
+      valB = (b[field] || "").toString().toLowerCase();
     }
+
+    if (valA < valB) return direction === "asc" ? -1 : 1;
+    if (valA > valB) return direction === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  renderStockTable(filtered);
+}
+
 
   </script>
 
