@@ -7,84 +7,73 @@
   <title>Reporting - SOP BURTOK (Kategori Ready)</title>
   <link rel="stylesheet" href="assets/css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <!-- Chart.js & plugins -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    .chart-wrapper{position:relative;width:100%;max-width:800px;margin:0 auto}
-    canvas#mainChart{width:100%!important;height:auto!important}
-    @media(min-width:769px){canvas#mainChart.pie-chart{aspect-ratio:.5/.5}canvas#mainChart.line-chart{aspect-ratio:16/9}}
-    @media(max-width:768px){.chart-wrapper{max-width:100%;padding:0 10px}canvas#mainChart.pie-chart{aspect-ratio:.5/.5}canvas#mainChart.line-chart{aspect-ratio:4/3}}
-    @media (min-width: 769px) {
-      .mobile-bottom-nav {
-        display: none !important;
-      }
+    .chart-wrapper { position: relative; width: 100%; max-width: 800px; margin: 0 auto; }
+    canvas#lineChart { width: 100%!important; height: auto!important; }
+    @media(min-width:769px){ canvas#lineChart { aspect-ratio: 16/9; } }
+    @media(max-width:768px){ canvas#lineChart { aspect-ratio: 4/3; } }
+      @media (max-width: 768px) {
+    .mobile-bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid #ddd;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
     }
 
-    @media (max-width: 768px) {
-      .mobile-bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #ffffff;
-        border-top: 1px solid #ddd;
-        display: flex;
-        justify-content: space-around;
-        padding: 10px 0;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-        z-index: 1000;
-      }
-
-      .mobile-bottom-nav button {
-        flex: 1;
-        background: none;
-        border: none;
-        padding: 6px 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        color: #777;
-        transition: color 0.3s ease;
-        font-size: 10px;
-      }
-
-      .mobile-bottom-nav button i {
-        font-size: 20px;
-        margin-bottom: 2px;
-        transition: transform 0.2s ease;
-      }
-
-      .mobile-bottom-nav button.active {
-        color: #777;
-        font-weight: 600;
-      }
-
-      .mobile-bottom-nav button.active i {
-        transform: scale(1.2);
-      }
-
-      .mobile-bottom-nav button:active i {
-        transform: scale(1.1);
-      }
-    }    
-    .mobile-bottom-nav button i{
-      font-size:18px
-    }
-    .mobile-bottom-nav button span{
-      font-size:10px;
-      margin-top:2px;
+    .mobile-bottom-nav button {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 6px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #777;
+      transition: color 0.3s ease;
+      font-size: 10px;
     }
 
+    .mobile-bottom-nav button i {
+      font-size: 20px;
+      margin-bottom: 2px;
+      transition: transform 0.2s ease;
+    }
+
+    .mobile-bottom-nav button.active {
+      color: #777;
+      font-weight: 600;
+    }
+
+    .mobile-bottom-nav button.active i {
+      transform: scale(1.2);
+    }
+
+    .mobile-bottom-nav button:active i {
+      transform: scale(1.1);
+    }
+
+    .mobile-bottom-nav button i {
+      font-size: 18px;
+    }
+    .mobile-bottom-nav button span {
+      font-size: 10px;
+      margin-top: 2px;
+    }
+  }
   </style>
 </head>
 <body>
   <div class="dashboard-wrapper">
-    <!-- Sidebar -->
     <div class="sidebar">
       <img src="assets/images/Logo Sop Burtok Ori.png" alt="SOP BURTOK" />
       <h3>SOP BURTOK</h3>
@@ -102,46 +91,18 @@
     </div>
 
     <div class="content">
-      <h2>Reporting - Laporan Stok Saat Ini</h2>
+      <h2>Reporting - Grafik Selisih Produksi</h2>
       <div class="export-buttons" id="exportButtons">
         <button onclick="exportToPDF()">Export to PDF</button>
         <button onclick="exportTableToCSV()">Export to Excel</button>
       </div>
 
-      <!-- ✅ Mulai area yang akan di-export -->
       <div id="pdfExportArea">
-        <div style="margin-bottom: 15px; display:flex; gap:1rem; flex-wrap:wrap;align-items:center;">
-          <label for="chartType">Tipe Grafik:</label>
-          <select id="chartType" onchange="updateChartType()">
-            <option value="pie">Pie Chart (Total)</option>
-            <option value="line">Line Chart Bulanan</option>
-            <option value="kategori">Pie Chart per Kategori</option>
-          </select>
-        </div>
-
         <div class="chart-wrapper">
-          <canvas id="mainChart"></canvas>
+          <canvas id="lineChart"></canvas>
         </div>
-
-        <table class="stock-table">
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>SKU</th>
-              <th>Nama</th>
-              <th>Kategori</th>
-              <th>Tanggal Masuk</th>
-              <th>Jumlah</th>
-              <th>Satuan</th>
-              <th>Harga</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody id="reportingTableBody"></tbody>
-        </table>
       </div>
 
-      <!-- Log Aktivitas tidak termasuk dalam PDF -->
       <h2 style="margin-top: 50px;">Log Aktivitas</h2>
       <table class="stock-table">
         <thead>
@@ -181,179 +142,76 @@
   </div>
 
 <script>
-const API_BASE = 'https://api.sopburtok.giize.com/api';
 const token = localStorage.getItem('token');
 if (!token) location.href = 'index.html';
 const user = JSON.parse(localStorage.getItem("user") || "{}");
-const userRole = user.role || "";
-
 let chartInstance = null;
-let currentChartType = "pie"; // default
 
-// --- Data containers ---
-let totalChartLabels = [];           // ['Jumlah Stok', 'Total Harga']
-let totalChartData   = [];           // [x, y]
-let kategoriChartLabels = [];        // ['Bahan Baku', 'Kemasan', ...]
-let kategoriChartData   = [];        // [stok per kategori]
-let lineChartLabels     = [];        // ['Jan 2025', 'Feb 2025', ...]
-let lineChartDatasets   = {};        // { 'Jumlah Stok': [...], 'Total Harga': [...] }
-
-// -----------------------
 async function loadReports(){
-  try{
-    const res = await fetch(`${API_BASE}/inventory`,{
-      headers:{'Authorization':`Bearer ${token}`,'Accept':'application/json'}
+  try {
+    const res = await fetch(`https://api.sopburtok.giize.com/api/production`, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
     });
     const data = await res.json();
-    const tbody = document.getElementById('reportingTableBody');
-    tbody.innerHTML = '';
+    const labels = [], selisihData = [], persenData = [];
 
-    let totalStok = 0;
-    let totalHarga = 0;
-    const trendMap = {};     // bulanan
-    const kategoriMap = {};  // per kategori
-
-    data.forEach((item,index)=>{
-      const satuan = item.unit || 'gr';
-      const jumlahDisplay = (satuan==='kg' || satuan==='ltr') ? (item.stock/1000).toFixed(2) : item.stock;
-      const harga = item.harga || 0;
-      const total = item.stock ? harga * item.stock : 0;
-
-      // Tabel
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${index+1}</td>
-        <td>${item.sku||'-'}</td>
-        <td>${item.name}</td>
-        <td>${item.category}</td>
-        <td>${item.entry_date}</td>
-        <td>${jumlahDisplay}</td>
-        <td>${satuan}</td>
-        <td>Rp ${parseInt(harga).toLocaleString('id-ID')}</td>
-        <td>${total?`Rp ${total.toLocaleString('id-ID')}`:'-'}</td>`;
-      tbody.appendChild(tr);
-
-      // Akumulasi total
-      totalStok  += parseFloat(item.stock||0);
-      totalHarga += parseFloat(total||0);
-
-      // Bulanan
-      const bulan = new Date(item.entry_date).toLocaleString('id-ID',{month:'short',year:'numeric'});
-      if(!trendMap[bulan]) trendMap[bulan]={stok:0,harga:0};
-      trendMap[bulan].stok  += parseFloat(item.stock||0);
-      trendMap[bulan].harga += parseFloat(total||0);
-
-      // Kategori
-      const kategori = item.category || 'Tanpa Kategori';
-      if(!kategoriMap[kategori]) kategoriMap[kategori]={stok:0,harga:0};
-      kategoriMap[kategori].stok  += parseFloat(item.stock||0);
-      kategoriMap[kategori].harga += parseFloat(total||0);
+    data.forEach(entry => {
+      if (!entry.used_date || entry.selisih_total == null || entry.persentase_selisih == null) return;
+      labels.push(entry.used_date);
+      selisihData.push(parseFloat(entry.selisih_total));
+      persenData.push(parseFloat(entry.persentase_selisih));
     });
 
-    // --- Global data assignment ---
-    totalChartLabels = ['Jumlah Stok','Total Harga'];
-    totalChartData   = [totalStok, totalHarga];
-
-    kategoriChartLabels = Object.keys(kategoriMap);
-    kategoriChartData   = kategoriChartLabels.map(k=>kategoriMap[k].stok); // stok per kategori
-
-    // Sorting bulan agar terurut kronologis
-    lineChartLabels = Object.keys(trendMap).sort((a,b)=>{
-      const parse = (str)=>{
-        const [mon,yr] = str.split(' ');
-        const idMonths=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-        return new Date(+yr,idMonths.indexOf(mon));
-      };
-      return parse(a)-parse(b);
-    });
-
-    lineChartDatasets = {
-      'Jumlah Stok': lineChartLabels.map(b=>trendMap[b].stok),
-      'Total Harga': lineChartLabels.map(b=>trendMap[b].harga)
-    };
-
-    updateChart();
-  }catch(err){
-    console.error('Gagal memuat laporan:',err);
-    document.getElementById('reportingTableBody').innerHTML='<tr><td colspan="9">Gagal memuat data.</td></tr>';
+    updateChart(labels, selisihData, persenData);
+  } catch (err) {
+    console.error('❌ Gagal memuat data logbook:', err);
   }
 }
 
-function updateChartType(){
-  currentChartType = document.getElementById('chartType').value;
-  updateChart();
-}
-
-function updateChart(){
-  const canvas = document.getElementById('mainChart');
+function updateChart(labels, selisihData, persenData) {
+  const canvas = document.getElementById('lineChart');
   const ctx = canvas.getContext('2d');
-  canvas.classList.remove('pie-chart','line-chart');
-  canvas.classList.add(currentChartType==='line'?'line-chart':'pie-chart');
+  if (chartInstance) chartInstance.destroy();
 
-  if(chartInstance) chartInstance.destroy();
-
-  const options={
-    responsive:true,
-    maintainAspectRatio:true,
-    plugins:{
-      datalabels:{
-        formatter:(value,ctx)=>{
-          const sum = ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
-          const percent = (value*100/sum).toFixed(1)+'%';
-          return percent;
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Selisih Total (gr)',
+          data: selisihData,
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          tension: 0.3,
+          fill: false
         },
-        color:'#000',
-        font:{weight:'bold'},
-        clip:false,
-        padding:6
-      }
-    }
-  };
-
-  if(currentChartType==='pie'){
-    // Pie total
-    chartInstance = new Chart(ctx,{
-      type:'pie',
-      data:{labels:totalChartLabels,datasets:[{data:totalChartData,backgroundColor:totalChartLabels.map((_,i)=>`hsl(${i*60},70%,60%)`)}]},
-      options,
-      plugins:[ChartDataLabels]
-    });
-  }else if(currentChartType==='kategori'){
-    // Pie per kategori (stok)
-    chartInstance = new Chart(ctx,{
-      type:'pie',
-      data:{labels:kategoriChartLabels,datasets:[{data:kategoriChartData,backgroundColor:kategoriChartLabels.map((_,i)=>`hsl(${i*45},70%,60%)`)}]},
-      options,
-      plugins:[ChartDataLabels]
-    });
-  }else if(currentChartType==='line'){
-    // Line bulanan
-    chartInstance = new Chart(ctx,{
-      type:'line',
-      data:{
-        labels:lineChartLabels,
-        datasets:totalChartLabels.map((label,i)=>({
-          label,
-          data:lineChartDatasets[label],
-          borderColor:`hsl(${i*60},70%,50%)`,
-          fill:false,
-          tension:0.3
-        }))
+        {
+          label: 'Persentase Selisih (%)',
+          data: persenData,
+          borderColor: 'rgba(255, 99, 132, 1)',
+          backgroundColor: 'rgba(255, 99, 132, 0.2)',
+          tension: 0.3,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        tooltip: { mode: 'index', intersect: false },
+        legend: { position: 'top' }
       },
-      options
-    });
-  }
+      interaction: { mode: 'nearest', axis: 'x', intersect: false },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
 }
 
-function logoutUser(){
-  fetch(`${API_BASE}/logout`,{method:'POST',headers:{'Authorization':`Bearer ${token}`,'Accept':'application/json'}})
-    .finally(()=>{localStorage.clear();window.location.href='index.html';});
-}
-
-// --- Ekspor & log aktivitas --- (fungsi lain tetap sama seperti versi sebelumnya)
 function exportTableToCSV(){
-  const table=document.querySelector('.stock-table');
-  const rows=table.querySelectorAll('tr');
+  const area=document.getElementById('pdfExportArea');
+  const rows=area.querySelectorAll('tr');
   let csv=[];
   rows.forEach(row=>{
     let cols=row.querySelectorAll('th,td');
@@ -365,11 +223,10 @@ function exportTableToCSV(){
   const url=URL.createObjectURL(blob);
   const username=(user.name||'pengguna').replace(/\s+/g,'_');
   const today=new Date().toISOString().slice(0,10);
-  const filename=`laporan_stok_${username}_${today}.csv`;
+  const filename=`laporan_selisih_${username}_${today}.csv`;
   const a=document.createElement('a');
   a.href=url; a.download=filename; a.style.display='none';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  logExportActivity(`Export Excel - ${filename}`);
 }
 
 function exportToPDF(){
@@ -378,45 +235,14 @@ function exportToPDF(){
     const imgData=canvas.toDataURL('image/png');
     const pdf=new jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
     const pageWidth=pdf.internal.pageSize.getWidth();
-    const pageHeight=pdf.internal.pageSize.getHeight();
     const imgWidth=pageWidth-20;
     const imgHeight=(canvas.height*imgWidth)/canvas.width;
-    let y=10;
-    if(imgHeight>pageHeight-20){
-      pdf.addImage(imgData,'PNG',10,y,imgWidth,pageHeight-20);
-      pdf.addPage();
-      pdf.addImage(imgData,'PNG',10,10,imgWidth,imgHeight);
-    }else{pdf.addImage(imgData,'PNG',10,y,imgWidth,imgHeight);}   
+    pdf.addImage(imgData,'PNG',10,10,imgWidth,imgHeight);
     const username=(user.name||'pengguna').replace(/\s+/g,'_');
     const today=new Date().toISOString().slice(0,10);
-    const filename=`laporan_stok_${username}_${today}.pdf`;
+    const filename=`laporan_selisih_${username}_${today}.pdf`;
     pdf.save(filename);
-    logExportActivity(`Export PDF - ${filename}`);
   });
-}
-
-function logExportActivity(judulLaporan){
-  fetch(`${API_BASE}/activity-log`,{
-    method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
-    body:JSON.stringify({document_title:judulLaporan})
-  }).then(res=>res.json()).then(data=>console.log('Log tercatat:',data.message)).catch(err=>console.error('Gagal log aktivitas:',err));
-}
-
-function loadActivityLogs(){
-  fetch(`${API_BASE}/activity-log`,{headers:{'Authorization':`Bearer ${token}`}})
-    .then(res=>res.json())
-    .then(logs=>{
-      const tbody=document.getElementById('logTableBody');
-      tbody.innerHTML='';
-      logs.forEach(log=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${log.document_title}</td><td>${log.action}</td><td>${new Date(log.created_at).toLocaleString('id-ID')}</td><td>${log.name}</td>`;
-        tbody.appendChild(tr);
-      });
-    }).catch(err=>{
-      console.error('Gagal memuat log aktivitas:',err);
-      document.getElementById('logTableBody').innerHTML='<tr><td colspan="4">Gagal memuat log aktivitas.</td></tr>';
-    });
 }
 
 function updateLiveClock(){
@@ -432,10 +258,30 @@ function toggleMode(){
   localStorage.setItem('theme',isDark?'dark':'light');
 }
 
-// ---------- Init ----------
+function logoutUser(){
+  fetch(`https://api.sopburtok.giize.com/api/logout`,{method:'POST',headers:{'Authorization':`Bearer ${token}`,'Accept':'application/json'}})
+    .finally(()=>{localStorage.clear();window.location.href='index.html';});
+}
+
+function loadActivityLogs(){
+  fetch(`https://api.sopburtok.giize.com/api/activity-log`,{headers:{'Authorization':`Bearer ${token}`}})
+    .then(res=>res.json())
+    .then(logs=>{
+      const tbody=document.getElementById('logTableBody');
+      tbody.innerHTML='';
+      logs.forEach(log=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${log.document_title}</td><td>${log.action}</td><td>${new Date(log.created_at).toLocaleString('id-ID')}</td><td>${log.name}</td>`;
+        tbody.appendChild(tr);
+      });
+    }).catch(err=>{
+      console.error('Gagal memuat log aktivitas:',err);
+      document.getElementById('logTableBody').innerHTML='<tr><td colspan="4">Gagal memuat log aktivitas.</td></tr>';
+    });
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   if(localStorage.getItem('theme')==='dark') document.body.classList.add('dark-mode');
-  if(userRole==='staff') document.getElementById('exportButtons').style.display='none';
   loadReports();
   loadActivityLogs();
   updateLiveClock();
