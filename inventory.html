@@ -196,6 +196,8 @@
               <th>Satuan</th>
               <th>Harga</th>
               <th>Total</th>
+              <th>Keterangan</th>
+              <th>Analisis</th>
             </tr>
           </thead>
           <tbody id="stockTableBody"></tbody>
@@ -395,6 +397,17 @@ function hideAddForm() {
         ? `Rp ${(item.harga * item.stock).toLocaleString("id-ID")}`
         : "-"}
       </td>
+
+      <td>
+        <input value="${item.keterangan || ''}" 
+              onchange="updateInventory(${item.id}, 'keterangan', this.value); runSentimentAnalysis(this.value, ${item.id})" 
+              placeholder='Tulis keterangan...' />
+      </td>
+
+      <td id="analisis-${item.id}">
+        ${item.analisis || '-'}
+      </td>
+
 
     `;
     tbody.appendChild(row);
