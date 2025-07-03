@@ -103,6 +103,19 @@
         </div>
       </div>
 
+      <h2 style="margin-top: 50px;">Logbook Hasil Produksi</h2>
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Selisih Total (gr)</th>
+              <th>Persentase Selisih (%)</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="logbookBodyReporting"></tbody>
+        </table>
+
       <h2 style="margin-top: 50px;">Log Aktivitas</h2>
       <table class="stock-table">
         <thead>
@@ -154,6 +167,8 @@ async function loadReports(){
     });
     const data = await res.json();
     const labels = [], selisihData = [], persenData = [];
+
+    data.sort((a, b) => new Date(a.used_date) - new Date(b.used_date));
 
     data.forEach(entry => {
       if (!entry.used_date || entry.selisih_total == null || entry.persentase_selisih == null) return;
@@ -209,25 +224,64 @@ function updateChart(labels, selisihData, persenData) {
   });
 }
 
-function exportTableToCSV(){
-  const area=document.getElementById('pdfExportArea');
-  const rows=area.querySelectorAll('tr');
-  let csv=[];
-  rows.forEach(row=>{
-    let cols=row.querySelectorAll('th,td');
-    let rowData=Array.from(cols).map(col=>`"${col.innerText.trim()}"`).join(',');
+function renderLogbookReporting() {
+  fetch("https://api.sopburtok.giize.com/api/production", {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Accept": "application/json"
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    const tbody = document.getElementById("logbookBodyReporting");
+    tbody.innerHTML = "";
+
+    data.sort((a, b) => new Date(b.used_date) - new Date(a.used_date)).forEach(entry => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${entry.used_date}</td>
+        <td>${entry.selisih_total} gr</td>
+        <td>${entry.persentase_selisih} %</td>
+        <td>-</td>`;
+      tbody.appendChild(row);
+    });
+  })
+  .catch(err => {
+    console.error("❌ Gagal ambil log produksi:", err);
+  });
+}
+document.addEventListener('DOMContentLoaded', renderLogbookReporting);
+
+
+function exportTableToCSV() {
+  const rows = document.querySelectorAll('#logbookBodyReporting tr'); // target tabel logbook
+  if (rows.length === 0) {
+    alert('Tidak ada data logbook untuk diekspor.');
+    return;
+  }
+
+  let csv = [];
+  // Header
+  csv.push('"Tanggal","Selisih Total (gr)","Persentase Selisih (%)","Aksi"');
+  // Data
+  rows.forEach(row => {
+    const cols = row.querySelectorAll('td');
+    const rowData = Array.from(cols).map(col => `"${col.innerText.trim()}"`).join(',');
     csv.push(rowData);
   });
-  const csvString=csv.join('\n');
-  const blob=new Blob([csvString],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const username=(user.name||'pengguna').replace(/\s+/g,'_');
-  const today=new Date().toISOString().slice(0,10);
-  const filename=`laporan_selisih_${username}_${today}.csv`;
-  const a=document.createElement('a');
-  a.href=url; a.download=filename; a.style.display='none';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+
+  const csvString = csv.join('\n');
+  const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'logbook_hasil_produksi.csv';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
+
 
 function exportToPDF(){
   const area=document.getElementById('pdfExportArea');

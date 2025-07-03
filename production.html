@@ -8,90 +8,131 @@
   <link rel="stylesheet" href="assets/css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <style>
-    @media (min-width: 769px) {
-      .mobile-bottom-nav {
-        display: none !important;
-      }
+<style>
+  @media (min-width: 769px) {
+    .mobile-bottom-nav {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .mobile-bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-top: 1px solid #ddd;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+      z-index: 1000;
     }
 
-    @media (max-width: 768px) {
-      .mobile-bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: #ffffff;
-        border-top: 1px solid #ddd;
-        display: flex;
-        justify-content: space-around;
-        padding: 10px 0;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-        z-index: 1000;
-      }
-
-      .mobile-bottom-nav button {
-        flex: 1;
-        background: none;
-        border: none;
-        padding: 6px 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        color: #777;
-        transition: color 0.3s ease;
-        font-size: 10px;
-      }
-
-      .mobile-bottom-nav button i {
-        font-size: 20px;
-        margin-bottom: 2px;
-        transition: transform 0.2s ease;
-      }
-
-      .mobile-bottom-nav button.active {
-        color: #777;
-        font-weight: 600;
-      }
-
-      .mobile-bottom-nav button.active i {
-        transform: scale(1.2);
-      }
-
-      .mobile-bottom-nav button:active i {
-        transform: scale(1.1);
-      }
-    }
-    @media (max-width: 768px) {
-      .content {
-        padding-bottom: 60px;
-      }
-
-      .grid-wrapper {
-        display: grid;
-        grid-template-columns: 1fr;
-        grid-template-areas:
-          "stok"
-          "kasir"
-          "selisih"
-          "persen"
-          "logbook";
-      }
-
-      .stok { grid-area: stok; }
-      .kasir { grid-area: kasir; }
-      .selisih { grid-area: selisih; }
-      .persentase { grid-area: persen; }
-      .logbook { grid-area: logbook; }
-    }
-    .mobile-bottom-nav button i {
-      font-size: 18px;
-    }
-    .mobile-bottom-nav button span {
+    .mobile-bottom-nav button {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 6px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #777;
+      transition: color 0.3s ease;
       font-size: 10px;
-      margin-top: 2px;
     }
-  </style>
+
+    .mobile-bottom-nav button i {
+      font-size: 20px;
+      margin-bottom: 2px;
+      transition: transform 0.2s ease;
+    }
+
+    .mobile-bottom-nav button.active {
+      color: #777;
+      font-weight: 600;
+    }
+
+    .mobile-bottom-nav button.active i {
+      transform: scale(1.2);
+    }
+
+    .mobile-bottom-nav button:active i {
+      transform: scale(1.1);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .content {
+      padding-bottom: 60px;
+    }
+
+    .grid-wrapper {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "stok"
+        "kasir"
+        "selisih"
+        "persen"
+        "logbook";
+    }
+
+    .stok { grid-area: stok; }
+    .kasir { grid-area: kasir; }
+    .selisih { grid-area: selisih; }
+    .persentase { grid-area: persen; }
+    .logbook { grid-area: logbook; }
+  }
+
+  .mobile-bottom-nav button i {
+    font-size: 18px;
+  }
+  .mobile-bottom-nav button span {
+    font-size: 10px;
+    margin-top: 2px;
+  }
+
+  .card.logbook {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* ✅ Ikut tinggi grid */
+  }
+
+  .card.logbook h3 {
+    flex: 0 0 auto;      /* ✅ Header fix sesuai konten */
+    margin: 0;
+    padding: 10px;
+  }
+
+  .table-wrapper {
+    flex: 1;               /* ✅ Sisa ruang (80% dari card) */
+    overflow-y: auto;      /* ✅ Scroll vertikal */
+    border: 1px solid #ddd;
+    border-radius: 6px;
+  }
+
+  .logbook-table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;   /* ✅ Tabel tidak melebar */
+  }
+
+  .logbook-table th,
+  .logbook-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+
+  .logbook-table th {
+    background-color: #f5f5f5;
+    position: sticky;     /* ✅ Header tetap saat scroll */
+    top: 0;
+    z-index: 1;
+  }
+</style>
 </head>
 <body>
   <div class="dashboard-wrapper">
@@ -190,7 +231,7 @@
                   <th>Tanggal</th>
                   <th>Selisih Total (gr)</th>
                   <th>Persentase Selisih (%)</th>
-                  <th>Aksi</th
+                  <th>Aksi</th>
                 </tr>
               </thead>
               <tbody id="logbookBody"></tbody>
@@ -199,11 +240,13 @@
                   <th>Total</th>
                   <td id="sumSelisih">-</td>
                   <td id="sumPersen">-</td>
+                  <td></td>
                 </tr>
                 <tr>
                   <th>Rata-rata</th>
                   <td id="avgSelisih">-</td>
                   <td id="avgPersen">-</td>
+                  <td></td>
                 </tr>
               </tfoot>
             </table>
