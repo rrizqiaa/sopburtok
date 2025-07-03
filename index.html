@@ -1,190 +1,178 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
-  <title>Login - SOP BURTOK</title>
-  <style>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="assets/images/favicon.ico" type="image/x-icon" />
+    <title>Login - SOP BURTOK</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: sans-serif;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        background-color: #f5f5f5;
+      }
 
-        body {
-      margin: 0;
-      padding: 0;
-      font-family: sans-serif;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-    }
+      .background-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -2;
+        background: url('assets/images/bg-login.png') no-repeat center center;
+        background-size: cover;
+      }
 
-    .background-wrapper {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -2;
-      background: url('assets/images/bg-login.png') no-repeat center center;
-      background-size: cover;
-    }
+      .white-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.15);
+        z-index: -1;
+      }
 
-    .white-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(255, 255, 255, 0.15);
-      z-index: -1;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: sans-serif;
-      background-color: #f5f5f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    .login-page {
-      width: 100%;
-      max-width: 400px;
-      padding: 20px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-
-    .login-page img {
-      width: 120px;
-      margin-bottom: 10px;
-    }
-
-    .sop-title {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    .login-box input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-    }
-
-    .login-box button {
-      width: 100%;
-      padding: 12px;
-      background-color: #2c3e50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .login-box button:hover {
-      background-color: #1a252f;
-    }
-
-    #error {
-      color: red;
-      font-size: 14px;
-      margin-top: 10px;
-    }
-
-    @media (max-width: 480px) {
-      .sop-title {
-        font-size: 20px;
+      * {
+        box-sizing: border-box;
       }
 
       .login-page {
-        padding: 15px;
+        width: 100%;
+        max-width: 400px;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .login-page img {
+        width: 120px;
+        margin-bottom: 10px;
+      }
+
+      .sop-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #333;
+      }
+
+      .login-box input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: 14px;
       }
 
       .login-box button {
+        width: 100%;
+        padding: 12px;
+        background-color: #2c3e50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .login-box button:hover {
+        background-color: #1a252f;
+      }
+
+      #error {
+        color: red;
         font-size: 14px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="background-wrapper"></div>
-  <div class="white-overlay"></div>
-
-  <div class="login-page" id="loginPage">
-    <img src="assets/images/Logo Sop Burtok Ori.png" alt="SOP BURTOK">
-    
-    <div class="login-box">
-      <h2>Login</h2>
-      <input type="email" id="email" placeholder="Email" />
-      <input type="password" id="password" placeholder="Password" />
-      <button id="loginBtn">LOGIN</button>
-      <div id="error"></div>
-    </div>
-  </div>
-
-  <script>
-    const loginBtn = document.getElementById("loginBtn");
-    const apiUrl = "https://api.sopburtok.giize.com/api/login";
-
-    loginBtn.addEventListener("click", async () => {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const errorDiv = document.getElementById("error");
-
-      if (!email || !password) {
-        errorDiv.innerText = "Email dan password wajib diisi!";
-        return;
+        margin-top: 10px;
       }
 
-      try {
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("user", JSON.stringify(data.user));
-          window.location.href = "dashboard.html";
-        } else {
-          errorDiv.innerText = data.message || "Login gagal. Cek email dan password.";
+      @media (max-width: 480px) {
+        .sop-title {
+          font-size: 20px;
         }
-      } catch (err) {
-        console.error(err);
-        errorDiv.innerText = "Terjadi kesalahan koneksi.";
-      }
 
-      
-    });
+        .login-page {
+          padding: 15px;
+        }
 
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        loginBtn.click();
+        .login-box button {
+          font-size: 14px;
+        }
       }
-    });
-  </script>
-</body>
+    </style>
+  </head>
+  <body>
+    <div class="background-wrapper"></div>
+    <div class="white-overlay"></div>
+
+    <div class="login-page" id="loginPage">
+      <img src="assets/images/Logo Sop Burtok Ori.png" alt="SOP BURTOK" />
+
+      <div class="login-box">
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Email" />
+        <input type="password" id="password" placeholder="Password" />
+        <button id="loginBtn">LOGIN</button>
+        <div id="error"></div>
+      </div>
+    </div>
+
+    <script>
+      const loginBtn = document.getElementById("loginBtn");
+      const apiUrl = "https://api.sopburtok.giize.com/api/login";
+
+      loginBtn.addEventListener("click", async () => {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const errorDiv = document.getElementById("error");
+
+        if (!email || !password) {
+          errorDiv.innerText = "Email dan password wajib diisi!";
+          return;
+        }
+
+        try {
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
+            window.location.href = "dashboard.html";
+          } else {
+            errorDiv.innerText =
+              data.message || "Login gagal. Cek email dan password.";
+          }
+        } catch (err) {
+          console.error(err);
+          errorDiv.innerText = "Terjadi kesalahan koneksi.";
+        }
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          loginBtn.click();
+        }
+      });
+    </script>
+  </body>
 </html>

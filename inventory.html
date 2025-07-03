@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,12 +11,13 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <style>
+  <style>
     @media (min-width: 769px) {
       .mobile-bottom-nav {
         display: none !important;
       }
     }
+
     @media (max-width: 768px) {
       .mobile-bottom-nav {
         position: fixed;
@@ -27,7 +29,7 @@
         display: flex;
         justify-content: space-around;
         padding: 10px 0;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
         z-index: 1000;
       }
 
@@ -62,24 +64,23 @@
       .mobile-bottom-nav button:active i {
         transform: scale(1.1);
       }
+
+      .content {
+        padding-bottom: 60px;
+      }
     }
-  
-@media (max-width: 768px) {
-  .content {
-    padding-bottom: 60px;
-  }
-}
 
     .mobile-bottom-nav button i {
-  font-size: 18px;
+      font-size: 18px;
     }
+
     .mobile-bottom-nav button span {
       font-size: 10px;
       margin-top: 2px;
     }
-
-</style>
+  </style>
 </head>
+
 <body>
   <div class="dashboard-wrapper">
     <div class="sidebar">
@@ -101,7 +102,8 @@
     <div class="content">
       <div style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 10px;">
         <h2 style="margin: 0;">Peringatan Bahan Baku</h2>
-        <button onclick="toggleWarningTable()" id="warningToggleBtn" style="padding: 2px 8px; font-size: 14px;">🔽</button>
+        <button onclick="toggleWarningTable()" id="warningToggleBtn"
+          style="padding: 2px 8px; font-size: 14px;">🔽</button>
       </div>
 
       <div id="warningTableContainer" style="overflow-x:auto;">
@@ -115,7 +117,6 @@
           <tbody id="warningTableBody"></tbody>
         </table>
       </div>
-
 
       <h2>Inventory Bahan Baku</h2>
       <div class="inventory-action-row">
@@ -161,9 +162,7 @@
             <option value="total-desc">Harga Total Mahal</option>
           </select>
         </label>
-
       </div>
-
 
       <div id="addStockForm" class="hidden">
         <input id="stockSKU" placeholder="SKU (opsional)" />
@@ -188,9 +187,7 @@
             <option value="pack">pack</option>
           </select>
         </div>
-
         <input id="stockPrice" type="number" placeholder="Harga (Rp)" />
-
         <button onclick="addInventory()">Simpan</button>
         <button onclick="hideAddForm()">Batal</button>
       </div>
@@ -201,7 +198,7 @@
             <tr>
               <th><input type="checkbox" onclick="toggleSelectAll(this)" /></th>
               <th>No</th>
-              <th>SKU</th> 
+              <th>SKU</th>
               <th>Nama</th>
               <th>Kategori</th>
               <th>Tanggal Masuk</th>
@@ -241,7 +238,6 @@
       <span>Profile</span>
     </button>
   </div>
-
 
 <script>
   document.addEventListener("DOMContentLoaded", () => {

@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,7 +27,7 @@
         display: flex;
         justify-content: space-around;
         padding: 10px 0;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
         z-index: 1000;
       }
 
@@ -63,6 +63,7 @@
         transform: scale(1.1);
       }
     }
+
     .log-row {
       display: flex;
       flex-wrap: wrap;
@@ -82,17 +83,16 @@
     }
 
     .mobile-bottom-nav button i {
-  font-size: 18px;
+      font-size: 18px;
     }
 
     .mobile-bottom-nav button span {
-  font-size: 10px;
-  margin-top: 2px;
-}
-
-
+      font-size: 10px;
+      margin-top: 2px;
+    }
   </style>
 </head>
+
 <body>
   <div class="dashboard-wrapper">
     <div class="sidebar">
@@ -118,20 +118,20 @@
           <h3>Inventory Bahan Baku</h3>
           <div style="overflow-x: auto;">
             <table class="stock-table">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>SKU</th>
-                <th>Nama</th>
-                <th>Kategori</th>
-                <th>Tanggal Masuk</th>
-                <th>Jumlah</th>
-                <th>Satuan</th>
-                <th>Harga</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody id="rekapInventoryBody"></tbody>
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>SKU</th>
+                  <th>Nama</th>
+                  <th>Kategori</th>
+                  <th>Tanggal Masuk</th>
+                  <th>Jumlah</th>
+                  <th>Satuan</th>
+                  <th>Harga</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody id="rekapInventoryBody"></tbody>
             </table>
           </div>
         </div>
@@ -140,177 +140,20 @@
           <h2>&nbsp;</h2>
           <h3>Logbook Hasil Produksi</h3>
           <table class="stock-table">
-          <thead>
-            <tr>
-              <th>Tanggal</th>
-              <th>Selisih Total (gr)</th>
-              <th>Persentase Selisih (%)</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Selisih Total (gr)</th>
+                <th>Persentase Selisih (%)</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
             <tbody id="logbookBodyDashboard"></tbody>
           </table>
         </div>
       </div>
     </div>
   </div>
-
-  <script>
-    function updateLiveClock() {
-      const el = document.getElementById("liveClock");
-      const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-      const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-      const now = new Date();
-      el.textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} - ${now.toLocaleTimeString('id-ID')}`;
-    }
-    setInterval(updateLiveClock, 1000);
-    updateLiveClock();
-  </script>
-
-  <script>
-    function toggleMode() {
-      const isDark = document.body.classList.toggle('dark-mode');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    }
-    document.addEventListener('DOMContentLoaded', function () {
-      if (localStorage.getItem('theme') === 'dark') {
-        document.body.classList.add('dark-mode');
-      }
-    });
-  </script>
-
-  <script>
-    const token = localStorage.getItem("token");
-    if (!token) window.location.href = "index.html";
-
-    async function fetchLogs() {
-      try {
-        const inventoryRes  = await fetch("https://api.sopburtok.giize.com/api/inventory", {
-          headers: { "Authorization": `Bearer ${token}`, "Accept": "application/json" }
-        });
-        const inventoryData = await inventoryRes.json();
-
-        // Jika tidak ada fungsi renderLogs, hapus atau ganti
-        // renderLogs(inventoryData, "inventoryLogBody", "Penambahan Stok", "name", "stock");
-
-        // ATAU ganti dengan render langsung di sini
-        const tbody = document.getElementById("rekapInventoryBody");
-        tbody.innerHTML = "";
-        inventoryData.slice(0, 30).forEach(item => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${item.entry_date || "-"}</td>
-            <td>${item.name}</td>
-            <td>${item.category}</td>
-            <td>${item.stock}</td>
-            <td>${item.unit}</td>
-            <td>${item.action}</td>
-          `;
-          tbody.appendChild(row);
-        });
-      } catch (err) {
-        console.error("Gagal memuat log:", err);
-        const fallback = document.getElementById("rekapInventoryBody");
-        if (fallback) {
-          fallback.innerHTML = "<tr><td colspan='6'>Gagal memuat log inventory.</td></tr>";
-        }
-      }
-    }
-
-
-    async function renderRekapInventory() {
-      if (!token) return;
-
-      try {
-        const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/json"
-          }
-        });
-
-        const data = await res.json();
-        const tbody = document.getElementById("rekapInventoryBody");
-        tbody.innerHTML = "";
-
-        data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 30).forEach((item, index) => {
-          const unit = item.unit || "gr";
-          const stockDisplay = convertStock(item.stock, unit);
-          const total = item.harga && item.stock ? item.harga * item.stock : 0;
-
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${item.sku || '-'}</td>
-            <td>${item.name}</td>
-            <td>${item.category}</td>
-            <td>${item.entry_date || '-'}</td>
-            <td>${stockDisplay}</td>
-            <td>${unit}</td>
-            <td>${item.harga ? formatRupiah(item.harga) : '-'}</td>
-            <td>${total ? formatRupiah(total) : '-'}</td>
-          `;
-          tbody.appendChild(row);
-        });
-
-
-      } catch (err) {
-        console.error("Gagal memuat rekap inventory:", err);
-      }
-    }
-
-
-    renderRekapInventory();
-
-    function renderLogbookFromStorage() {
-      const tbody = document.getElementById("logbookBodyDashboard");
-      tbody.innerHTML = "";
-
-      // Coba fetch dari backend seperti di production.html
-      fetch("https://api.sopburtok.giize.com/api/production", {
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
-          "Accept": "application/json"
-        }
-      })
-      .then(res => res.json())
-      .then(data => {
-        data.sort((a, b) => new Date(b.used_date) - new Date(a.used_date)).slice(0, 30).forEach(entry => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${entry.used_date}</td>
-            <td>${entry.selisih_total} gr</td>
-            <td>${entry.persentase_selisih} %</td>
-            <td>-</td>~
-          `;
-          tbody.appendChild(row);
-        });
-      })
-      .catch(err => {
-        console.error("❌ Gagal ambil log produksi dari backend:", err);
-        tbody.innerHTML = "<tr><td colspan='4'>Gagal memuat log produksi.</td></tr>";
-      });
-    }
-
-
-    
-    renderLogbookFromStorage();
-  </script>
-
-  <script>
-    function logoutUser() {
-      fetch("https://api.sopburtok.giize.com/api/logout", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Accept": "application/json"
-        }
-      }).finally(() => {
-        localStorage.clear();
-        window.location.href = "index.html";
-      });
-    }
-  </script>
 
   <div class="mobile-bottom-nav">
     <button class="active" onclick="location.href='dashboard.html'">
@@ -336,6 +179,158 @@
   </div>
 
   <script>
+    function updateLiveClock() {
+      const el = document.getElementById("liveClock");
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      const now = new Date();
+      el.textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()} - ${now.toLocaleTimeString('id-ID')}`;
+    }
+    setInterval(updateLiveClock, 1000);
+    updateLiveClock();
+  </script>
+
+  <script>
+    function toggleMode() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+      if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
+    });
+  </script>
+
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) window.location.href = "index.html";
+
+    async function fetchLogs() {
+      try {
+        const inventoryRes = await fetch("https://api.sopburtok.giize.com/api/inventory", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json"
+          }
+        });
+        const inventoryData = await inventoryRes.json();
+        const tbody = document.getElementById("rekapInventoryBody");
+        tbody.innerHTML = "";
+        inventoryData.slice(0, 30).forEach(item => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${item.entry_date || "-"}</td>
+            <td>${item.name}</td>
+            <td>${item.category}</td>
+            <td>${item.stock}</td>
+            <td>${item.unit}</td>
+            <td>${item.action}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (err) {
+        console.error("Gagal memuat log:", err);
+        const fallback = document.getElementById("rekapInventoryBody");
+        if (fallback) {
+          fallback.innerHTML = "<tr><td colspan='6'>Gagal memuat log inventory.</td></tr>";
+        }
+      }
+    }
+
+    async function renderRekapInventory() {
+      if (!token) return;
+
+      try {
+        const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json"
+          }
+        });
+
+        const data = await res.json();
+        const tbody = document.getElementById("rekapInventoryBody");
+        tbody.innerHTML = "";
+
+        data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .slice(0, 30)
+          .forEach((item, index) => {
+            const unit = item.unit || "gr";
+            const stockDisplay = convertStock(item.stock, unit);
+            const total = item.harga && item.stock ? item.harga * item.stock : 0;
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${index + 1}</td>
+              <td>${item.sku || '-'}</td>
+              <td>${item.name}</td>
+              <td>${item.category}</td>
+              <td>${item.entry_date || '-'}</td>
+              <td>${stockDisplay}</td>
+              <td>${unit}</td>
+              <td>${item.harga ? formatRupiah(item.harga) : '-'}</td>
+              <td>${total ? formatRupiah(total) : '-'}</td>
+            `;
+            tbody.appendChild(row);
+          });
+      } catch (err) {
+        console.error("Gagal memuat rekap inventory:", err);
+      }
+    }
+
+    renderRekapInventory();
+
+    function renderLogbookFromStorage() {
+      const tbody = document.getElementById("logbookBodyDashboard");
+      tbody.innerHTML = "";
+
+      fetch("https://api.sopburtok.giize.com/api/production", {
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+          "Accept": "application/json"
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          data.sort((a, b) => new Date(b.used_date) - new Date(a.used_date))
+            .slice(0, 30)
+            .forEach(entry => {
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                <td>${entry.used_date}</td>
+                <td>${entry.selisih_total} gr</td>
+                <td>${entry.persentase_selisih} %</td>
+                <td>-</td>
+              `;
+              tbody.appendChild(row);
+            });
+        })
+        .catch(err => {
+          console.error("❌ Gagal ambil log produksi dari backend:", err);
+          tbody.innerHTML = "<tr><td colspan='4'>Gagal memuat log produksi.</td></tr>";
+        });
+    }
+
+    renderLogbookFromStorage();
+  </script>
+
+  <script>
+    function logoutUser() {
+      fetch("https://api.sopburtok.giize.com/api/logout", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json"
+        }
+      }).finally(() => {
+        localStorage.clear();
+        window.location.href = "index.html";
+      });
+    }
+  </script>
+
+  <script>
     document.addEventListener("DOMContentLoaded", () => {
       const path = window.location.pathname.split('/').pop();
       const buttons = document.querySelectorAll(".mobile-bottom-nav button");
@@ -350,19 +345,18 @@
   </script>
 
   <script>
-  function convertStock(stock, unit) {
-    if (unit === "kg" || unit === "ltr") {
-      return (stock / 1000).toFixed(2);
+    function convertStock(stock, unit) {
+      if (unit === "kg" || unit === "ltr") {
+        return (stock / 1000).toFixed(2);
+      }
+      return stock;
     }
-    return stock;
-  }
 
-  function formatRupiah(value) {
-    const val = parseInt(value) || 0;
-    return "Rp " + val.toLocaleString("id-ID");
-  }
-</script>
-
-
+    function formatRupiah(value) {
+      const val = parseInt(value) || 0;
+      return "Rp " + val.toLocaleString("id-ID");
+    }
+  </script>
 </body>
+
 </html>

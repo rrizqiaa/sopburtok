@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,132 +9,146 @@
   <link rel="stylesheet" href="assets/css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<style>
-  @media (min-width: 769px) {
-    .mobile-bottom-nav {
-      display: none !important;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .mobile-bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #ffffff;
-      border-top: 1px solid #ddd;
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 0;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-      z-index: 1000;
+  <style>
+    @media (min-width: 769px) {
+      .mobile-bottom-nav {
+        display: none !important;
+      }
     }
 
-    .mobile-bottom-nav button {
-      flex: 1;
-      background: none;
-      border: none;
-      padding: 6px 0;
+    @media (max-width: 768px) {
+      .mobile-bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        border-top: 1px solid #ddd;
+        display: flex;
+        justify-content: space-around;
+        padding: 10px 0;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+      }
+
+      .mobile-bottom-nav button {
+        flex: 1;
+        background: none;
+        border: none;
+        padding: 6px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #777;
+        transition: color 0.3s ease;
+        font-size: 10px;
+      }
+
+      .mobile-bottom-nav button i {
+        font-size: 20px;
+        margin-bottom: 2px;
+        transition: transform 0.2s ease;
+      }
+
+      .mobile-bottom-nav button.active {
+        color: #777;
+        font-weight: 600;
+      }
+
+      .mobile-bottom-nav button.active i {
+        transform: scale(1.2);
+      }
+
+      .mobile-bottom-nav button:active i {
+        transform: scale(1.1);
+      }
+
+      .content {
+        padding-bottom: 60px;
+      }
+
+      .grid-wrapper {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "stok"
+          "kasir"
+          "selisih"
+          "persen"
+          "logbook";
+      }
+
+      .stok {
+        grid-area: stok;
+      }
+
+      .kasir {
+        grid-area: kasir;
+      }
+
+      .selisih {
+        grid-area: selisih;
+      }
+
+      .persentase {
+        grid-area: persen;
+      }
+
+      .logbook {
+        grid-area: logbook;
+      }
+
+      .mobile-bottom-nav button i {
+        font-size: 18px;
+      }
+
+      .mobile-bottom-nav button span {
+        font-size: 10px;
+        margin-top: 2px;
+      }
+    }
+
+    .card.logbook {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      color: #777;
-      transition: color 0.3s ease;
-      font-size: 10px;
+      height: 100%;
     }
 
-    .mobile-bottom-nav button i {
-      font-size: 20px;
-      margin-bottom: 2px;
-      transition: transform 0.2s ease;
+    .card.logbook h3 {
+      flex: 0 0 auto;
+      margin: 0;
+      padding: 10px;
     }
 
-    .mobile-bottom-nav button.active {
-      color: #777;
-      font-weight: 600;
+    .table-wrapper {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 6px;
     }
 
-    .mobile-bottom-nav button.active i {
-      transform: scale(1.2);
+    .logbook-table {
+      border-collapse: collapse;
+      width: 100%;
+      table-layout: fixed;
     }
 
-    .mobile-bottom-nav button:active i {
-      transform: scale(1.1);
-    }
-  }
-
-  @media (max-width: 768px) {
-    .content {
-      padding-bottom: 60px;
+    .logbook-table th,
+    .logbook-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
     }
 
-    .grid-wrapper {
-      display: grid;
-      grid-template-columns: 1fr;
-      grid-template-areas:
-        "stok"
-        "kasir"
-        "selisih"
-        "persen"
-        "logbook";
+    .logbook-table th {
+      background-color: #f5f5f5;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
-
-    .stok { grid-area: stok; }
-    .kasir { grid-area: kasir; }
-    .selisih { grid-area: selisih; }
-    .persentase { grid-area: persen; }
-    .logbook { grid-area: logbook; }
-  }
-
-  .mobile-bottom-nav button i {
-    font-size: 18px;
-  }
-  .mobile-bottom-nav button span {
-    font-size: 10px;
-    margin-top: 2px;
-  }
-
-  .card.logbook {
-    display: flex;
-    flex-direction: column;
-    height: 100%; /* ✅ Ikut tinggi grid */
-  }
-
-  .card.logbook h3 {
-    flex: 0 0 auto;      /* ✅ Header fix sesuai konten */
-    margin: 0;
-    padding: 10px;
-  }
-
-  .table-wrapper {
-    flex: 1;               /* ✅ Sisa ruang (80% dari card) */
-    overflow-y: auto;      /* ✅ Scroll vertikal */
-    border: 1px solid #ddd;
-    border-radius: 6px;
-  }
-
-  .logbook-table {
-    border-collapse: collapse;
-    width: 100%;
-    table-layout: fixed;   /* ✅ Tabel tidak melebar */
-  }
-
-  .logbook-table th,
-  .logbook-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-  }
-
-  .logbook-table th {
-    background-color: #f5f5f5;
-    position: sticky;     /* ✅ Header tetap saat scroll */
-    top: 0;
-    z-index: 1;
-  }
-</style>
+  </style>
 </head>
+
 <body>
   <div class="dashboard-wrapper">
     <!-- Sidebar -->
@@ -147,28 +162,28 @@
       <button class="menu-btn" onclick="location.href='profile.html'">Profile</button>
     </div>
 
-  <div class="mobile-bottom-nav">
-    <button onclick="location.href='dashboard.html'">
-      <i class="fas fa-home"></i>
-      <span>Home</span>
-    </button>
-    <button onclick="location.href='inventory.html'">
-      <i class="fas fa-box"></i>
-      <span>Inventory</span>
-    </button>
-    <button class="active" onclick="location.href='production.html'">
-      <i class="fas fa-industry"></i>
-      <span>Production</span>
-    </button>
-    <button onclick="location.href='reporting.html'">
-      <i class="fas fa-chart-bar"></i>
-      <span>Reporting</span>
-    </button>
-    <button onclick="location.href='profile.html'">
-      <i class="fas fa-user"></i>
-      <span>Profile</span>
-    </button>
-  </div>
+    <div class="mobile-bottom-nav">
+      <button onclick="location.href='dashboard.html'">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </button>
+      <button onclick="location.href='inventory.html'">
+        <i class="fas fa-box"></i>
+        <span>Inventory</span>
+      </button>
+      <button class="active" onclick="location.href='production.html'">
+        <i class="fas fa-industry"></i>
+        <span>Production</span>
+      </button>
+      <button onclick="location.href='reporting.html'">
+        <i class="fas fa-chart-bar"></i>
+        <span>Reporting</span>
+      </button>
+      <button onclick="location.href='profile.html'">
+        <i class="fas fa-user"></i>
+        <span>Profile</span>
+      </button>
+    </div>
 
     <!-- Top tools -->
     <div id="top-tools">
@@ -181,7 +196,6 @@
     <div class="content">
       <h2>Produksi - Perhitungan Pemakaian Daging</h2>
       <div class="grid-wrapper">
-        <!-- Baris 1 -->
         <!-- Stok -->
         <div class="card">
           <h3>Daging Terpakai Stok</h3>
@@ -193,8 +207,8 @@
           <input type="number" id="closing" />
           <button onclick="hitungDagingStok()">Hitung Daging Stok</button>
           <div class="result" id="hasilStok">Daging Terpakai Stok: - gr</div>
-        </div>        
-        
+        </div>
+
         <!-- Kasir -->
         <div class="card">
           <h3>Daging Terpakai Kasir</h3>
@@ -220,7 +234,7 @@
           <button onclick="importKasirData()">Impor Data Kasir</button>
           <div id="importResult"></div>
         </div>
-        
+
         <!-- Logbook -->
         <div class="card logbook">
           <h3>Logbook Hasil Produksi</h3>
@@ -253,7 +267,6 @@
           </div>
         </div>
 
-        <!-- Baris 2 -->
         <!-- Selisih -->
         <div class="card">
           <h3>Selisih Total</h3>
@@ -273,17 +286,15 @@
           <label>Daging Terpakai Kasir (gr):</label>
           <input type="number" id="kasirTotal" />
           <button onclick="hitungPersentase()">Hitung Persentase</button>
-          
           <div class="result" id="hasilPersentase">Persentase Selisih: - %</div>
         </div>
 
-      
-        </div>
-          <select id="arsipSelect"></select>
-          <button onclick="generateArsip()">Buat Arsip</button>
-          <button onclick="downloadArsip()">Download Arsip</button>
       </div>
+      <select id="arsipSelect"></select>
+      <button onclick="generateArsip()">Buat Arsip</button>
+      <button onclick="downloadArsip()">Download Arsip</button>
     </div>
+  </div>
 
 
 </body>
