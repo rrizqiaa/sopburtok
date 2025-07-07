@@ -322,6 +322,58 @@ function hideAddForm() {
       document.getElementById("addStockForm").classList.add("hidden");
     }
 
+   async function runSentimentAnalysis(keterangan, id) {
+  const el = document.getElementById(`analisis-${id}`);
+  const token = localStorage.getItem("token");
+
+  if (!keterangan || !keterangan.trim()) {
+    el.innerText = "-";
+    return;
+  }
+
+  if (!token) {
+    console.warn("Token tidak ditemukan. User mungkin belum login.");
+    el.innerText = "UNAUTH";
+    return;
+  }
+
+  try {
+    // Tampilkan loading sementara
+    el.innerText = "⏳";
+
+    const res = await fetch("https://api.sopburtok.giize.com/api/sentimen", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({ text: keterangan })
+    });
+
+    if (!res.ok) {
+      console.error("Respon error:", res.status, res.statusText);
+      el.innerText = `ERR ${res.status}`;
+      return;
+    }
+
+    const data = await res.json();
+    const label = data.label || "Netral";
+
+    // Tampilkan label di kolom Analisis
+    el.innerText = label;
+
+    // Simpan ke Laravel via PUT
+    await updateInventory(id, "analisis", label);
+
+  } catch (err) {
+    console.error("Gagal analisis:", err);
+    el.innerText = "ERROR";
+  }
+}
+
+
+
     async function loadInventory() {
       try {
         const res = await fetch("https://api.sopburtok.giize.com/api/inventory", {
@@ -409,10 +461,10 @@ function hideAddForm() {
 
       <td>
         ${isEditable
-          ? `<input value="${item.keterangan || ''}" 
-                    onchange="updateInventory(${item.id}, 'keterangan', this.value); runSentimentAnalysis(this.value, ${item.id})" 
-                    placeholder='Tulis keterangan...' />`
-          : (item.keterangan || '-')}
+            ? `<input value="${item.keterangan || ''}" 
+                onchange="updateInventory(${item.id}, 'keterangan', this.value); runSentimentAnalysis(this.value, ${item.id})" 
+                placeholder='Tulis keterangan...' />`
+            : (item.keterangan || '-')}
       </td>
 
       <td id="analisis-${item.id}">
