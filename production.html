@@ -198,7 +198,7 @@
       <div class="grid-wrapper">
         <!-- Stok -->
         <div class="card">
-          <h3>Daging Terpakai Stok</h3>
+          <h3>Sold Daging Timbangan</h3>
           <label>Daging Opening (gr):</label>
           <input type="number" id="opening" />
           <label>Daging Penambahan (gr):</label>
@@ -206,12 +206,12 @@
           <label>Daging Closing (gr):</label>
           <input type="number" id="closing" />
           <button onclick="hitungDagingStok()">Hitung Daging Stok</button>
-          <div class="result" id="hasilStok">Daging Terpakai Stok: - gr</div>
+          <div class="result" id="hasilStok">Sold Daging Timbangan: - gr</div>
         </div>
 
         <!-- Kasir -->
         <div class="card">
-          <h3>Daging Terpakai Kasir</h3>
+          <h3>Sold Daging POS & CCWSL</h3>
           <label>Sop Komplit (40gr):</label>
           <input type="number" id="sopKomplit" />
           <label>Sop Reguler (40gr):</label>
@@ -229,7 +229,7 @@
           <label>Extra Dry (25gr):</label>
           <input type="number" id="extraDry" />
           <button onclick="hitungDagingKasir()">Hitung Daging Kasir</button>
-          <div class="result" id="hasilKasir">Daging Terpakai Kasir: - gr</div>
+          <div class="result" id="hasilKasir">Sold Daging POS & CCWSL: - gr</div>
           <input type="file" id="fileKasir" accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" />
           <button onclick="importKasirData()">Impor Data Kasir</button>
           <div id="importResult"></div>
@@ -270,9 +270,9 @@
         <!-- Selisih -->
         <div class="card">
           <h3>Selisih Total</h3>
-          <label>Daging Terpakai Stok (A):</label>
+          <label>Sold Daging Timbangan (A):</label>
           <input type="number" id="stokTerpakai" />
-          <label>Daging Terpakai Kasir (B):</label>
+          <label>Sold Daging POS & CCWSL (B):</label>
           <input type="number" id="kasirTerpakai" />
           <button onclick="hitungSelisihManual()">Hitung Selisih Total (C)</button>
           <div class="result" id="hasilSelisihManual">Selisih Total: - gr</div>
@@ -283,7 +283,7 @@
           <h3>Persentase Selisih</h3>
           <label>Selisih Total (gr):</label>
           <input type="number" id="selisihPersen" />
-          <label>Daging Terpakai Kasir (gr):</label>
+          <label>Sold Daging POS & CCWSL (gr):</label>
           <input type="number" id="kasirTotal" />
           <button onclick="hitungPersentase()">Hitung Persentase</button>
           <div class="result" id="hasilPersentase">Persentase Selisih: - %</div>
@@ -443,7 +443,7 @@ document.addEventListener("DOMContentLoaded", initArsipSelect);
       const totalKasir = get("sopKomplit") * 40 + get("sopReguler") * 40 + get("sopKecil") * 20 +
                          get("dryKomplit") * 45 + get("dryReguler") * 45 + get("dryKecil") * 25 +
                          get("extraDaging") * 20 + get("extraDry") * 25;
-      document.getElementById("hasilKasir").innerText = `Daging Terpakai Kasir: ${totalKasir} gr`;
+      document.getElementById("hasilKasir").innerText = `Sold Daging POS & CCWSL: ${totalKasir} gr`;
       document.getElementById("kasirTerpakai").value = totalKasir;
       document.getElementById("kasirTotal").value = totalKasir;
     }
@@ -453,7 +453,7 @@ document.addEventListener("DOMContentLoaded", initArsipSelect);
       const penambahan = parseFloat(document.getElementById("penambahan").value) || 0;
       const closing = parseFloat(document.getElementById("closing").value) || 0;
       const totalStok = opening + penambahan - closing;
-      document.getElementById("hasilStok").innerText = `Daging Terpakai Stok: ${totalStok} gr`;
+      document.getElementById("hasilStok").innerText = `Sold Daging Timbangan: ${totalStok} gr`;
       document.getElementById("stokTerpakai").value = totalStok;
     }
 
